@@ -11,8 +11,10 @@ using std::cout;
 using std::endl;
 using std::string;
 
-TestReport::TestReport(const char* dir, const char* prefix)
-  : m_dir(dir), m_prefix(prefix), m_outputFile(0), m_mcFile(0), m_mcTree(0),
+TestReport::TestReport(const char* dir, const char* prefix, 
+		       const char* version, const char* emVersion)
+  : m_dir(dir), m_prefix(prefix), m_version(version), m_emVersion(emVersion),
+    m_outputFile(0), m_mcFile(0), m_mcTree(0),
     m_mcBranch(0), m_mcEvent(0), m_reconFile(0), m_reconTree(0), 
     m_reconBranch(0), m_reconEvent(0), m_digiFile(0), m_digiTree(0),
     m_digiBranch(0), m_digiEvent(0), m_trigger(0), m_nEvent(0),
@@ -291,6 +293,9 @@ void TestReport::generateReport()
   writeHeader();
 
   (*m_report) << "@section summary Summary" << endl;
+  (*m_report) << "This report is produced using the @b " << m_version 
+	      << " TestReport package and the @b " << m_emVersion 
+	      << " EngineeringModel package." << endl; 
   (*m_report) << "There are @b " << m_nEvent << " events in @em " 
 	      << m_digiFile->GetName() << "." << endl;
 

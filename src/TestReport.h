@@ -14,7 +14,8 @@ class TestReport {
 
  public:
 
-  TestReport(const char* dir, const char* prefix);
+  TestReport(const char* dir, const char* prefix, const char* version,
+	     const char* emVersion);
   ~TestReport();
 
   void analyzeTrees(const char* mcFileName,
@@ -101,6 +102,12 @@ class TestReport {
 
   /// prefix to the report files
   std::string m_prefix;
+
+  /// version of the TestReport package
+  std::string m_version;
+
+  /// version of the EngineeringModel package
+  std::string m_emVersion;
 
   TFile* m_outputFile;
 
