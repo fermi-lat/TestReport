@@ -12,12 +12,18 @@
 #include "reconRootData/ReconEvent.h"
 #include "digiRootData/DigiEvent.h"
 
+/**
+ * \class TestReport
+ * \brief TestReport produces SVAC reports for both digi and recon data
+ * \author Xin Chen
+ */
+
 class TestReport {
 
  public:
 
   TestReport(const char* dir, const char* prefix, const char* version,
-	     const char* emVersion);
+	     const char* emVersion, const char*tkrV, const char* calV);
   ~TestReport();
 
   void analyzeTrees(const char* mcFileName,
@@ -112,7 +118,15 @@ class TestReport {
 				 int y=410) : 
       m_file(file), m_caption(caption), m_label(label), m_yLog(yLog),
 	 m_height(height), m_width(width), m_xPixel(x), m_yPixel(y)
-    { }
+    { 
+      m_nColor = 6;
+      m_colors[0] = 4; 
+      m_colors[1] = 6;
+      m_colors[2] = 7;
+      m_colors[3] = 5;
+      m_colors[4] = 3;
+      m_colors[5] = 2;
+    }
 
     void set(const char* file=0, const char* caption=0, const char* label=0, 
 	     bool yLog=0, float height=10, float width=15, int x=606, 
@@ -126,6 +140,7 @@ class TestReport {
       m_width = width;
       m_xPixel = x;
       m_yPixel = y;
+      m_nColor = 6;
     }
 
     /// name of file to be produced, note file type such as ".eps" is not
@@ -144,6 +159,10 @@ class TestReport {
 
     enum PlotType {COLZ, LEGO};
     PlotType m_2dPlotType;
+
+    /// colors used to make a palette for drawing 2D histogram using colz
+    int m_nColor;
+    int m_colors[6];
   };
 
   struct TableDef {
@@ -196,6 +215,10 @@ class TestReport {
 
   void produceReconDirPlots();
 
+  void produceReconPosPlots();
+
+  void produceReconEnePlots();
+
   /// set some common parameters for a 1D histogram
   void setHistParameters(TH1* h, const HistAttribute& att);
 
@@ -240,6 +263,9 @@ class TestReport {
 
   /// version of the EngineeringModel package
   std::string m_emVersion;
+ 
+  std::string m_tkrCalibVersion;
+  std::string m_calCalibVersion;
 
   TFile* m_outputFile;
 
@@ -337,6 +363,16 @@ class TestReport {
   TH1F* m_nTkrTrack;
 
   /// angular distributions of fit tracks
-  TH1F* m_reconDir[3];
+  TH2F* m_reconDirXY;
+  TH1F* m_reconDirZ;
+
+  /// position distribution of fit vertices
+  TH2F* m_reconPosXY;
+  TH1F* m_reconPosZ;
+
+  TH1F* m_reconEne;
+
+  /// sum of energy in the CAL cluster, at the moment there is only one cluster
+  TH1F* m_calSumEne;
 };
 #endif

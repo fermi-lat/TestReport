@@ -7,14 +7,17 @@
 #include "TestReport.h"
 #include "ToString.h"
 #include "TStyle.h"
+#include "Geo.h"
 
 using std::cout;
 using std::endl;
 using std::string;
 
 TestReport::TestReport(const char* dir, const char* prefix, 
-		       const char* version, const char* emVersion)
+		       const char* version, const char* emVersion,
+		       const char*tkrV, const char* calV)
   : m_dir(dir), m_prefix(prefix), m_version(version), m_emVersion(emVersion),
+    m_tkrCalibVersion(tkrV), m_calCalibVersion(calV),
     m_outputFile(0), m_mcFile(0), m_mcTree(0),
     m_mcBranch(0), m_mcEvent(0), m_reconFile(0), m_reconTree(0), 
     m_reconBranch(0), m_reconEvent(0), m_digiFile(0), m_digiTree(0),
@@ -50,15 +53,15 @@ TestReport::TestReport(const char* dir, const char* prefix,
   setHistParameters(m_trigger, att);
 
   m_condSummary = new TH1F("condSummary", "Condition summary distribution", 32, -0.5, 31.5);
-  att.m_xTitle = "Condition summary word";
+  att.m_xTitle = "GEM Condition summary word";
   setHistParameters(m_condSummary, att);
 
   for(int i = 0; i != 7; ++i) {
     m_nEventDigi[i] = 0;
   }
 
-  m_nHit2D = new TH2F("nHit2D", "nhits distribution", 16, -0.5, 15.5, 36, -0.5, 35.5);
-  att.set("Tower", "Plane");
+  m_nHit2D = new TH2F("nHit2D", "nhits distribution", 36, -0.5, 35.5, 16, -0.5, 15.5);
+  att.set("Plane", "Tower");
   setHistParameters(m_nHit2D, att);
 
   for(int i = 0; i != g_nTower; ++i) {
@@ -94,34 +97,48 @@ TestReport::TestReport(const char* dir, const char* prefix,
   att.set("Tower", "Layer");
   setHistParameters(m_nCalHit2D, att);
 
-  m_totZero2D = new TH2F("totZero2D", "Zerot tot0 distribution", 16, -0.5, 15.5, 72, 0., 36.);
-  att.set("Tower", "Plane");
+  m_totZero2D = new TH2F("totZero2D", "Zerot tot0 distribution", 72, 0., 36., 16, -0.5, 15.5);
+  att.set("Plane", "Tower");
   setHistParameters(m_totZero2D, att);
 
-  m_totSat2D = new TH2F("totSat2D", "Tot distribution", 16, -0.5, 15.5, 72, 0, 36);
-  att.set("Tower", "Plane");
+  m_totSat2D = new TH2F("totSat2D", "Tot distribution", 72, 0, 36, 16, -0.5, 15.5);
+  att.set("Plane", "Tower");
   setHistParameters(m_totSat2D, att);
 
-  m_totAve2D = new TH2F("totAve2D", "Tot distribution", 16, -0.5, 15.5, 72, 0, 36);
-  att.set("Tower", "Plane");
+  m_totAve2D = new TH2F("totAve2D", "Tot distribution", 72, 0, 36, 16, -0.5, 15.5);
+  att.set("Plane", "Tower");
   setHistParameters(m_totAve2D, att);
 
-  m_nTkrTrack = new TH1F("nTkrTrack", "Number of reconstructed tracks", 10, -0.5, 9.5);
-  att.m_xTitle = "Number of reconstructed tracks";
+  m_nTkrTrack = new TH1F("nTkrTrack", "Number of reconstructed tracks", 11, -0.5, 10.5);
+  att.set("Number of reconstructed tracks", "No. of events");
   att.m_canRebin = false;
   setHistParameters(m_nTkrTrack, att);
 
-  char* temp[3];
-  temp[0] = "X", temp[1] = "Y", temp[2] = "Z";
-  for(int i = 0; i != 3; ++i) {
-    char name[] = "reconDir0";
-    sprintf(name, "reconDir%1d", i);
-    char xTitle[] = "Reconstructed 0 direction";
-    sprintf(xTitle, "Reconstructed %s direction", temp[i]);
-    m_reconDir[i] = new TH1F(name, xTitle, 100, -1., 1.);
-    att.set(xTitle, "No. of events", 0.06, 0.05, 0.7, 0.5);
-    setHistParameters(m_reconDir[i], att);
-  }
+  m_reconDirXY = new TH2F("reconDirXY", "Reconstructed dir xy distribution", 100, -1, 1, 100, -1, 1);
+  att.set("Reconstructed x direction", "Reconstructed y direction");
+  setHistParameters(m_reconDirXY, att);
+
+  m_reconDirZ = new TH1F("reconDirZ", "Reconstructed dir z distribution", 100, -1, 0.);
+  att.set("Reconstructed z direction", "No. of events");
+  setHistParameters(m_reconDirZ, att);
+
+  m_reconPosXY = new TH2F("reconPosXY", "Reconstructed dir xy position", 100, -400, 400, 100, -400, 400);
+  att.set("Reconstructed x position", "Reconstructed y position");
+  setHistParameters(m_reconPosXY, att);
+
+  m_reconPosZ = new TH1F("reconPosZ", "Reconstructed dir z position", 100, 0, 200.);
+  att.set("Reconstructed z position", "No. of events");
+  setHistParameters(m_reconPosZ, att);
+
+  m_reconEne = new TH1F("reconEne", "Reconstructed energy", 100, 0., 400.);
+  att.set("Reconstructed energy(MeV)", "No. of events");
+  att.m_canRebin = false;
+  setHistParameters(m_reconEne, att);
+
+  m_calSumEne = new TH1F("calSumEne", "Cal energy", 100, 0., 400.);
+  att.set("Sum of crystal crystal energies in the CAL cluster(MeV).", "No. of events");
+  att.m_canRebin = false;
+  setHistParameters(m_calSumEne, att);
 }
 
 TestReport::~TestReport()
@@ -270,32 +287,36 @@ void TestReport::analyzeReconTree()
 {
   TkrRecon* tkrRecon = m_reconEvent->getTkrRecon();
  
-  assert(tkrRecon != 0);
+  if(tkrRecon) {
+    m_nTkrTrack->Fill(tkrRecon->getTrackCol()->GetLast()+1);
 
-  m_nTkrTrack->Fill(tkrRecon->getTrackCol()->GetLast()+1);
-
-  TObjArray* vertices = tkrRecon->getVertexCol();
-  if(tkrRecon->getVertexCol()->GetLast() >= 0) {
-    TkrVertex* tkrVertex = dynamic_cast<TkrVertex*>(vertices->At(0));
-    if(tkrVertex) {
-      const TVector3& pos = tkrVertex->getPosition();
-      const TVector3& dir = tkrVertex->getDirection();
-      m_reconDir[0]->Fill(dir.X());
-      m_reconDir[1]->Fill(dir.Y());
-      m_reconDir[2]->Fill(dir.Z());
-      /*
-      m_ntuple.m_pos[0] = pos.X();
-      m_ntuple.m_pos[1] = pos.Y();
-      m_ntuple.m_pos[2] = pos.Z();
-      m_ntuple.m_dir[0] = dir.X();
-      m_ntuple.m_dir[1] = dir.Y();
-      m_ntuple.m_dir[2] = dir.Z();
-      m_ntuple.m_fitTotalEnergy = tkrVertex->getEnergy();
-      m_ntuple.m_vtxTrks = tkrVertex->getNumTracks();
-      */
+    TObjArray* vertices = tkrRecon->getVertexCol();
+    if(tkrRecon->getVertexCol()->GetLast() >= 0) {
+      TkrVertex* tkrVertex = dynamic_cast<TkrVertex*>(vertices->At(0));
+      if(tkrVertex) {
+	const TVector3& pos = tkrVertex->getPosition();
+	const TVector3& dir = tkrVertex->getDirection();
+	m_reconDirXY->Fill(dir.X(), dir.Y(), 1./m_nEvent);
+	m_reconDirZ->Fill(dir.Z());
+	m_reconPosXY->Fill(pos.X(), pos.Y(), 1./m_nEvent);
+	m_reconPosZ->Fill(pos.Z());
+	m_reconEne->Fill(tkrVertex->getEnergy());
+      }
     }
   }
 
+  CalRecon* calRecon = m_reconEvent->getCalRecon();
+
+  if(calRecon) {
+    TObjArray* calClusterCol = calRecon->getCalClusterCol();
+    if(calClusterCol) {
+      // currently there is just one cluster in CAL
+      CalCluster* calCluster = dynamic_cast<CalCluster*>(calClusterCol->At(0));
+      if(calCluster) {
+	m_calSumEne->Fill(calCluster->getEnergySum());
+      }
+    }
+  }
 }
 
 
@@ -343,8 +364,13 @@ void TestReport::analyzeDigiTree()
     int tower = tkrDigi->getTower().id();
     int biLayer = tkrDigi->getBilayer();
     GlastAxis::axis view = tkrDigi->getView();
-    int plane = 2 * biLayer;
-    if(view == GlastAxis::Y) ++plane;
+    int plane;
+    if(view == GlastAxis::X) {
+      plane = Geo::instance()->getPlane(biLayer, 0);
+    }
+    else {
+      plane = Geo::instance()->getPlane(biLayer, 1);
+    }
 
     ++nDigi[tower];
 
@@ -352,7 +378,7 @@ void TestReport::analyzeDigiTree()
 
     nHit[tower] += tkrDigi->getNumHits();
 
-    m_nHit2D->Fill(tower, plane, double(tkrDigi->getNumHits())/m_nEvent);
+    m_nHit2D->Fill(plane, tower, double(tkrDigi->getNumHits())/m_nEvent);
 
     int lowCount = 0, highCount = 0;
     int nStrips = tkrDigi->getNumHits();
@@ -378,19 +404,19 @@ void TestReport::analyzeDigiTree()
     assert(tot0>=0 && tot0 <=g_satTot && tot1>=0 && tot1 <=g_satTot); 
 
     if(tot0 == 0){
-      m_totZero2D->Fill(tower, plane+0.25);
+      m_totZero2D->Fill(plane+0.25, tower, 1./m_nEvent);
     }
     if(tot1 == 0){
-      m_totZero2D->Fill(tower, plane+0.75);
+      m_totZero2D->Fill(plane+0.75, tower, 1./m_nEvent);
     }
 
     if(tot0 == g_satTot){
       satTot = true;
-      m_totSat2D->Fill(tower, plane+0.25);
+      m_totSat2D->Fill(plane+0.25, tower, 1./m_nEvent);
     }
     if(tot1 == g_satTot){
       satTot = true;
-      m_totSat2D->Fill(tower, plane+0.75);
+      m_totSat2D->Fill(plane+0.75, tower, 1./m_nEvent);
     }
 
     if(tot0>0 && tot0<g_satTot) {
@@ -441,12 +467,23 @@ void TestReport::generateReport()
   writeHeader();
 
   (*m_report) << "@section purpose Purpose" << endl;
-  (*m_report) << "This report is used in offline data analyses to identify apparent problems in cosmic ray muon and VDG data. <b>Warning, results from other tests should be studied with care</b>" << endl;
+  (*m_report) << "This report is used in offline data analyses to identify apparent problems in cosmic ray muon and VDG data. <b>Warning, results from other tests(such as charge injection) should be interpreted with care</b>" << endl;
+
+  (*m_report) << "@section version Software Version" << endl;
+  (*m_report) << "@li EngineeringModel: @b " << m_emVersion << endl;
+  (*m_report) << "@li TestReport: @b " << m_version << endl;
+  (*m_report) << "@li calibGenTKR: @b " << m_tkrCalibVersion << endl;
+  (*m_report) << "@li calibGenCAL: @b " << m_calCalibVersion << endl;
 
   (*m_report) << "@section summary Summary" << endl;
-  (*m_report) << "This report is produced using the @b " << m_version 
-	      << " TestReport package and the @b " << m_emVersion 
-	      << " EngineeringModel package." << endl << endl;
+  (*m_report) << "In digi file @em " << m_digiFile->GetName() << endl;
+  (*m_report) << "@li There are @b " << m_nEvent << " triggers " << endl;
+  (*m_report) << "@li Time of first trigger: <b>" << ctime((time_t*) (&m_startTime)) << " (GMT) </b>";
+  (*m_report) << "@li Time of last trigger: <b>" << ctime((time_t*) (&m_endTime)) << " (GMT) </b>";
+  (*m_report) << "@li Duration: <b>" << m_endTime - m_startTime << " seconds" << "</b>" << endl;
+  (*m_report) << "@li Rate: <b>" << double(m_nEvent)/(m_endTime - m_startTime) << " hz" << "</b>" << endl;
+
+  (*m_report) << "<p>Recon file @em " << m_reconFile->GetName() << "</p>" << endl;
 
   if(m_reconFile) generateReconReport();
 
@@ -457,115 +494,117 @@ void TestReport::generateReport()
 
 void TestReport::generateDigiReport()
 {
-  (*m_report) << "In digi file @em " << m_digiFile->GetName() << endl;
-  (*m_report) << "@li There are @b " << m_nEvent << " triggers " << endl;
-  (*m_report) << "@li Time of first trigger: <b>" << ctime((time_t*) (&m_startTime)) << " (GMT) </b>";
-  (*m_report) << "@li Time of last trigger: <b>" << ctime((time_t*) (&m_endTime)) << " (GMT) </b>";
-  (*m_report) << "@li Duration: <b>" << m_endTime - m_startTime << " seconds" << "</b>" << endl;
-  (*m_report) << "@li Rate: <b>" << double(m_nEvent)/(m_endTime - m_startTime) << " hz" << "</b>" << endl;
+  (*m_report) << "@section trigger Trigger" << endl;
+
+  // print condition summary plots
+  string file = m_prefix;
+  file += "_condSummary";
+  PlotAttribute att(file.c_str(), "GEM condition summary distribution. The word is deduced by combining bit patterns from table 4", "condSummary", 1);
+  producePlot(m_condSummary, att);
+  insertPlot(att);
+  *(m_report) << "@latexonly \\nopagebreak @endlatexonly" << endl;
+  printCondSummaryTable();
+
+  // print trigger plots
+  file = m_prefix;
+  file += "_trigger";
+  att.set(file.c_str(), "Trigger distribution calculated by triggerAlg. The word is deduced by combining bit patterns from table 3", "trigger", 1);
+  producePlot(m_trigger, att);
+  insertPlot(att);
+  *(m_report) << "@latexonly \\nopagebreak @endlatexonly" << endl;
+  printGltTriggerTable();
+
+  (*m_report) << "@section tkrDigi TKR Digitization" << endl;
  
-  (*m_report) << "@section digi Digi" << endl;
+  *(m_report) << "@subsection nDigi nDigi" << endl;
   *(m_report) << "@latexonly \\nopagebreak @endlatexonly" << endl;
   printNDigiTable();
   *(m_report) << "@latexonly \\nopagebreak @endlatexonly" << endl;
   printNDigiTowerTable();
   *(m_report) << "@latexonly \\pagebreak @endlatexonly" << endl;
+  *(m_report) << "@latexonly \\pagebreak @endlatexonly" << endl;
 
-  *(m_report) << "@section badStrip Bad Strip" << endl;
+  (*m_report) << "@subsection strip_hit Strip Hit Info" << endl;
   *(m_report) << "@latexonly \\nopagebreak @endlatexonly" << endl;
   *(m_report) << "@li There are @b " << ToString(m_nEventBadStrip) << " events with strip ID outside the range from 0 to 1535." << endl;
 
   *(m_report) << "@li There are @b " << ToString(m_nEventMoreStrip) << " events with more than 64 strips per GTRC. <b> Warning: EM2 splitting is assumed where tot0 at X1 reads from front end card 0-3 </b>" << endl << endl;
   
-  *(m_report) << "@section totInfo TOT info" << endl;
-  *(m_report) << "@latexonly \\nopagebreak @endlatexonly" << endl;
-  *(m_report) << "@li There are @b " << ToString(m_nEventSatTot) << " events with saturated TOT values." << endl;
-  *(m_report) << "@li There are @b " << ToString(m_nEventZeroTot) << " events with zero TOT in one plane but nonzero number of strip hits in that plane." << endl;
-  *(m_report) << "@li There are @b " << ToString(m_nEventBadTot) << " events with nonzero TOT on one plane but no strip hits in that plane." << endl << endl;
-
-
-  (*m_report) << "@section trigger Trigger" << endl;
-
-  // print trigger plots
-  string file(m_prefix);
-  file += "_trigger";
-  PlotAttribute att(file.c_str(), "Trigger distribution. The word is deduced by combining bit patterns from table 3", "trigger", 1);
-  producePlot(m_trigger, att);
-  insertPlot(att);
-  *(m_report) << "@latexonly \\nopagebreak @endlatexonly" << endl;
-  printGltTriggerTable();
-  *(m_report) << "@latexonly \\pagebreak @endlatexonly" << endl;
-
-  // print condition summary plots
-  file = m_prefix;
-  file += "_condSummary";
-  att.set(file.c_str(), "Condition summary distribution. The word is deduced by combining bit patterns from table 4", "condSummary", 1);
-  producePlot(m_condSummary, att);
-  insertPlot(att);
-  *(m_report) << "@latexonly \\nopagebreak @endlatexonly" << endl;
-  printCondSummaryTable();
-  *(m_report) << "@latexonly \\pagebreak @endlatexonly" << endl;
-
-  (*m_report) << "@section strip_hit Strip Hit Info" << endl;
+  (*m_report) << "@subsection strip_hit Strip Hit Info" << endl;
 
   produceNhits2DPlot();
 
-  produceCalNhits2DPlot();
+  //  produceDigiPlot();
 
   // produce plots for nhits distribution for 16 towers
   file = m_prefix;
   file += "_hitsPerTower_1";
-  att.set(file.c_str(), "Number of strip hits distribution for tower 0 to tower 7", "hitsPerTower_1", 1, 18, 12.2, 909, 615);
+  att.set(file.c_str(), "Number of strip hits distribution for tower 0 to tower 7", "hitsPerTower_1", 1, 18, 18, 909, 615);
   producePlot((TObject**) m_nHit, att, 4, 2);
   insertPlot(att);
 
   file = m_prefix;
   file += "_hitsPerTower_2";
-  att.set(file.c_str(), "Number of strip hits distribution from tower 8 to tower 15", "hitsPerTower_2", 1, 18, 12.2, 909, 615);
+  att.set(file.c_str(), "Number of strip hits distribution from tower 8 to tower 15", "hitsPerTower_2", 1, 18, 18, 909, 615);
   producePlot((TObject**) m_nHit+8, att, 4, 2);
   insertPlot(att);
 
   // produce plots for nLayer distribution
-  (*m_report) << "@section layer_hit Total number of layers hit per tower" << endl;
 
   file = m_prefix;
   file += "_layersPerTower_1";
-  att.set(file.c_str(), "Number of hit layers distribution for tower 0 to tower 7", "layersPerTower_1", 1, 18, 12.2, 909, 615);
+  att.set(file.c_str(), "Number of hit layers distribution for tower 0 to tower 7", "layersPerTower_1", 1, 18, 18, 909, 615);
   producePlot((TObject**) m_nLayer, att, 4, 2);
   insertPlot(att);
 
   file = m_prefix;
   file += "_layersPerTower_2";
-  att.set(file.c_str(), "Number of hit layers distribution for tower 8 to tower 15", "layersPerTower_1", 1, 18, 12.2, 909, 615);
+  att.set(file.c_str(), "Number of hit layers distribution for tower 8 to tower 15", "layersPerTower_1", 1, 18, 18, 909, 615);
   producePlot((TObject**) m_nLayer+8, att, 4, 2);
   insertPlot(att);
 
-  //  produceDigiPlot();
+  *(m_report) << "@latexonly \\pagebreak @endlatexonly" << endl;
+  *(m_report) << "@subsection totInfo TOT info" << endl;
+  *(m_report) << "@latexonly \\nopagebreak @endlatexonly" << endl;
+  *(m_report) << "@li Ratio of events with saturated TOT: @b " << ToString(m_nEventSatTot/double(m_nEvent)) << endl;
+  *(m_report) << "@li Ratio of events with TOT==0 and nStrip!=0 for each Si plane:@b " << ToString(m_nEventZeroTot/double(m_nEvent)) << endl;
+  *(m_report) << "@li Ratio of events with TOT!=0 and nStrip==0 for each Si plane:@b " << ToString(m_nEventBadTot/double(m_nEvent)) << endl;
 
   // TOT plots
   produceZeroSatTot2DPlot();
 
   produceAveTot2DPlot();
   //  produceAveTotPlots();
+
+  (*m_report) << "@section calDigi CAL Digitization" << endl;
+
+  produceCalNhits2DPlot();
+
 }
 
 void TestReport::generateReconReport()
 {
-  (*m_report) << "In recon file @em " << m_reconFile->GetName() << endl;
+  (*m_report) << "@section tkrRecon TKR Reconstruction" << endl;
 
-  // print trigger plots
+  // print reconstructed track plots
   string file(m_prefix);
   file += "_nTkrTrack";
-  PlotAttribute att(file.c_str(), "Number of reconstructed tracks", "nTkrTrack", 1);
+  PlotAttribute att(file.c_str(), "Number of reconstructed tracks for all trigger types", "nTkrTrack", 1);
   producePlot(m_nTkrTrack, att);
   insertPlot(att);
 
   produceReconDirPlots();
+
+  produceReconPosPlots();
+
+  (*m_report) << "@section calRecon CAL Reconstruction" << endl;
+
+  produceReconEnePlots();
 }
 
 void TestReport::writeHeader()
 {
-  *(m_report) << "/** @mainpage Run Test Report" << endl
+  *(m_report) << "/** @mainpage SVAC Report" << endl
 	      << "@htmlonly" << endl
 	      << "<center>" << endl
 	      << "<a href=\"../latex/refman.ps\"> PS file </a> &nbsp" << endl
@@ -593,6 +632,7 @@ void TestReport::producePlot(TObject* h, const PlotAttribute& att)
   gStyle->SetTitleFontSize();
   gStyle->SetStatW(0.2);
   gStyle->SetStatH(0.16);
+  gStyle->SetPalette();
 
   if(att.m_yLog) gPad->SetLogy();
  
@@ -604,6 +644,7 @@ void TestReport::producePlot(TObject* h, const PlotAttribute& att)
       h2->Draw("LEGO");
     }
     else {
+      gStyle->SetPalette(att.m_nColor, (int*) att.m_colors);
       h2->Draw("COLZ");
     }
   }
@@ -657,16 +698,15 @@ void TestReport::producePlot(TObject** h, const PlotAttribute& att, int nRow,
 
   for(int i = 0; i != nRow*nCol; ++i) {
 
-    gStyle->SetTitleH(0.12);
-    gStyle->SetTitleW(0.2);
-    gStyle->SetTitleFontSize(2);
-    gStyle->SetStatW(0.4);
-    gStyle->SetStatH(0.3);
+    //    gStyle->SetTitleH(0.12);
+    //    gStyle->SetTitleW(0.2);
+    //    gStyle->SetTitleFontSize(4);
+    c1.cd(i+1);
+    gStyle->SetStatH(0.4);
     gPad->SetBottomMargin(0.05*nRow);
 
     if(att.m_yLog) gPad->SetLogy();
 
-    c1.cd(i+1);
     if(TGraph* gr = dynamic_cast<TGraph*>(h[i])) {
       gr->Draw("A*");
     }
@@ -889,7 +929,7 @@ void TestReport::printNDigiTable()
 void TestReport::printNDigiTowerTable()
 {
   if(m_nTkrTrigger == 0) {
-    *m_report << "There are no events with TKR trigger." << endl;
+    //    *m_report << "There are no events with TKR trigger." << endl;
     return;
   }
 
@@ -992,7 +1032,7 @@ void TestReport::produceAveTotPlots()
 
   string file(m_prefix);
   file += "_tot0";
-  PlotAttribute att(file.c_str(), "Average TOT value in tower 0 to tower 7(excluding 0 and saturation). Plane 0 is at bottom of the tracker.", "tot0", 0, 18, 12.2, 909, 615);
+  PlotAttribute att(file.c_str(), "Average TOT value in tower 0 to tower 7(excluding 0 and saturation). Plane 0 is at bottom of the tracker.", "tot0", 0, 18, 18, 909, 615);
   producePlot((TObject**) graphs, att, 4, 2);
   insertPlot(att);
 
@@ -1020,7 +1060,7 @@ void TestReport::produceCalNhits2DPlot()
   file += "_nCalHits2d";
   PlotAttribute att(file.c_str(), "Average number of crystal hits in each CAL layer of each tower", "nCalHits2d");
   att.m_2dPlotType = PlotAttribute::COLZ;
-  producePlot(m_nHit2D, att);
+  producePlot(m_nCalHit2D, att);
   insertPlot(att);
 }
 
@@ -1029,13 +1069,15 @@ void TestReport::produceZeroSatTot2DPlot()
 
   string file = m_prefix;
   file += "_totZero";
-  PlotAttribute att(file.c_str(), "Number of events with zero TOT in each plane (plane 0 is at bottom) in each tower. Note the plot contains info for both tot counters in the same plane. For example, bin at tower 0, plane 0-0.5 contains tot0 value at plane 0 in tower 0. Bin at tower 0, plane 0.5-1. contains tot1 value at plane 0 in tower 0", "satTot");
+  PlotAttribute att(file.c_str(), "Ratio of events with zero TOT in each plane (plane 0 is at bottom) in each tower. Note the plot contains info for both tot counters in the same plane. For example, bin at tower 0, plane 0-0.5 corresponds to tot value from GTRC close to strip 0 at plane 0 in tower 0. Bin at tower 0, plane 0.5-1. corresponds to tot value from GTRC close to strip 1536 at plane 0 in tower 0", "satTot");
+  att.m_nColor = 4;
   producePlot(m_totZero2D, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_totSat";
-  att.set(file.c_str(), "Number of events with saturated TOT in each plane (plane 0 is at bottom) in each tower. Note the plot contains info for both tot counters in the same plane. For example, bin at tower 0, plane 0-0.5 contains tot0 value at plane 0 in tower 0. Bin at tower 0, plane 0.5-1. contains tot1 value at plane 0 in tower 0", "satTot");
+  att.set(file.c_str(), "Ratio of events with saturated TOT(250) in each plane (plane 0 is at bottom) in each tower. Note the plot contains info for both tot counters in the same plane. For example, bin at tower 0, plane 0-0.5 corresponds to tot value from GTRC close to strip 0 at plane 0 in tower 0. Bin at tower 0, plane 0.5-1. corresponds to tot value from GTRC close to strip 1536 at plane 0 in tower 0", "satTot");
+  att.m_nColor = 4;
   producePlot(m_totSat2D, att);
   insertPlot(att);
 }
@@ -1044,8 +1086,8 @@ void TestReport::produceAveTot2DPlot()
 {
   for(int i = 0; i != g_nTower; ++i) {
     for(int j = 0; j != g_nPlane; ++j) {
-      m_totAve2D->Fill(i, j+0.25, m_tot[i][j][0]->GetMean());
-      m_totAve2D->Fill(i, j+0.75, m_tot[i][j][1]->GetMean());
+      m_totAve2D->Fill(j+0.25, i, m_tot[i][j][0]->GetMean());
+      m_totAve2D->Fill(j+0.75, i, m_tot[i][j][1]->GetMean());
     }
   }
 
@@ -1059,8 +1101,45 @@ void TestReport::produceAveTot2DPlot()
 void TestReport::produceReconDirPlots()
 {
   string file(m_prefix);
-  file += "_reconDir";
-  PlotAttribute att(file.c_str(), "Reconstructed event direction", "reconDir", 0, 18, 12.2, 909, 615);
-  producePlot((TObject**) m_reconDir, att, 3, 1);
+  file += "_reconDirXY";
+  PlotAttribute att(file.c_str(), "Reconstructed event direction along the X and the Y axis, plotted in ratio", "reconDirXY");
+  producePlot(m_reconDirXY, att);
   insertPlot(att);
+
+  file = m_prefix;
+  file += "_reconDirZ";
+  att.set(file.c_str(), "Reconstructed event direction along the Z axis", "reconDirZ");
+  producePlot(m_reconDirZ, att);
+  insertPlot(att);
+}
+
+void TestReport::produceReconPosPlots()
+{
+  string file(m_prefix);
+  file += "_reconPosXY";
+  PlotAttribute att(file.c_str(), "Reconstructed event position along the X and the Y axis, plotted in ratio", "reconPosXY");
+  producePlot(m_reconPosXY, att);
+  insertPlot(att);
+
+  file = m_prefix;
+  file += "_reconPosZ";
+  att.set(file.c_str(), "Reconstructed event position along the Z axis", "reconPosZ", 1);
+  producePlot(m_reconPosZ, att);
+  insertPlot(att);
+}
+
+void TestReport::produceReconEnePlots()
+{
+  string file(m_prefix);
+  file += "_reconEne";
+  PlotAttribute att(file.c_str(), "Reconstructed event energy(MeV) assigned in first reconstructed vertex", "reconEne", 1);
+  producePlot(m_reconEne, att);
+  insertPlot(att);
+
+  file = m_prefix;
+  file += "_calSumEne";
+  att.set(file.c_str(), "Sum of crystal energies in the CAL cluster(MeV). Note there is only one CAL cluster produced by CalRecon at the moment", "calSumEne", 1);
+  producePlot(m_calSumEne, att);
+  insertPlot(att);
+
 }
