@@ -206,6 +206,10 @@ TestReport::TestReport(const char* dir, const char* prefix,
   att.m_canRebin = false;
   setHistParameters(m_timeIntervalCut, att);
 
+  m_timeIntervalGem = new TH1F("timeIntervalGem", "Time interval between adjacent event in mill second, the time is measured by GEM", 100, 0., 3.);
+  att.set("Time interval between adjacent events(ms)", "No. of events");
+  setHistParameters(m_timeIntervalGem, att);
+
   m_alignCalTkr = new TH1F("alignCalTkr", "Distance between the reconstructed CAL cluster XY coordinates and the XY coordinates extrapolated from TKR", 50, 0., 10.);
   att.set("Difference(mm)", "No. of events");
   setHistParameters(m_alignCalTkr, att);
@@ -486,6 +490,10 @@ void TestReport::analyzeDigiTree()
   int cond = m_digiEvent->getGem().getConditionSummary();
   m_condSummary->Fill(cond);
 
+  // 1 count = 50 ns
+  UInt_t deltaT = m_digiEvent->getGem().getDeltaEventTime();
+  m_timeIntervalGem->Fill(0.00005*deltaT);
+
   int tkrVector = m_digiEvent->getGem().getTkrVector();
 
   // 3 in a row TKR trigger
@@ -685,7 +693,7 @@ void TestReport::generateDigiReport()
   // print trigger plots
   file = m_prefix;
   file += "_trigger";
-  att.set(file.c_str(), "Trigger word calculated by triggerAlg. The word is deduced by combining bit patterns from the following table. For example, an event with both the TKR trigger bit and the CAL Low trigger bit set in GEM has the condition summary word of @latex $2^{2} + 2^{3} = 12$ @endlatex @html 2<sup>2</sup> + 2<sup>3</sup> = 12 @endhtml.", "trigger", 1);
+  att.set(file.c_str(), "Trigger word calculated by triggerAlg. The word is deduced by combining bit patterns from the following table. For example, an event with both the TKR trigger bit and the CAL Low trigger bit set in GEM has the condition summary word of @latex $2^{2} + 2^{1} = 6$ @endlatex @html 2<sup>2</sup> + 2<sup>1</sup> = 6 @endhtml.", "trigger", 1);
   producePlot(m_trigger, att);
   insertPlot(att);
   *(m_report) << "@latexonly \\nopagebreak @endlatexonly" << endl;
@@ -1074,12 +1082,11 @@ void TestReport::printGltTriggerTable()
  
   table[1][0] = "Trigger";
   table[1][1] = "ACD Low";
-  table[1][2] = "ACD High";
-  table[1][3] = "TKR";
-  table[1][4] = "CAL Low";
-  table[1][5] = "CAL High";
+  table[1][2] = "TKR";
+  table[1][3] = "CAL Low";
+  table[1][4] = "CAL High";
+  table[1][5] = "ACD High";
   table[1][6] = "Throttle";
-  table[1][7] = "LiveTime";
 
   TableDef t((string*) table, "Trigger bit used in triggerAlg calculation", "gltTriggerTable", nRow, nCol);
 
@@ -1494,7 +1501,7 @@ void TestReport::produceCalEneLayer2DPlot()
 
   file = m_prefix;
   file += "_zeroCalEndLayer2d";
-  att.set(file.c_str(), "Fraction of events with zero energy measured for all CAL layers", "zeroCalEndLayer2d");
+  att.set(file.c_str(), "Fraction of events with zero energy measured for all CAL layers.", "zeroCalEndLayer2d");
   producePlot(m_zeroCalEneLayer2D, att);
   insertPlot(att);
 }
@@ -1530,6 +1537,12 @@ void TestReport::produceTimeIntervalPlot()
   att.set(file.c_str(), "Time interval between adjacent event in millsecond with a cut of 1 ms. Note this interval is between the time when the event is built, NOT the trigger time. The time is measured by the 16MHZ clock in the power PC.", "timeIntervalCut", true);
   producePlot(m_timeIntervalCut, att);
   insertPlot(att);
+
+  file = m_prefix;
+  file += "_timeIntervalGem";
+  att.set(file.c_str(), "Time interval between adjacent event in millsecond with a cut of 1 ms. Note this interval time is measured in GEM. The time is stored in a 16 bit counter, each count is equal to 50 ns, so the time will be saturated at roughly 3.3 ms.", "timeIntervalGem", true);
+  producePlot(m_timeIntervalGem, att);
+  insertPlot(att);
 }
 
 string TestReport::boldFaceLatex(const string& s) 
@@ -1537,7 +1550,12 @@ string TestReport::boldFaceLatex(const string& s)
   string temp("{\\bf ");
   temp += s;
   string::size_type pos = temp.find('.');
-  temp.insert(pos+1, "}");
+  if(pos != string::npos) {
+    temp.insert(pos+1, "}");
+  }
+  else {
+    temp += "}";
+  }
   return temp;
 }
 
@@ -1546,7 +1564,12 @@ string TestReport::boldFaceHtml(const string& s)
   string temp("<strong> ");
   temp += s;
   string::size_type pos = temp.find('.');
-  temp.insert(pos+1, "</strong>");
+  if(pos != string::npos) {
+    temp.insert(pos+1, "</strong>");
+  }
+  else {
+    temp += "</strong>";
+  }
   return temp;
 }
 

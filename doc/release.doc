@@ -33,3 +33,10 @@ v3r2
 
 add a plot to check consistence between CAL recon and TKR recon
 
+v3r2p0
+
+Cosmetic changes
+
+v3r2p1
+
+Add time interval plot from GEM. Change trigger bit calculated by triggerAlg

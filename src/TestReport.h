@@ -439,6 +439,9 @@ class TestReport {
   /// 3 ms to study the dead time
   TH1F* m_timeIntervalCut;
 
+  /// histogram of time between adjacent event in mili second, taken from GEM
+  TH1F* m_timeIntervalGem;
+
   /// percentage of events with TKR trigger but less than 6 digis in a tower
   TGraph* m_nDigi;
 
