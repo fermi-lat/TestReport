@@ -25,6 +25,8 @@ my $prefix = <OPTFILE>;
 chop($prefix);
 my $testReportVersion = <OPTFILE>;
 chop($testReportVersion);
+close(OPTFILE);
+
 my $texFile = 'refman.tex';
 my $dviFile = 'refman.dvi';
 my $psFile = 'refman.ps';
@@ -32,7 +34,7 @@ my $pdfFile = 'refman.pdf';
 my $htmlFile = 'index.html';
 my $pwd =  $ENV{PWD};
 
-my $cmtPath = "/nfs/farm/g/glast/u06/chen/svac:/nfs/farm/g/glast/u05/builds/rh9_gcc32/EngineeringModel/EngineeringModel-v3r0404p0";
+my $cmtPath = "/nfs/farm/g/glast/u06/chen/svac:/nfs/farm/g/glast/u05/builds/rh9_gcc32/EngineeringModel/EngineeringModel-v3r0404p2";
 my $cmtDir = "/nfs/farm/g/glast/u06/chen/svac/TestReport/v0/cmt";
 my $exeDir = "/nfs/farm/g/glast/u06/chen/svac/TestReport/v0/rh9_gcc32";
 my $doxyFile = "/nfs/farm/g/glast/u06/chen/svac/TestReport/v0/src/ReportDoxyfile";

@@ -23,7 +23,8 @@ class TestReport {
  public:
 
   TestReport(const char* dir, const char* prefix, const char* version,
-	     const char* emVersion, const char*tkrV, const char* calV);
+	     const char* emVersion, const char*tkrV, const char* calV,
+	     const char* splitF);
   ~TestReport();
 
   void analyzeTrees(const char* mcFileName,
@@ -117,15 +118,17 @@ class TestReport {
 				 float height=10, float width=15, int x=606,
 				 int y=410) : 
       m_file(file), m_caption(caption), m_label(label), m_yLog(yLog),
-	 m_height(height), m_width(width), m_xPixel(x), m_yPixel(y)
+	 m_height(height), m_width(width), m_xPixel(x), m_yPixel(y),
+	 m_statMode(1111)
     { 
-      m_nColor = 6;
-      m_colors[0] = 4; 
-      m_colors[1] = 6;
-      m_colors[2] = 7;
-      m_colors[3] = 5;
-      m_colors[4] = 3;
-      m_colors[5] = 2;
+      m_2dPlotType = COLZ;
+      m_nColor = 3;
+      m_colors[0] = 1; 
+      m_colors[1] = 5;
+      m_colors[2] = 2;
+      m_colors[3] = 15;
+      m_colors[4] = 30;
+      m_colors[5] = 4;
     }
 
     void set(const char* file=0, const char* caption=0, const char* label=0, 
@@ -140,7 +143,9 @@ class TestReport {
       m_width = width;
       m_xPixel = x;
       m_yPixel = y;
-      m_nColor = 6;
+      m_nColor = 3;
+      m_2dPlotType = COLZ;
+      m_statMode = 1111;
     }
 
     /// name of file to be produced, note file type such as ".eps" is not
@@ -163,6 +168,9 @@ class TestReport {
     /// colors used to make a palette for drawing 2D histogram using colz
     int m_nColor;
     int m_colors[6];
+
+    /// mode controlling what are drawn in the stat box
+    int m_statMode;
   };
 
   struct TableDef {
@@ -195,12 +203,14 @@ class TestReport {
   /// produce a table containing ratio of events with TKR trigger but less than 6 digis in each tower
   void printNDigiTowerTable();
 
+  void printNTrackTable();
+
   /// produce a plot describing ratio of events with TKR trigger but less than 6 digis
   void produceNDigiPlot();
 
   /// produce average TOT plots in each plane, each tower
   void produceAveTotPlots();
-
+ 
   /// produce 2D average TOT plots in each plane, each tower
   void produceAveTot2DPlot();
 
@@ -213,11 +223,23 @@ class TestReport {
   /// produce 2D plot for number of events with zero or saturated tot value in each plane of each tower
   void produceZeroSatTot2DPlot();
 
+  void produceTotNoise2DPlot();
+
+  /// produce a histogram plot of sum of CAL energies
+  void produceCalEneSum2DPlot();
+
+  /// produce 2D plot of energies measured in each CAL layer
+  void produceCalEneLayer2DPlot();
+
   void produceReconDirPlots();
 
   void produceReconPosPlots();
 
   void produceReconEnePlots();
+
+  void produceTimeIntervalPlot();
+
+  void produceNHitPlane2DPlot();
 
   /// set some common parameters for a 1D histogram
   void setHistParameters(TH1* h, const HistAttribute& att);
@@ -239,10 +261,18 @@ class TestReport {
 
   void insertPlot(const PlotAttribute& att);
 
+  /// scale a 2d histogram by number of events in each bin
+  /// note size and dimensions of nEvents array must agree with the histogram
+  void scale2DHist(TH2F* h, int* nEvents);
+
   /// apply \ in front of some latex special characters 
   void applyDash(std::string* x, int n) const;
 
-  int getGtrcSplit(int layer, GlastAxis::axis view);
+  /// used in producing caption for a plot in a latex file. It will put the
+  /// first sentence in the caption to be bold face.
+  std::string boldFaceLatex(const std::string& s);
+
+  bool isLowEnd(int tower, int layer, int iView, int stripId);
 
   void analyzeMcTree() { }
 
@@ -285,7 +315,8 @@ class TestReport {
   DigiEvent* m_digiEvent;
 
   enum {g_nLayer = 18, g_nView = 2, g_nPlane = 36, g_nStrip = 1536, 
-	g_nFEC = 24, g_nTower = 16, g_satTot = 250};
+	g_nFEC = 24, g_nTower = 16, g_satTot = 250, g_nCalLayer = 8,
+	g_nEnd =2};
 
   /// trigger histogram
   TH1F* m_trigger;
@@ -315,13 +346,37 @@ class TestReport {
   /// number of strip hits for each tower
   TH1F* m_nHit[g_nTower];
 
-  /// number of strip hits in each TKR plane of each tower
+  /// average number of strip hits in a particular TKR plane. 
+  /// zero hit is not used in calculating the average 
   TH2F* m_nHit2D;
 
-  /// number of crystal hits in each CAL layer of each tower 
+  /// average number of strip hits in a particular TKR plane. 
+  /// zero hit is not used in calculating the average, used to fill m_nHit2D
+  int m_nHitPlane[g_nTower][g_nPlane];
+
+  /// no of events with zero strip hit in a particular TKR plane
+  TH2F* m_nZeroHit2D;
+
+  /// no of events with non-zero strip hit in one end of a particular TKR plane
+  /// end = 0 corresponds to GTRC value close to strip 0
+  int m_nEvtHitPlane[g_nTower][g_nPlane][g_nEnd];
+
+  /// average number of crystal hits in a particular CAL layer 
+  /// 0 hit is not used in calculating the average
   TH2F* m_nCalHit2D;
 
-  /// number of layers for each tower
+  /// average number of crystal hits in a particular CAL layer 
+  /// used to fill m_nCalHit2D
+  int m_nCalHit[g_nTower][g_nCalLayer];
+
+  /// ratio of events with no hit in a particular CAL layer
+  TH2F* m_nZeroCalHit2D;
+
+  /// no of events with nonzero hit in a particular CAL layer
+  int m_nEvtCalHit[g_nTower][g_nCalLayer];
+
+  /// number of single hit layers (range [0, 36], 0 is at the bottom) for each 
+  /// tower
   TH1F* m_nLayer[g_nTower];
 
   /// distribution of events with zero TOT
@@ -333,6 +388,10 @@ class TestReport {
   /// distribution of average TOT values excluding 0 and saturation
   TH2F* m_totAve2D;
 
+  /// 2d histogram of ratio of events with zero TOT but no-zero strip hits in
+  /// a particular plane. Likely to be noises.
+  TH2F* m_totNoise2D;
+
   /// TOT distributions
   TH1F* m_tot[g_nTower][g_nPlane][2];
 
@@ -342,14 +401,24 @@ class TestReport {
   /// number of events with 0 TOT but at least 1 strip
   int m_nEventZeroTot;
 
+  /// number of events with TOT values outside range [0, g_satTot]
+  int m_nEvtInvalidTot;
+
   /// number of events with none zero TOT but no strip hit
   int m_nEventBadTot;
 
   /// time of first trigger
-  long m_startTime;
+  UInt_t m_startTime;
 
   /// time of last trigger
-  long m_endTime;
+  UInt_t m_endTime;
+
+  /// histogram of time between adjacent event in mili second
+  TH1F* m_timeInterval;
+
+  /// histogram of time between adjacent event in mili second with a cut of
+  /// 3 ms to study the dead time
+  TH1F* m_timeIntervalCut;
 
   /// percentage of events with TKR trigger but less than 6 digis in a tower
   TGraph* m_nDigi;
@@ -370,9 +439,30 @@ class TestReport {
   TH2F* m_reconPosXY;
   TH1F* m_reconPosZ;
 
+  /// reconstructed energy stored in first reconstructed vertex
   TH1F* m_reconEne;
 
   /// sum of energy in the CAL cluster, at the moment there is only one cluster
   TH1F* m_calSumEne;
+
+  /// average energy measured in each crystal layer, zero energy is not used 
+  /// in calculating average
+  TH2F* m_calEneLayer2D; 
+
+  /// average energy measured in each crystal layer, zero energy is not used 
+  /// in calculating average. Used to fill m_calEneLayer2D
+  double m_calEneLayer[g_nTower][g_nCalLayer];
+
+  /// no of events where energy measured in a particular layer is zero
+  TH2F* m_zeroCalEneLayer2D; 
+
+  /// no of events where non-zero energy is measured in a particular layer.
+  int m_nCalEneLayer[g_nTower][g_nCalLayer];
+
+  /// TKR split info. The array contains no. of cards read from each end
+  int m_nFec[g_nTower][g_nLayer][g_nView][2];
+
+  /// input file containing TKR split info 
+  std::ifstream m_tkrSplitF;
 };
 #endif
