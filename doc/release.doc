@@ -59,3 +59,8 @@ v3r2p6
 
 Add a row in both GLT and GEM trigger table to present no. of events triggered 
 by a particular trigger.
+
+v3r2p7
+
+The title of the Gem delta event time histogram says: "Time interval between adjacent event in millsecond with a cut of 1 ms." It should be: "Time interval between adjacent events in milliseconds." There is no cut of 1 ms.Jira-SVAC-14
+

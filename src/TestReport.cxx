@@ -1555,7 +1555,7 @@ void TestReport::produceTimeIntervalPlot()
 
   file = m_prefix;
   file += "_timeIntervalGem";
-  att.set(file.c_str(), "Time interval between adjacent event in millsecond with a cut of 1 ms. Note this interval time is measured in GEM. The time is stored in a 16 bit counter, each count is equal to 50 ns, so the time will be saturated at roughly 3.3 ms.", "timeIntervalGem", true);
+  att.set(file.c_str(), "Time interval between adjacent event in millsecond. Note this interval time is measured in GEM. The time is stored in a 16 bit counter, each count is equal to 50 ns, so the time will be saturated at roughly 3.3 ms.", "timeIntervalGem", true);
   producePlot(m_timeIntervalGem, att);
   insertPlot(att);
 }
