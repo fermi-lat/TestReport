@@ -17,6 +17,8 @@ open(OPTFILE, "<$optionFile") || die "Can't open $optionFile for input, abortted
 
 my $digiRootFile = <OPTFILE>;
 chop($digiRootFile);
+my $reconRootFile = <OPTFILE>;
+chop($reconRootFile);
 my $reportDir = <OPTFILE>;
 chop($reportDir);
 my $prefix = <OPTFILE>;
@@ -28,7 +30,7 @@ my $pdfFile = 'refman.pdf';
 my $htmlFile = 'index.html';
 my $pwd =  $ENV{PWD};
 
-my $cmtPath = "/nfs/farm/g/glast/u06/chen/svac:/nfs/farm/g/glast/u10/builds/EngineeringModel/EngineeringModel-v1r0401p9";
+my $cmtPath = "/nfs/farm/g/glast/u06/chen/svac:/nfs/farm/g/glast/u05/builds/rh9_gcc32/EngineeringModel/EngineeringModel-v3r0402p16";
 my $cmtDir = "/nfs/farm/g/glast/u06/chen/svac/TestReport/v0/cmt";
 my $exeDir = "/nfs/farm/g/glast/u06/chen/svac/TestReport/v0/rh9_gcc32";
 my $doxyFile = "/nfs/farm/g/glast/u06/chen/svac/TestReport/v0/src/ReportDoxyfile";

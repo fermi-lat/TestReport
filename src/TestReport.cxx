@@ -71,11 +71,14 @@ TestReport::TestReport(const char* dir, const char* prefix)
 
   }
 
-  m_tot = new TH1F("tot", "Tot distribution", 251, 0, 250);
+  m_tot = new TH1F("tot", "Tot distribution", 300, 0, 300);
   att.m_xTitle = "Time over threshold";
   att.m_yTitle = "Number of events";
-  setHistParameters(m_trigger, att);
+  setHistParameters(m_tot, att);
 
+  for(int i = 0; i != 6; ++i) {
+    m_nTrack[i] = 0;
+  }
 }
 
 TestReport::~TestReport()
@@ -100,8 +103,8 @@ void TestReport::setHistParameters(TH1F* h, const HistAttribute& att)
 {
   assert(h != 0);
 
-  h->SetXTitle(att.m_xTitle);
-  h->SetYTitle(att.m_yTitle);
+  h->SetXTitle(att.m_xTitle.c_str());
+  h->SetYTitle(att.m_yTitle.c_str());
   h->SetTitle("");
   h->SetLineWidth(1);
   h->SetBit(TH1::kCanRebin);
@@ -184,6 +187,16 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   if(m_digiFile) m_digiFile->Close();
 }
 
+void TestReport::analyzeReconTree()
+{
+  TkrRecon* tkrRecon = m_reconEvent->getTkrRecon();
+ 
+  assert(tkrRecon != 0);
+
+  ++m_nTrack[tkrRecon->getTrackCol()->GetLast()+1];
+}
+
+
 void TestReport::analyzeDigiTree()
 {
   int trigger = m_digiEvent->getL1T().getTriggerWord();
@@ -218,6 +231,7 @@ void TestReport::analyzeDigiTree()
 
     int tower = tkrDigi->getTower().id();
     int layer = tkrDigi->getBilayer();
+    GlastAxis::axis view = tkrDigi->getView();
 
     ++nDigi[tower];
 
@@ -231,12 +245,14 @@ void TestReport::analyzeDigiTree()
       int stripId = tkrDigi->getStrip(i);
       if(stripId < 0 || stripId >1535) badStrip = true;
 
-      int div = getGtrcSplit(layer);
+      int div = getGtrcSplit(layer, view);
       (stripId < div) ? ++lowCount : ++highCount;
  
     }
 
-    if(lowCount > 63 || highCount > 63) moreStrip = true;
+    if(lowCount > 63 || highCount > 63) {
+      moreStrip = true;
+    }
 
     int tot0 = tkrDigi->getToT(0);
     int tot1 = tkrDigi->getToT(1);
@@ -265,9 +281,9 @@ void TestReport::analyzeDigiTree()
     if(nDigi[i] > maxNDigi) maxNDigi = nDigi[i];
   }
 
-  if(tkrTrigger) {
+  //  if(tkrTrigger) {
     (maxNDigi >= 6) ? ++m_nEventDigi[6] : ++m_nEventDigi[maxNDigi];
-  }
+    //  }
 }
 
 void TestReport::generateReport()
@@ -333,7 +349,7 @@ void TestReport::generateReport()
   // produce a table containing number of events as a function a number digis
   TableDef d;
 
-  string caption("Number of events with different numer of TKR digis. There are ");
+  string caption("Number of events with different number of TKR digis. There are ");
   caption += ToString(m_nTkrTrigger); 
   caption += " events with 3 in a row TKR trigger.";
   d.m_caption = caption.c_str();
@@ -378,7 +394,7 @@ void TestReport::generateReport()
   *(m_report) << "TOT info: " << endl;
   *(m_report) << "@latexonly \\nopagebreak @endlatexonly" << endl;
   *(m_report) << "@li There are @b " << ToString(m_nEventSatTot) << " events with saturated TOT values." << endl;
-  *(m_report) << "@li There are @b " << ToString(m_nEventZeroTot) << " events with zero TOT on one plane but nonzero number of strip hits in that plane." << endl;
+  *(m_report) << "@li There are @b " << ToString(m_nEventZeroTot) << " events with zero TOT in one plane but nonzero number of strip hits in that plane." << endl;
   *(m_report) << "@li There are @b " << ToString(m_nEventBadTot) << " events with nonzero TOT on one plane but no strip hits in that plane." << endl << endl;
 
   // TOT plot
@@ -390,6 +406,46 @@ void TestReport::generateReport()
   att.m_yLog = true;
   producePlot(m_tot, att);
   insertPlot(att);
+
+  if(m_reconFile) {
+
+    // produce a table containing number of events as a function of number
+    // of reconstructed track
+    TableDef dTrack;
+
+    string caption("Number of events as a function of number of reconstructed track. There are ");
+    caption += ToString(m_nEvent); 
+    caption += " events in the digi root file.";
+    dTrack.m_caption = caption.c_str();
+    dTrack.m_label = "nTrack";
+
+    dTrack.m_nRow = 7;
+    dTrack.m_nCol = 3;
+    string table[dTrack.m_nRow][dTrack.m_nCol];
+    dTrack.m_table = (string*) table;
+    table[0][0] = "Number of reconstructed tracks";
+    table[0][1] = "Number of events"; 
+    table[0][2] = "percentage";
+
+    for(int i = 1; i != dTrack.m_nRow; ++i) {
+      if(i == 6) {
+	table[i][0] =  ">= 5";
+      }
+      else {
+	table[i][0] = ToString(i-1);
+      }
+      table[i][1] =  ToString(m_nTrack[i-1]);  
+      table[i][2] = ToString(float(m_nTrack[i-1])/m_nEvent*100.);
+      table[i][2] += "%"; 
+    }
+
+    printHtmlTable(dTrack);
+
+    table[6][0] =  "$\\geq$ 5";
+    applyDash((string*) table, dTrack.m_nRow*dTrack.m_nCol);
+    printLatexTable(dTrack);
+
+  }
 
   writeTail(); 
 }
@@ -428,7 +484,7 @@ void TestReport::producePlot(TH1F* h, const PlotAttribute& att)
   c1.SaveAs(epsFile.c_str());
 
   // ROOT can not produce gif file in the batch mode
-  // gif files will be generated in the pl script
+  // run pstopnm and ppmtogif to produce gif file
 
   string pwd = gSystem->WorkingDirectory();
   gSystem->cd(m_dir.c_str());
@@ -530,3 +586,13 @@ void TestReport::printLatexTable(const TableDef& r)
   *(m_report) << "@endlatexonly" << endl << endl;
 }
 
+int TestReport::getGtrcSplit(int layer, GlastAxis::axis view)
+{
+  // for EM2
+  if(layer == 1 && view == GlastAxis::X) {
+    return g_nStrip / g_nFEC * 4;
+  }
+  else {
+    return g_nStrip / 2;
+  }
+}

@@ -26,10 +26,10 @@ class TestReport {
  private:
 
   struct HistAttribute {
-    HistAttribute(const char* xTitle=0, const char* yTitle=0) : 
+    HistAttribute(const char* xTitle="", const char* yTitle="") : 
     m_xTitle(xTitle), m_yTitle(yTitle) { }
-    const char* m_xTitle;
-    const char* m_yTitle;
+    std::string m_xTitle;
+    std::string m_yTitle;
   };
 
   struct PlotAttribute {
@@ -39,8 +39,8 @@ class TestReport {
       m_file(file), m_caption(caption), m_label(label), m_yLog(yLog),
 	 m_height(height), m_width(width)
     { }
-    // name of file to be produced, note file type such as ".eps" is not
-    // included 
+    /// name of file to be produced, note file type such as ".eps" is not
+    /// included 
     const char* m_file;  
     const char* m_caption;
     const char* m_label;
@@ -63,43 +63,43 @@ class TestReport {
     int m_nCol;
   };
 
-  // print table in html format
+  /// print table in html format
   void printHtmlTable(const TableDef& r);
 
-  //print table in latex format
+  /// print table in latex format
   void printLatexTable(const TableDef& r);
 
-  //set some common parameters for a 1D histogram
+  /// set some common parameters for a 1D histogram
   void setHistParameters(TH1F* h, const HistAttribute& att);
 
-  // write Latex header
+  /// write Latex header
   void writeHeader();
 
-  // write Latex tail
+  /// write Latex tail
   void writeTail();
 
-  // produce a eps file from a 1D histogram
+  /// produce a eps file from a 1D histogram
   void producePlot(TH1F* h, const PlotAttribute& att);
 
   void insertPlot(const PlotAttribute& att);
 
-  // apply \ in front of some latex special characters 
+  /// apply \ in front of some latex special characters 
   void applyDash(std::string* x, int n) const;
 
-  int getGtrcSplit(int layer) { return 1536/2; }
+  int getGtrcSplit(int layer, GlastAxis::axis view);
 
   void analyzeMcTree() { }
 
-  void analyzeReconTree() { }
+  void analyzeReconTree();
 
   void analyzeDigiTree();
 
   std::ofstream* m_report;
 
-  // directory where all report files are generated
+  /// directory where all report files are generated
   std::string m_dir;
 
-  // prefix to the report files
+  /// prefix to the report files
   std::string m_prefix;
 
   TFile* m_outputFile;
@@ -122,45 +122,51 @@ class TestReport {
   enum {g_nLayer = 18, g_nView = 2, g_nPlane = 36, g_nStrip = 1536, 
 	g_nFEC = 24, g_nTower = 16, g_satTot = 250};
 
-  // trigger histogram
+  /// trigger histogram
   TH1F* m_trigger;
 
-  // number of events in the digi root file
+  /// number of events in the digi root file
   int m_nEvent;
 
-  // number of events with 3 in a row trigger
+  /// number of events with 3 in a row trigger
   int m_nTkrTrigger;
 
-  // number of events with different number of digis.
-  // For example: m_nEventDigi[0] is number of events with 0 digi
-  // m_nEventDigi[6] is number of events with >= 6 digis
-  // If there are more than one tower, maximal number of digis in any single
-  // tower is used
+  /// number of events with different number of digis.
+  /// For example: m_nEventDigi[0] is number of events with 0 digi
+  /// m_nEventDigi[6] is number of events with >= 6 digis
+  /// If there are more than one tower, maximal number of digis in any single
+  /// tower is used
   int m_nEventDigi[7];
 
-  // number of events with strip ID outside the range from 0 to 1535
+  /// number of events with strip ID outside the range from 0 to 1535
   int m_nEventBadStrip;
 
-  // number of events with more than 63 strips per GTRC
+  /// number of events with more than 63 strips per GTRC
   int m_nEventMoreStrip;
 
-  // number of strip hits for each tower
+  /// number of strip hits for each tower
   TH1F* m_nHit[g_nTower];
 
-  // number of layers for each tower
+  /// number of layers for each tower
   TH1F* m_nLayer[g_nTower];
 
-  // tot distribution
+  /// tot distribution
   TH1F* m_tot;
 
-  // number of events with saturated TOT (250 ADC )
+  /// number of events with saturated TOT (250 ADC )
   int m_nEventSatTot;
 
-  // number of events with 0 TOT but at least 1 strip
+  /// number of events with 0 TOT but at least 1 strip
   int m_nEventZeroTot;
 
-  // number of events with none zero TOT but no strip hit
+  /// number of events with none zero TOT but no strip hit
   int m_nEventBadTot;
+
+  /// m_nTrack[0] stores number of events with 0 track
+  /// m_nTrack[1] stores number of events with 1 track
+  /// m_nTrack[5] stores number of events with more than 4 track
+  int m_nTrack[6];
+
 
 };
 #endif

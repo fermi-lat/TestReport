@@ -17,8 +17,11 @@ executables/scripts
  a text file containing some plots/tables of test results. It reads 
 configuration info from a job
  option file. First line in the option file is name of the digi root file to be
-analyzed, second line is the dir where output text is going to be produced, 
-third line is prefix of the output file. For example, if prefix is test, a text
+analyzed, second line is name of the recon root file to be analyzed(Even if 
+the  recon root files does not exist, the name has to be there and the file 
+will be ignored.), third line is the dir where output text is going to be 
+produced, 
+fourth line is prefix of the output file. For example, if prefix is test, a text
 file called test_report.txt will be produced. The exe uses its first argument
  as name of the option file; when there is no argument, it uses 
 ../src/ReportOption.dat as the option file</li>
