@@ -11,6 +11,8 @@ intended to be generated for every run. The package includes following
 executables/scripts
 
 <ul>
+<li> cmt/GlastRelease.env needs to be modified to reflect actual CMT path. 
+</li>
 <li> TestReport.exe. It read data from a digi root file, analyze it and produce
  a text file containing some plots/tables of test results. It reads 
 configuration info from a job
@@ -26,6 +28,8 @@ file called test_report.txt will be produced. The exe uses its first argument
   <li>run doxygen to produce html and latex files. </li>
   <li>run latex to produce a ps file, then run ps2pdf to produce a pdf file. </li>
   </ul>
+  Depending where the TestReport package is installed and the CMT path, some 
+variables in GenTestReport.pl need to be changed.
 </li>
 </ul>
 
