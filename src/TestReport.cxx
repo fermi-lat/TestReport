@@ -312,7 +312,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
     m_nEvent = nDigi;
   }
 
-  //       int nEvent = 1000;
+  //         int nEvent = 100;
   //       m_nEvent = nEvent;
   for(int iEvent = 0; iEvent != m_nEvent; ++iEvent) {
 
@@ -692,7 +692,7 @@ void TestReport::generateDigiReport()
   // print trigger plots
   file = m_prefix;
   file += "_trigger";
-  att.set(file.c_str(), "Trigger word calculated by triggerAlg. The word is deduced by combining bit patterns from the following table. For example, an event with both the TKR trigger bit and the CAL Low trigger bit set has the Glt word of @latex $2^{2} + 2^{3} = 12$ @endlatex @html 2<sup>2</sup> + 2<sup>3</sup> = 12 @endhtml.", "trigger", 1);
+  att.set(file.c_str(), "Trigger word calculated by triggerAlg. The word is deduced by combining bit patterns from the following table. For example, an event with both the TKR trigger bit and the CAL Low trigger bit set has the Glt word of @latex $2^{1} + 2^{2} = 6$ @endlatex @html 2<sup>1</sup> + 2<sup>2</sup> = 6 @endhtml.", "trigger", 1);
   producePlot(m_trigger, att);
   insertPlot(att);
   *(m_report) << "@latexonly \\nopagebreak @endlatexonly" << endl;
@@ -1069,7 +1069,7 @@ void TestReport::printLatexTable(const TableDef& r)
 void TestReport::printGltTriggerTable()
 {
   int nRow = 2;
-  int nCol = 8;
+  int nCol = 6;
   string table[nRow][nCol];
 
   table[0][0] = "Trigger bit";
@@ -1079,12 +1079,11 @@ void TestReport::printGltTriggerTable()
  
   table[1][0] = "Trigger";
   table[1][1] = "ACD Low";
-  table[1][2] = "ACD High";
-  table[1][3] = "TKR";
-  table[1][4] = "CAL Low";
-  table[1][5] = "CAL High";
-  table[1][6] = "Throttle";
-
+  table[1][2] = "TKR";
+  table[1][3] = "CAL Low";
+  table[1][4] = "CAL High";
+  table[1][5] = "ACD High";
+  
   TableDef t((string*) table, "Trigger bit used in triggerAlg calculation", "gltTriggerTable", nRow, nCol);
 
   printHtmlTable(t);
@@ -1325,6 +1324,9 @@ void TestReport::produceCalNhits2DPlot()
   for(int i = 0; i != g_nTower; ++i) {
     for(int j = 0; j != g_nCalLayer; ++j) {
       if(m_nEvtCalHit[i][j]) {
+	if(i==4) {
+	  cout << "i = " << i << " " << m_nCalHit[i][j] << " " << m_nEvtCalHit[i][j];
+	}
 	m_nCalHit2D->Fill(j, i, double(m_nCalHit[i][j])/m_nEvtCalHit[i][j]);
       }
       if(m_nEvent > m_nEvtCalHit[i][j]) {
