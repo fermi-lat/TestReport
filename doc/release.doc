@@ -28,3 +28,8 @@ add many more tweaks to the reports
 v3r1p0
 
 add no. of bad events shown in EventSummaryData
+
+v3r2
+
+add a plot to check consistence between CAL recon and TKR recon
+

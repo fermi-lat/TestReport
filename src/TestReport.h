@@ -241,6 +241,9 @@ class TestReport {
 
   void produceNHitPlane2DPlot();
 
+  /// produce plots of histogram m_alignCalTkr
+  void produceAlignCalTkrPlot();
+
   /// set some common parameters for a 1D histogram
   void setHistParameters(TH1* h, const HistAttribute& att);
 
@@ -467,5 +470,10 @@ class TestReport {
 
   /// input file containing TKR split info 
   std::ifstream m_tkrSplitF;
+
+  /// histograms containing distance between reconstructed CAL cluster xy 
+  /// position and the position extrapolated from the reconstructed track 
+  /// in TKR
+  TH1F* m_alignCalTkr;
 };
 #endif

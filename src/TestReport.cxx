@@ -19,11 +19,11 @@ TestReport::TestReport(const char* dir, const char* prefix,
 		       const char* version, const char* emVersion,
 		       const char*tkrV, const char* calV, const char* splitF)
   : m_dir(dir), m_prefix(prefix), m_version(version), m_emVersion(emVersion),
-    m_tkrCalibVersion(tkrV), m_calCalibVersion(calV), m_nBadEvts(0),
+    m_tkrCalibVersion(tkrV), m_calCalibVersion(calV), 
     m_outputFile(0), m_mcFile(0), m_mcTree(0),
     m_mcBranch(0), m_mcEvent(0), m_reconFile(0), m_reconTree(0), 
     m_reconBranch(0), m_reconEvent(0), m_digiFile(0), m_digiTree(0),
-    m_digiBranch(0), m_digiEvent(0), m_trigger(0), m_nEvent(0),
+    m_digiBranch(0), m_digiEvent(0), m_trigger(0), m_nBadEvts(0), m_nEvent(0),
     m_nTkrTrigger(0), m_nEventBadStrip(0), m_nEventMoreStrip(0), 
     m_nEventSatTot(0), m_nEventZeroTot(0), m_nEvtInvalidTot(0),
     m_nEventBadTot(0), m_startTime(0),
@@ -202,6 +202,10 @@ TestReport::TestReport(const char* dir, const char* prefix,
   att.set("Time interval between adjacent events(milisecond)", "No. of events");
   att.m_canRebin = false;
   setHistParameters(m_timeIntervalCut, att);
+
+  m_alignCalTkr = new TH1F("alignCalTkr", "Distance between the reconstructed CAL cluster XY coordinates and the XY coordinates extrapolated from TKR", 50, 0., 10.);
+  att.set("Difference(mm)", "No. of events");
+  setHistParameters(m_alignCalTkr, att);
 }
 
 TestReport::~TestReport()
@@ -315,8 +319,8 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
     m_nEvent = nDigi;
   }
 
-  int nEvent = 1000;
-  m_nEvent = nEvent;
+  //  int nEvent = 1000;
+  //  m_nEvent = nEvent;
   for(int iEvent = 0; iEvent != m_nEvent; ++iEvent) {
 
     if(m_mcEvent) m_mcEvent->Clear();
@@ -349,7 +353,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       else {
 	// convert 16 MHZ clock to ms
 	
-	//	assert(uPpcT >= prevUPpcT);
+	assert(uPpcT >= prevUPpcT);
 
 	double interval;
 	static const double thirtyTwoBit = 256*256*256*256;
@@ -389,16 +393,22 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 void TestReport::analyzeReconTree()
 {
   TkrRecon* tkrRecon = m_reconEvent->getTkrRecon();
+
+  bool tkrReconSucceed = false;
+  bool muonThroughCal = false;
  
+  TVector3 pos, dir;
+
   if(tkrRecon) {
     m_nTkrTrack->Fill(tkrRecon->getTrackCol()->GetLast()+1);
 
     TObjArray* vertices = tkrRecon->getVertexCol();
     if(tkrRecon->getVertexCol()->GetLast() >= 0) {
+      tkrReconSucceed = true;
       TkrVertex* tkrVertex = dynamic_cast<TkrVertex*>(vertices->At(0));
       if(tkrVertex) {
-	const TVector3& pos = tkrVertex->getPosition();
-	const TVector3& dir = tkrVertex->getDirection();
+	pos = tkrVertex->getPosition();
+	dir = tkrVertex->getDirection();
 	m_reconDirXY->Fill(dir.X(), dir.Y());
 	m_reconDirZ->Fill(dir.Z());
 	m_reconPosXY->Fill(pos.X(), pos.Y());
@@ -410,6 +420,8 @@ void TestReport::analyzeReconTree()
 
   CalRecon* calRecon = m_reconEvent->getCalRecon();
 
+  TVector3 calPos;
+
   if(calRecon) {
 
     TObjArray* calClusterCol = calRecon->getCalClusterCol();
@@ -417,7 +429,9 @@ void TestReport::analyzeReconTree()
       // currently there is just one cluster in CAL
       CalCluster* calCluster = dynamic_cast<CalCluster*>(calClusterCol->At(0));
       if(calCluster) {
+	if(calCluster->getEnergySum() > 50)  muonThroughCal = true;
 	m_calSumEne->Fill(calCluster->getEnergySum());
+	calPos = calCluster->getPosition();
       }
     }
 
@@ -444,7 +458,15 @@ void TestReport::analyzeReconTree()
 	}
       }
     }
+  }
 
+  if(tkrReconSucceed && muonThroughCal) {
+
+    double x = dir.x()/dir.z()*(calPos.z()-pos.z()) + pos.x();
+    double y = dir.y()/dir.z()*(calPos.z()-pos.z()) + pos.y();
+    double distance = sqrt((x-calPos.x())*(x-calPos.x()) + (y-calPos.y())*(y-calPos.y()));
+
+    m_alignCalTkr->Fill(distance);
   }
 }
 
@@ -766,6 +788,10 @@ void TestReport::generateReconReport()
   produceCalEneSum2DPlot();
 
   produceCalEneLayer2DPlot();
+
+  (*m_report) << "@section align Alignment between TKR and CAL Reconstruction" << endl;
+
+  produceAlignCalTkrPlot();
 }
 
 void TestReport::writeHeader()
@@ -1506,3 +1532,13 @@ void TestReport::produceNHitPlane2DPlot()
   producePlot(&h2, pAtt);
   insertPlot(pAtt);
 }
+
+void TestReport::produceAlignCalTkrPlot()
+{
+  string file(m_prefix);
+  file += "_alignCalTkr";
+  PlotAttribute att(file.c_str(), "Distance between the reconstructed CAL cluster XY coordinates and the XY coordinates extrapolated from TKR according to reconstructed track direction. The plot only contains events with more than 50 MeV energy deposited in CAL.", "alignCalTkr", true);
+  producePlot(m_alignCalTkr, att);
+  insertPlot(att);
+}
+
