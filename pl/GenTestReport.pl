@@ -35,7 +35,7 @@ my $htmlFile = 'index.html';
 my $pwd =  $ENV{PWD};
 
 my $appRoot = '/nfs/farm/g/glast/u06/chen/svac';
-my $cmtPath = "$appRoot:/nfs/farm/g/glast/u05/builds/rh9_gcc32/EngineeringModel/EngineeringModel-v3r0406p1";
+my $cmtPath = "$appRoot:/nfs/farm/g/glast/u09/builds/rh9_gcc32/EngineeringModel/EngineeringModel-v3r0407p3";
 my $cmtDir = "$appRoot/TestReport/v3r2/cmt";
 my $exeDir = "$appRoot/TestReport/v3r2/rh9_gcc32";
 my $doxyFile = "$appRoot/TestReport/v3r2/src/ReportDoxyfile";

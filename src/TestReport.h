@@ -116,10 +116,10 @@ class TestReport {
     PlotAttribute::PlotAttribute(const char* file=0, const char* caption=0,
 				 const char* label=0, bool yLog=0,
 				 float height=10, float width=15, int x=606,
-				 int y=410) : 
+				 int y=410, int stat=1111) : 
       m_file(file), m_caption(caption), m_label(label), m_yLog(yLog),
 	 m_height(height), m_width(width), m_xPixel(x), m_yPixel(y),
-	 m_statMode(1111)
+	 m_statMode(stat)
     { 
       m_2dPlotType = COLZ;
       m_nColor = 3;
@@ -133,7 +133,7 @@ class TestReport {
 
     void set(const char* file=0, const char* caption=0, const char* label=0, 
 	     bool yLog=0, float height=10, float width=15, int x=606, 
-	     int y=410)
+	     int y=410, int stat=1111)
     {
       m_file = file;
       m_caption = caption;
@@ -145,7 +145,7 @@ class TestReport {
       m_yPixel = y;
       m_nColor = 3;
       m_2dPlotType = COLZ;
-      m_statMode = 1111;
+      m_statMode = stat;
     }
 
     /// name of file to be produced, note file type such as ".eps" is not
@@ -275,6 +275,16 @@ class TestReport {
   /// first sentence in the caption to be bold face.
   std::string boldFaceLatex(const std::string& s);
 
+  /// used in producing caption for a plot in a html file. It will put the
+  /// first sentence in the caption to be bold face.
+  std::string boldFaceHtml(const std::string& s);
+
+  /// delete sub strings enclosed between @latext and @latex
+  std::string eraseLatexStr(const std::string& s);
+
+  /// delete sub strings enclosed between @html and @html
+  std::string eraseHtmlStr(const std::string& s);
+
   bool isLowEnd(int tower, int layer, int iView, int stripId);
 
   void analyzeMcTree() { }
@@ -318,7 +328,7 @@ class TestReport {
   DigiEvent* m_digiEvent;
 
   enum {g_nLayer = 18, g_nView = 2, g_nPlane = 36, g_nStrip = 1536, 
-	g_nFEC = 24, g_nTower = 16, g_satTot = 250, g_nCalLayer = 8,
+	g_nFEC = 24, g_nTower = 16, g_satTot = 255, g_nCalLayer = 8,
 	g_nEnd =2};
 
   /// trigger histogram
@@ -356,7 +366,7 @@ class TestReport {
   /// zero hit is not used in calculating the average 
   TH2F* m_nHit2D;
 
-  /// average number of strip hits in a particular TKR plane. 
+  /// accumulated number of strip hits in a particular TKR plane. 
   /// zero hit is not used in calculating the average, used to fill m_nHit2D
   int m_nHitPlane[g_nTower][g_nPlane];
 
@@ -366,6 +376,9 @@ class TestReport {
   /// no of events with non-zero strip hit in one end of a particular TKR plane
   /// end = 0 corresponds to GTRC value close to strip 0
   int m_nEvtHitPlane[g_nTower][g_nPlane][g_nEnd];
+
+  /// no. of events with non-zero strip hit in one plane
+  int m_nEvtPlane[g_nTower][g_nPlane];
 
   /// average number of crystal hits in a particular CAL layer 
   /// 0 hit is not used in calculating the average
