@@ -51,6 +51,8 @@ print SHELLFILE qq{cd $reportDir \n};
 print SHELLFILE qq{setenv latexHeader '$latexHeader' \n};
 print SHELLFILE qq{setenv testReportVersion '$testReportVersion' \n};
 print SHELLFILE qq{doxygen $doxyFile \n};
+print SHELLFILE qq{mv *.eps latex/ \n};
+print SHELLFILE qq{mv *.gif html/ \n};
 print SHELLFILE qq{cd latex \n};
 print SHELLFILE qq{latex $texFile \n};
 print SHELLFILE qq{latex $texFile \n};

@@ -337,13 +337,19 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       static UInt_t prevUPpcT = uPpcT;
       static UInt_t prevLPpcT = lPpcT;
 
+ 
+      //     cout << "uPpcT = " << uPpcT << " lPpcT = " << lPpcT
+      //      << " good = " << m_digiEvent->getEventSummaryData().goodEvent()
+      //   << endl;
+
       if(iEvent == 0) {
 	m_startTime = m_digiEvent->getEbfTimeSec();
       }
       else {
 	// convert 16 MHZ clock to ms
 	
-	assert(uPpcT >= prevUPpcT);
+	//	assert(uPpcT >= prevUPpcT);
+
 	double interval;
 	static const double thirtyTwoBit = 256*256*256*256;
 

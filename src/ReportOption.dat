@@ -1,3 +1,24 @@
+/nfs/farm/g/glast/u06/chen/temp/em_v3r0404p2/306000164/041008130332_digi.root
+/nfs/farm/g/glast/u06/chen/temp/em_v3r0404p2/306000164/041008130332_recon.root
+/nfs/farm/g/glast/u06/chen/temp/em_v3r0404p2/306000164/rootReport
+041008130332
+v2r1
+v3r0404p2
+v0r1p8
+v2r3p4
+/nfs/farm/g/glast/u06/chen/temp/em_v3r0404p2/306000164/tkrSplit.dat
+
+/nfs/farm/g/glast/u06/chen/temp/em_v3r0406p1/306000164/041008130332_digi.root
+/nfs/farm/g/glast/u06/chen/temp/em_v3r0406p1/306000164/041008130332_recon.root
+/nfs/farm/g/glast/u06/chen/temp/em_v3r0406p1/306000164/rootReport
+041008130332
+v2r1
+v3r0406p1
+v0r1p8
+v2r3p4
+/nfs/farm/g/glast/u06/chen/temp/em_v3r0406p1/306000164/tkrSplit.dat
+
+
 /nfs/farm/g/glast/u01/mc/em_v3r0404p2/fullLat/surface_muons_50000_0_digi.root
 /nfs/farm/g/glast/u01/mc/em_v3r0404p2/fullLat/surface_muons_50000_0_recon.root
 /nfs/farm/g/glast/u01/mc/em_v3r0404p2/fullLat/rootReport
@@ -18,30 +39,8 @@ v0r1p8
 v2r3p4
 /nfs/farm/g/glast/u01/italyOneTower/em_v3r0404p2/306000163/tkrSplit.dat
 
-/nfs/farm/g/glast/u01/italyOneTower/em_v3r0404p2/306000164/041008130332_digi.root
-/nfs/farm/g/glast/u01/italyOneTower/em_v3r0404p2/306000164/041008130332_recon.root
-/nfs/farm/g/glast/u01/italyOneTower/em_v3r0404p2/306000164/rootReport
-041008130332
-v2r1
-v3r0404p2
-v0r1p8
-v2r3p4
 
-/nfs/farm/g/glast/u01/EM2/rootData/139000041/em_v3r0404p2/040626175242_digi.root
-/nfs/farm/g/glast/u01/EM2/rootData/139000041/em_v3r0404p2/040626175242_recon.root
-/nfs/farm/g/glast/u01/EM2/rootData/139000041/report
-040626175242
-v2r1
-v3r0404p2
-v0r1p8
-v2r3p4
 
-/nfs/farm/g/glast/u01/EM2/rootData/139000230/em_v3r0404p0/040810213615_digi.root
-/nfs/farm/g/glast/u01/EM2/rootData/139000230/em_v3r0404p0/0408102136151_recon.root
-/nfs/farm/g/glast/u01/EM2/rootData/139000230/report
-040810213615
-v2r1
-v3r0404p0
 
 
 
