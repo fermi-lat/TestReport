@@ -36,10 +36,10 @@ my $pwd =  $ENV{PWD};
 
 my $appRoot = '/nfs/farm/g/glast/u06/chen/svac';
 my $cmtPath = "$appRoot:/nfs/farm/g/glast/u09/builds/rh9_gcc32/EngineeringModel/EngineeringModel-v3r0407p8";
-my $cmtDir = "$appRoot/TestReport/v3r2p1/cmt";
-my $exeDir = "$appRoot/TestReport/v3r2p1/rh9_gcc32";
-my $doxyFile = "$appRoot/TestReport/v3r2p1/src/ReportDoxyfile";
-my $latexHeader = "$appRoot/TestReport/v3r2p1/src/latexHeader.tex";
+my $cmtDir = "$appRoot/TestReport/v3r2p2/cmt";
+my $exeDir = "$appRoot/TestReport/v3r2p2/rh9_gcc32";
+my $doxyFile = "$appRoot/TestReport/v3r2p2/src/ReportDoxyfile";
+my $latexHeader = "$appRoot/TestReport/v3r2p2/src/latexHeader.tex";
 
 my $shellFile = $reportDir.'/'.$prefix.'_report.scr';
 open(SHELLFILE, ">$shellFile") || die "Can't open $shellFile, abortted!";

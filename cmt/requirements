@@ -1,5 +1,5 @@
 package TestReport
-version v3r2p3
+version v3r2p4
 
 author X. Chen <xchen@slac.stanford.edu>
 
@@ -10,7 +10,6 @@ use commonRootData v*
 use mcRootData v*
 use digiRootData v*
 use reconRootData v*
-use RootPolicy v*
 
 #the following prepend makes the includes folder available locally: avoid the package_include
 macro_prepend includes "-I $(TESTREPORTROOT) " WIN32 "/I $(TESTREPORTROOT) "

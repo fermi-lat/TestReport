@@ -119,12 +119,12 @@ TestReport::TestReport(const char* dir, const char* prefix,
   }
 
 
-  m_nCalHit2D = new TH2F("nCalHit2D", "nhits distribution", 16, -0.5, 15.5, 8, -0.5, 7.5);
-  att.set("Tower", "Layer");
+  m_nCalHit2D = new TH2F("nCalHit2D", "nhits distribution", 8, -0.5, 7.5, 16, -0.5, 15.5);
+  att.set("Layer", "Tower");
   setHistParameters(m_nCalHit2D, att);
 
-  m_nZeroCalHit2D = new TH2F("nZeroCalHit2D", "ratio of events with no hit in a particular CAL layer", 16, -0.5, 15.5, 8, -0.5, 7.5);
-  att.set("Tower", "Layer");
+  m_nZeroCalHit2D = new TH2F("nZeroCalHit2D", "ratio of events with no hit in a particular CAL layer", 8, -0.5, 7.5, 16, -0.5, 15.5);
+  att.set("Layer", "Tower");
   setHistParameters(m_nZeroCalHit2D, att);
 
   m_totZero2D = new TH2F("totZero2D", "Zerot tot distribution", 72, 0., 36., 16, -0.5, 15.5);
@@ -175,12 +175,12 @@ TestReport::TestReport(const char* dir, const char* prefix,
   att.m_canRebin = false;
   setHistParameters(m_calSumEne, att);
 
-  m_calEneLayer2D = new TH2F("calEneLayer", "Energy in each CAL layer(MeV)", 16, -0.5, 15.5, 8, -0.5, 7.5);
-  att.set("Tower", "Layer");
+  m_calEneLayer2D = new TH2F("calEneLayer", "Energy in each CAL layer(MeV)", 8, -0.5, 7.5, 16, -0.5, 15.5);
+  att.set("Layer", "Tower");
   setHistParameters(m_calEneLayer2D, att);
 
-  m_zeroCalEneLayer2D = new TH2F("zeroCalEneLayer", "Ratio of events with zero energy measured in a particular CAL layer(MeV)", 16, -0.5, 15.5, 8, -0.5, 7.5);
-  att.set("Tower", "Layer");
+  m_zeroCalEneLayer2D = new TH2F("zeroCalEneLayer", "Ratio of events with zero energy measured in a particular CAL layer(MeV)", 8, -0.5, 7.5, 16, -0.5, 15.5);
+  att.set("Layer", "Tower");
   setHistParameters(m_zeroCalEneLayer2D, att);
 
   m_timeInterval = new TH1F("timeInterval", "Time interval between adjacent event in mill second", 100, 0., 3.);
@@ -312,8 +312,8 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
     m_nEvent = nDigi;
   }
 
-  //     int nEvent = 1000;
-  //     m_nEvent = nEvent;
+  //       int nEvent = 1000;
+  //       m_nEvent = nEvent;
   for(int iEvent = 0; iEvent != m_nEvent; ++iEvent) {
 
     if(m_mcEvent) m_mcEvent->Clear();
@@ -642,10 +642,11 @@ void TestReport::generateReport()
   (*m_report) << "@section version Software Version" << endl;
   (*m_report) << "@li EngineeringModel: @b " << m_emVersion << endl;
   (*m_report) << "@li TestReport: @b " << m_version << endl;
+  /*
   (*m_report) << "@section calibversion Serial no. of calibration constants (-9999 means no constants were used.)" << endl;
   (*m_report) << "@li TKR: @b " << m_tkrCalibSerNo << endl;
   (*m_report) << "@li CAL: @b " << m_calCalibSerNo << endl;
-
+  */
   (*m_report) << "@section summary Summary" << endl;
   if(m_nEvent == 0) {
     (*m_report) << "<b> There are no events in this run! </b>" << endl;
@@ -1324,10 +1325,10 @@ void TestReport::produceCalNhits2DPlot()
   for(int i = 0; i != g_nTower; ++i) {
     for(int j = 0; j != g_nCalLayer; ++j) {
       if(m_nEvtCalHit[i][j]) {
-	m_nCalHit2D->Fill(i, j, double(m_nCalHit[i][j])/m_nEvtCalHit[i][j]);
+	m_nCalHit2D->Fill(j, i, double(m_nCalHit[i][j])/m_nEvtCalHit[i][j]);
       }
       if(m_nEvent > m_nEvtCalHit[i][j]) {
-	m_nZeroCalHit2D->Fill(i, j, double(m_nEvent-m_nEvtCalHit[i][j])/m_nEvent);
+	m_nZeroCalHit2D->Fill(j, i, double(m_nEvent-m_nEvtCalHit[i][j])/m_nEvent);
       }
     }
   }
@@ -1466,10 +1467,10 @@ void TestReport::produceCalEneLayer2DPlot()
   for(int i = 0; i != g_nTower; ++i) {
     for(int j = 0; j != g_nCalLayer; ++j) {
       if(m_nCalEneLayer[i][j]) {
-	m_calEneLayer2D->Fill(i, j, m_calEneLayer[i][j]/m_nCalEneLayer[i][j]);
+	m_calEneLayer2D->Fill(j, i, m_calEneLayer[i][j]/m_nCalEneLayer[i][j]);
       }
       if(m_nEvent > m_nCalEneLayer[i][j]) {
-	m_zeroCalEneLayer2D->Fill(i, j, double(m_nEvent-m_nCalEneLayer[i][j])/m_nEvent);
+	m_zeroCalEneLayer2D->Fill(j, i, double(m_nEvent-m_nCalEneLayer[i][j])/m_nEvent);
       }
     }
   }

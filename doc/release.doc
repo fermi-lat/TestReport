@@ -45,3 +45,8 @@ v3r2p1
 
 Use lastController0Strip in digi root file to deduce the splitting info in TKR
 Roll back trigger bit definition calculated by triggerAlg
+
+v3r2p4
+
+Remove codes which print statement on whether calibration constants were used
+in reconstruction. From now on, reconstruction must use constants
