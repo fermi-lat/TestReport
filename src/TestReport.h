@@ -335,6 +335,11 @@ class TestReport {
   /// no of bad events indicated in event summary data
   unsigned m_nBadEvts;
 
+  /// Error bits: Currently OR'ed over all towers!
+  unsigned int m_nTrgParityErrors;
+  unsigned int m_nPacketErrors;
+  unsigned int m_nTemErrors;
+
   /// condition summary in GEM
   TH1F* m_condSummary;
 

@@ -25,7 +25,9 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_outputFile(0), m_mcFile(0), m_mcTree(0),
     m_mcBranch(0), m_mcEvent(0), m_reconFile(0), m_reconTree(0), 
     m_reconBranch(0), m_reconEvent(0), m_digiFile(0), m_digiTree(0),
-    m_digiBranch(0), m_digiEvent(0), m_trigger(0), m_nBadEvts(0), m_nEvent(0),
+    m_digiBranch(0), m_digiEvent(0), m_trigger(0), m_nBadEvts(0), 
+    m_nTrgParityErrors(0), m_nPacketErrors(0), m_nTemErrors(0),
+    m_nEvent(0),
     m_nTkrTrigger(0), m_nEventBadStrip(0), m_nEventMoreStrip(0), 
     m_nEventSatTot(0), m_nEventZeroTot(0), m_nEvtInvalidTot(0),
     m_nEventBadTot(0), m_startTime(0),
@@ -471,6 +473,10 @@ void TestReport::analyzeDigiTree()
 
   if(m_digiEvent->getEventSummaryData().badEvent()) ++m_nBadEvts;
 
+  if (m_digiEvent->getEventSummaryData().packetError())       ++m_nPacketErrors;
+  if (m_digiEvent->getEventSummaryData().trgParityError())    ++m_nTrgParityErrors;
+  if (m_digiEvent->getEventSummaryData().errorEventSummary()) ++m_nTemErrors;
+
   int cond = m_digiEvent->getGem().getConditionSummary();
   m_condSummary->Fill(cond);
 
@@ -649,6 +655,11 @@ void TestReport::generateReport()
   (*m_report) << "In digi file @em " << m_digiFile->GetName() << endl;
   (*m_report) << "@li There are @b " << m_nEvent << " triggers. There should be " << m_nEvent+2 << " events recorded in the eLog database since LATTE adds two additional events in the process which are not triggered events."<< endl;
   (*m_report) << "@li There are @b " << m_nBadEvts << " bad events " << endl;
+
+  (*m_report) << "@li There are @b " << m_nTrgParityErrors << " events with Trigger Parity errors " << endl;
+  (*m_report) << "@li There are @b " << m_nPacketErrors << " events with Packet errors " << endl;
+  (*m_report) << "@li There are @b " << m_nTemErrors << " events with TEM errors " << endl;
+
   (*m_report) << "@li Time of first trigger: <b>" << ctime((time_t*) (&m_startTime)) << " (GMT) </b>";
   (*m_report) << "@li Time of last trigger: <b>" << ctime((time_t*) (&m_endTime)) << " (GMT) </b>";
   (*m_report) << "@li Duration: <b>" << m_endTime - m_startTime << " seconds" << "</b>" << endl;
