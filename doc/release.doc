@@ -4,3 +4,7 @@ First version of test report generator.
 
 To be done: get info from on line configuration file
 
+v1
+
+Change codes to use Doxygen to produce report in both html and latex format
+

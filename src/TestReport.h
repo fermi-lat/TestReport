@@ -33,20 +33,41 @@ class TestReport {
   };
 
   struct PlotAttribute {
-    PlotAttribute::PlotAttribute(const char* epsFile=0, const char* caption=0,
+    PlotAttribute::PlotAttribute(const char* file=0, const char* caption=0,
 				 const char* label=0, bool yLog=0,
 				 float height=10, float width=15) : 
-      m_epsFile(epsFile), m_caption(caption), m_label(label), m_yLog(yLog),
+      m_file(file), m_caption(caption), m_label(label), m_yLog(yLog),
 	 m_height(height), m_width(width)
     { }
-    // name of eps file to be produced
-    const char* m_epsFile;  
+    // name of file to be produced, note file type such as ".eps" is not
+    // included 
+    const char* m_file;  
     const char* m_caption;
     const char* m_label;
     bool m_yLog;
     float m_height;
     float m_width;
   };
+
+  struct TableDef {
+    TableDef::TableDef() { }
+    TableDef::TableDef(const std::string* table, const char* caption, 
+		       const char* label, int nRow, int nCol) :
+      m_table(table), m_caption(caption), m_label(label), m_nRow(nRow), 
+	 m_nCol(nCol) { }
+
+    const std::string* m_table;
+    const char* m_caption;
+    const char* m_label;
+    int m_nRow;
+    int m_nCol;
+  };
+
+  // print table in html format
+  void printHtmlTable(const TableDef& r);
+
+  //print table in latex format
+  void printLatexTable(const TableDef& r);
 
   //set some common parameters for a 1D histogram
   void setHistParameters(TH1F* h, const HistAttribute& att);
@@ -62,9 +83,8 @@ class TestReport {
 
   void insertPlot(const PlotAttribute& att);
 
-  // apply \ in front of _ in a string, otherwise latex treat _ as a special 
-  // character
-  std::string applyDash(const char* x) const;
+  // apply \ in front of some latex special characters 
+  void applyDash(std::string* x, int n) const;
 
   int getGtrcSplit(int layer) { return 1536/2; }
 
@@ -76,8 +96,10 @@ class TestReport {
 
   std::ofstream* m_report;
 
+  // directory where all report files are generated
   std::string m_dir;
 
+  // prefix to the report files
   std::string m_prefix;
 
   TFile* m_outputFile;

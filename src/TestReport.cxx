@@ -7,6 +7,10 @@
 #include "TestReport.h"
 #include "ToString.h"
 
+using std::cout;
+using std::endl;
+using std::string;
+
 TestReport::TestReport(const char* dir, const char* prefix)
   : m_dir(dir), m_prefix(prefix), m_outputFile(0), m_mcFile(0), m_mcTree(0),
     m_mcBranch(0), m_mcEvent(0), m_reconFile(0), m_reconTree(0), 
@@ -25,13 +29,13 @@ TestReport::TestReport(const char* dir, const char* prefix)
   }
   gROOT->SetBatch();
 
-  std::string f(dir);
+  string f(dir);
   f += '/';
   f += prefix;
-  f += "_report.txt";
+  f += "_report.doxygen";
   m_report = new ofstream(f.c_str());
 
-  std::string r(dir);
+  string r(dir);
   r += '/';
   r += prefix;
   r += "_hist.root";
@@ -142,17 +146,17 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   int nMc, nRecon, nDigi;
   if(m_mcFile) {
     nMc = (int) m_mcTree->GetEntries();
-    std::cout << "No of events in " << mcFileName << " : " << nMc << std::endl;
+    std::cout << "No of events in " << mcFileName << " : " << nMc << endl;
     m_nEvent = nMc;
   }
   if(m_reconFile) {
     nRecon = (int) m_reconTree->GetEntries();
-    std::cout << "No of events in " << reconFileName << " : " << nRecon << std::endl;
+    std::cout << "No of events in " << reconFileName << " : " << nRecon << endl;
     m_nEvent = nRecon;
   }
   if(m_digiFile) {
     nDigi = (int) m_digiTree->GetEntries();
-    std::cout << "No of events in " << digiFileName << " : " << nDigi << std::endl;
+    std::cout << "No of events in " << digiFileName << " : " << nDigi << endl;
     m_nEvent = nDigi;
   }
 
@@ -270,22 +274,19 @@ void TestReport::generateReport()
 {
   writeHeader();
 
-  (*m_report) << "\\section{Summary}" << std::endl;
-  (*m_report) << "There are {\\bf " << m_nEvent << "} events in " 
-	      << applyDash(m_digiFile->GetName()) << "."
-	      << std::endl;
+  (*m_report) << "@section summary Summary" << endl;
+  (*m_report) << "There are @b " << m_nEvent << " events in @em " 
+	      << m_digiFile->GetName() << "." << endl;
 
-  (*m_report) << "\\section{Trigger}" << std::endl;
+  (*m_report) << "@section trigger Trigger" << endl;
 
-  std::string epsFile(m_dir);
-  epsFile += '/';
-  epsFile += m_prefix;
-  epsFile += "_trigger.eps";
-  PlotAttribute att(epsFile.c_str(), "Trigger distribution", "trigger", 1);
+  string file(m_prefix);
+  file += "_trigger";
+  PlotAttribute att(file.c_str(), "Trigger distribution", "trigger", 1);
   producePlot(m_trigger, att);
   insertPlot(att);
 
-  (*m_report) << "\\section{Strip hit info}" << std::endl;
+  (*m_report) << "@section strip_hit Strip hit info" << endl;
 
   // produce plots for nhits distribution
   for(int i = 0; i != g_nTower; ++i) {
@@ -294,16 +295,13 @@ void TestReport::generateReport()
 
       char name[] = "_nHit_00";
       sprintf(name, "_nHit_%02d", i);
-      epsFile = m_dir;
-      epsFile += '/';
-      epsFile += m_prefix;
-      epsFile += name;
-      epsFile += ".eps";
+      file = m_prefix;
+      file += name;
       char title[] = "Number of hit strips in tower 00";
       sprintf(title, "Number of hit strips in tower %02d", i);
       char tag[] = "nHit_00";
       sprintf(tag, "nHit_%02d", i);
-      PlotAttribute att(epsFile.c_str(), title, tag, 1); 
+      PlotAttribute att(file.c_str(), title, tag, 1); 
       producePlot(m_nHit[i], att);
       insertPlot(att);
 
@@ -318,16 +316,13 @@ void TestReport::generateReport()
 
       char name[] = "_nLayer_00";
       sprintf(name, "_nLayer_%02d", i);
-      epsFile = m_dir;
-      epsFile += '/';
-      epsFile += m_prefix;
-      epsFile += name;
-      epsFile += ".eps";
+      file = m_prefix;
+      file += name;
       char title[] = "Number of hit layers in tower 00";
       sprintf(title, "Number of hit layers in tower %02d", i);
       char tag[] = "nLayer_00";
       sprintf(tag, "nLayer_%02d", i);
-      PlotAttribute att(epsFile.c_str(), title, tag, 1); 
+      PlotAttribute att(file.c_str(), title, tag, 1); 
       producePlot(m_nLayer[i], att);
       insertPlot(att);
 
@@ -336,53 +331,60 @@ void TestReport::generateReport()
   }
 
   // produce a table containing number of events as a function a number digis
-  *(m_report) << "\\begin{table}" << std::endl
-	      << "\\begin{center}" << std::endl
-	      << "\\caption{Number of events with different numer of TKR digis. There are " << ToString(m_nTkrTrigger) << " events with 3 in a row TKR trigger.}" << std::endl
-	      << "\\label{nEventDigi}" << std::endl
-	      << "\\begin{tabular}{|c|c|c|} \\hline" << std::endl
-	      << "Number of TKR digis & Number of TKR events & percentage \\\\ \\hline" << std::endl;
+  TableDef d;
 
-  for(int i = 0; i != 7; ++i) {
-    if(i == 6) {
-      *(m_report) << "$\\geq$ 6 & " << m_nEventDigi[i] << " & " 
-		  << float(m_nEventDigi[i])/m_nTkrTrigger*100. << "\\%" 
-		  << "\\\\ \\hline" << std::endl;
+  string caption("Number of events with different numer of TKR digis. There are ");
+  caption += ToString(m_nTkrTrigger); 
+  caption += " events with 3 in a row TKR trigger.";
+  d.m_caption = caption.c_str();
+  d.m_label = "nEventDigi";
+
+  d.m_nRow = 8;
+  d.m_nCol = 3;
+  string table[d.m_nRow][d.m_nCol];
+  d.m_table = (string*) table;
+  table[0][0] = "Number of TKR digis";
+  table[0][1] = "Number of TKR events"; 
+  table[0][2] = "percentage";
+
+  for(int i = 1; i != d.m_nRow; ++i) {
+    if(i == 7) {
+      table[i][0] =  ">= 6";
     }
     else {
-      *(m_report) << i << " & " << m_nEventDigi[i] << " & " 
-		  << float(m_nEventDigi[i])/m_nTkrTrigger*100. << "\\%" 
-		  << "\\\\ \\hline" << std::endl;
+      table[i][0] = ToString(i-1);
     }
+    table[i][1] =  ToString(m_nEventDigi[i-1]);  
+    table[i][2] = ToString(float(m_nEventDigi[i-1])/m_nTkrTrigger*100.);
+    table[i][2] += "%"; 
   }
-  *(m_report) << "\\end{tabular}" << std::endl
-              << "\\end{center}" << std::endl
-	      << "\\end{table}" << std::endl << std::endl;
+
+  printHtmlTable(d);
+
+  table[7][0] =  "$\\geq$ 6";
+  applyDash((string*) table, d.m_nRow*d.m_nCol);
+  printLatexTable(d);
 
   // bad strips
-  *(m_report) << "Bad Strips: \\nopagebreak" << std::endl;
-  *(m_report) << "\\begin{itemize}" << std::endl;
-  *(m_report) << "\\item There are {\\bf " << ToString(m_nEventBadStrip) << "} events with strip ID outside the range from 0 to 1535." << std::endl;
+  *(m_report) << "Bad Strips: " << endl;
+  *(m_report) << "@latexonly \\nopagebreak @endlatexonly" << endl;
+  *(m_report) << "@li There are @b " << ToString(m_nEventBadStrip) << " events with strip ID outside the range from 0 to 1535." << endl;
 
-  *(m_report) << "\\item There are {\\bf " << ToString(m_nEventMoreStrip) << "} events with more than 63 strips per GTRC." << std::endl;
-  *(m_report) << "\\end{itemize}" << std::endl;
-
-  *(m_report) << "\\section{Time Over Threshold}" << std::endl;
+  *(m_report) << "@li There are @b " << ToString(m_nEventMoreStrip) << " events with more than 63 strips per GTRC." << endl << endl;
+  
+  *(m_report) << "@section tot Time Over Threshold" << endl;
 
   // bad TOTs
-  *(m_report) << "TOT info: \\nopagebreak" << std::endl;
-  *(m_report) << "\\begin{itemize}" << std::endl;
-  *(m_report) << "\\item There are {\\bf " << ToString(m_nEventSatTot) << "} events with saturated TOT values." << std::endl;
-  *(m_report) << "\\item There are {\\bf " << ToString(m_nEventZeroTot) << "} events with zero TOT on one plane but nonzero number of strip hits in that plane." << std::endl;
-  *(m_report) << "\\item There are {\\bf " << ToString(m_nEventBadTot) << "} events with nonzero TOT on one plane but no strip hits in that plane." << std::endl;
-  *(m_report) << "\\end{itemize}" << std::endl;
+  *(m_report) << "TOT info: " << endl;
+  *(m_report) << "@latexonly \\nopagebreak @endlatexonly" << endl;
+  *(m_report) << "@li There are @b " << ToString(m_nEventSatTot) << " events with saturated TOT values." << endl;
+  *(m_report) << "@li There are @b " << ToString(m_nEventZeroTot) << " events with zero TOT on one plane but nonzero number of strip hits in that plane." << endl;
+  *(m_report) << "@li There are @b " << ToString(m_nEventBadTot) << " events with nonzero TOT on one plane but no strip hits in that plane." << endl << endl;
 
   // TOT plot
-  epsFile = m_dir;
-  epsFile += '/';
-  epsFile += m_prefix;
-  epsFile += "_tot.eps";
-  att.m_epsFile = epsFile.c_str();
+  file = m_prefix;
+  file += "_tot";
+  att.m_file = file.c_str();
   att.m_caption = "TOT distribution";
   att.m_label = "tot"; 
   att.m_yLog = true;
@@ -394,21 +396,19 @@ void TestReport::generateReport()
 
 void TestReport::writeHeader()
 {
-  *(m_report) << "\\documentstyle[12pt,epsfig]{article}" << std::endl
-	      << "\\textwidth 150mm" << std::endl
-	      << "\\textheight 242mm" << std::endl
-	      << "\\hoffset -15mm" << std::endl
-	      << "\\voffset -20mm" << std::endl << std::endl
-	      << "\\begin{document}" << std::endl
-	      << "\\title{Run Test Report}" << std::endl
-	      << "\\author{automatically generated}" << std::endl
-	      << "\\maketitle" << std::endl << std::endl 
-	      << "\\newpage" << std::endl;
+  *(m_report) << "/** @mainpage Run Test Report" << endl
+	      << "@htmlonly" << endl
+	      << "<center>" << endl
+	      << "<a href=\"../latex/refman.ps\"> PS file </a> &nbsp" << endl
+	      << "<a href=\"../latex/refman.pdf\"> PDF file </a>" << endl 
+	      << "</center>" << endl
+	      << "@endhtmlonly" << endl
+	      << "@author{automatically generated}" << endl << endl;
 }
 
 void TestReport::writeTail()
 {
-  *(m_report) << "\\end{document}" << std::endl;
+  *(m_report) << "*/" << endl;
 }
 
 
@@ -421,28 +421,112 @@ void TestReport::producePlot(TH1F* h, const PlotAttribute& att)
 
   h->Draw();
 
-  c1.Print(att.m_epsFile);
+  string epsFile(m_dir);
+  epsFile += "/";
+  epsFile += att.m_file;
+  epsFile += ".eps";
+  c1.SaveAs(epsFile.c_str());
+
+  // ROOT can not produce gif file in the batch mode
+  // gif files will be generated in the pl script
+
+  string pwd = gSystem->WorkingDirectory();
+  gSystem->cd(m_dir.c_str());
+
+  string cmd1("pstopnm -ppm -xborder 0 -yborder 0 -portrait ");
+  epsFile = att.m_file;
+  epsFile += ".eps";
+  cmd1 += epsFile;
+  gSystem->Exec(cmd1.c_str());
+
+  string ppmFile(epsFile);
+  ppmFile += "001.ppm";
+  string gifFile(att.m_file);
+  gifFile += ".gif";
+
+  string cmd2("ppmtogif ");
+  cmd2 += ppmFile;
+  cmd2 += " > ";
+  cmd2 += gifFile;
+  gSystem->Exec(cmd2.c_str());
+
+  gSystem->cd(pwd.c_str());
 }
 
 void TestReport::insertPlot(const PlotAttribute& att)
 {
-  *(m_report) << "\\begin{figure}" << std::endl
-	      << "\\centerline{\\epsfig{figure=" << att.m_epsFile
-	      << ", height=" << att.m_height << "cm, width=" << att.m_width
-	      << "cm}}" << std::endl
-	      << "\\caption{" << att.m_caption << "}" << std::endl
-	      << "\\label{" << att.m_label << "}" << std::endl
-	      << "\\end{figure}" << std::endl << std::endl; 
+  string gifFile(att.m_file);
+  gifFile += ".gif";
+
+  *(m_report) << "@image html " << gifFile << " \"" << att.m_caption << "\" "
+	      << endl;
+ 
+  string epsFile(att.m_file);
+  epsFile += ".eps";
+
+  *(m_report) << "@image latex " << epsFile << " \"" << att.m_caption << "\" "
+	      << "height=" << att.m_height << "cm" << ",width=" 
+	      << att.m_width << "cm " << endl << endl;
 }
 
-std::string TestReport::applyDash(const char* x) const 
+void TestReport::applyDash(string* x, int n) const 
 {
-  std::string s;
+  for(int i = 0; i != n; ++i) {
 
-  for(const char* p = x; *p != 0; ++p) {
-    if(*p == '_') s += "\\";
-    s += *p;
+    string s;
+    for(const char* p = x[i].c_str(); *p != 0; ++p) {
+      if(*p == '_') s += "\\";
+      if(*p == '%') s += "\\";
+      s += *p;
+    }
+
+    x[i] = s;
+  }
+}      
+
+void TestReport::printHtmlTable(const TableDef& r)
+{
+  *(m_report) << endl << "@htmlonly" << endl;
+  *(m_report) << "<table border=\"1\" width=\"100%\">" << endl;
+  *(m_report) << "<caption> " << r.m_caption << " </caption>" << endl;
+
+  for(int i = 0; i != r.m_nRow; ++i) {
+    *(m_report) << "  <tr>" << endl;
+    for(int j = 0; j != r.m_nCol; ++j) {
+      *(m_report) << "    <td> " << r.m_table[i*r.m_nCol+j] 
+		  << " </td>" << endl;
+    }
+    *(m_report) << "  </tr>" << endl;
   }
 
-  return s;
-}      
+  *(m_report) << "</table>" << endl;
+  *(m_report) << "@endhtmlonly" << endl << endl;
+}
+
+void TestReport::printLatexTable(const TableDef& r)
+{
+  *(m_report) << endl << "@latexonly" << endl;
+  *(m_report) << "\\begin{table}" << endl;
+  *(m_report) << "\\begin{center}" << endl;
+  *(m_report) << "\\caption{" << r.m_caption << "}" << endl;
+  *(m_report) << "\\label{" << r.m_label << "}" << endl;
+
+  *(m_report) << "\\begin{tabular}{";
+  for(int i = 0; i != r.m_nCol; ++i) {
+    *(m_report) << "|c";
+  }
+  *(m_report) << "|} \\hline" << endl;
+
+  for(int i = 0; i != r.m_nRow; ++i) {
+    for(int j = 0; j != r.m_nCol-1; ++j) {
+      *(m_report) << r.m_table[i*r.m_nCol+j] << " & ";
+    }
+    *(m_report) << r.m_table[(i+1)*r.m_nCol-1] << " \\\\ \\hline" << endl;
+  }
+
+  *(m_report) << "\\end{tabular}" << endl;
+  *(m_report) << "\\end{center}" << endl;
+  *(m_report) << "\\end{table}" << endl;
+  *(m_report) << "@endlatexonly" << endl << endl;
+}
+

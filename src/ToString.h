@@ -4,13 +4,11 @@
 #include <sstream>
 #include <string>
 
-template<class X> std::string& ToString(X data)
+template<class X> std::string ToString(X data)
 {
-  std::stringstream stream;
-  static std::string s;
+  std::ostringstream stream;
   stream << data;
-  stream >> s;
-  return s;
+  return stream.str();
 }
 
 #endif
