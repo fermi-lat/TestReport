@@ -40,3 +40,8 @@ Cosmetic changes
 v3r2p1
 
 Add time interval plot from GEM. Change trigger bit calculated by triggerAlg
+
+v3r2p1
+
+Use lastController0Strip in digi root file to deduce the splitting info in TKR
+Roll back trigger bit definition calculated by triggerAlg

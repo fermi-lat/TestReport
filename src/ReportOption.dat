@@ -3,10 +3,9 @@
 /nfs/farm/g/glast/u06/chen/temp/testReport
 test
 v3r2
-v3r0404p2
-v0r1p8
-v2r3p4
-/nfs/slac/g/svac/mc/em_v3r0404p2/1Tower/report/tkrSplit.dat
+v3r0407p8
+-9999
+-9999
 
 /nfs/slac/g/svac/mc/em_v3r0407p1/oneTowerNoisyAm/surface_muons_100000_0_digi.root
 /nfs/slac/g/svac/mc/em_v3r0407p1/oneTowerNoisyAm/surface_muons_100000_0_recon.root

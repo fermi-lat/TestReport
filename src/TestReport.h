@@ -23,8 +23,8 @@ class TestReport {
  public:
 
   TestReport(const char* dir, const char* prefix, const char* version,
-	     const char* emVersion, const char*tkrV, const char* calV,
-	     const char* splitF);
+	     const char* emVersion, const char*tkrCalibSerNo, 
+	     const char* calCalibSerNo);
   ~TestReport();
 
   void analyzeTrees(const char* mcFileName,
@@ -285,8 +285,6 @@ class TestReport {
   /// delete sub strings enclosed between @html and @html
   std::string eraseHtmlStr(const std::string& s);
 
-  bool isLowEnd(int tower, int layer, int iView, int stripId);
-
   void analyzeMcTree() { }
 
   void analyzeReconTree();
@@ -307,8 +305,8 @@ class TestReport {
   /// version of the EngineeringModel package
   std::string m_emVersion;
  
-  std::string m_tkrCalibVersion;
-  std::string m_calCalibVersion;
+  std::string m_tkrCalibSerNo;
+  std::string m_calCalibSerNo;
 
   TFile* m_outputFile;
 
@@ -483,9 +481,6 @@ class TestReport {
 
   /// TKR split info. The array contains no. of cards read from each end
   int m_nFec[g_nTower][g_nLayer][g_nView][2];
-
-  /// input file containing TKR split info 
-  std::ifstream m_tkrSplitF;
 
   /// histograms containing distance between reconstructed CAL cluster xy 
   /// position and the position extrapolated from the reconstructed track 

@@ -19,9 +19,9 @@ using std::string;
 
 TestReport::TestReport(const char* dir, const char* prefix, 
 		       const char* version, const char* emVersion,
-		       const char*tkrV, const char* calV, const char* splitF)
+		       const char*tkrCalibSerNo, const char* calCalibSerNo)
   : m_dir(dir), m_prefix(prefix), m_version(version), m_emVersion(emVersion),
-    m_tkrCalibVersion(tkrV), m_calCalibVersion(calV), 
+    m_tkrCalibSerNo(tkrCalibSerNo), m_calCalibSerNo(calCalibSerNo), 
     m_outputFile(0), m_mcFile(0), m_mcTree(0),
     m_mcBranch(0), m_mcEvent(0), m_reconFile(0), m_reconTree(0), 
     m_reconBranch(0), m_reconEvent(0), m_digiFile(0), m_digiTree(0),
@@ -29,7 +29,7 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_nTkrTrigger(0), m_nEventBadStrip(0), m_nEventMoreStrip(0), 
     m_nEventSatTot(0), m_nEventZeroTot(0), m_nEvtInvalidTot(0),
     m_nEventBadTot(0), m_startTime(0),
-    m_endTime(0), m_nDigi(0), m_tkrSplitF(splitF)
+    m_endTime(0), m_nDigi(0)
 { 
   // initialize ROOT
   if(gROOT == 0) {
@@ -55,22 +55,6 @@ TestReport::TestReport(const char* dir, const char* prefix,
   m_outputFile = new TFile(r.c_str(), "RECREATE");
 
   std::fill((int*) m_nFec, ((int*) m_nFec)+g_nTower*g_nLayer*g_nView*2, 12);
-
-  if(m_tkrSplitF) {
-    string line;
-
-    // first line is comment
-    getline(m_tkrSplitF, line);
-
-    int tower, layer, view, nFecL, nFecH;
-    while(m_tkrSplitF >> tower >> layer >> view >> nFecL >> nFecH) {
-      m_nFec[tower][layer][view][0] = nFecL;
-      m_nFec[tower][layer][view][1] = nFecH;
-    }
-  }
-  else {
-    cout << "tkrSplit info file is not found: " << splitF << endl;
-  }
 
   m_trigger = new TH1F("trigger", "Trigger distribution", 32, -0.5, 31.5);
   HistAttribute att("Trigger word", "Number of events");
@@ -544,15 +528,17 @@ void TestReport::analyzeDigiTree()
 
     int lowCount = 0, highCount = 0;
     int nStrips = tkrDigi->getNumHits();
+
+    int lastController0Strip = tkrDigi->getLastController0Strip();
+
     for(int i = 0; i != nStrips; ++i) {
       int stripId = tkrDigi->getStrip(i);
 
-      try {
-	bool low = isLowEnd(tower, biLayer, iView, stripId);
-	(low) ? ++lowCount : ++highCount;
-      }
-      catch(std::range_error& e) {
+      if(stripId < 0 || stripId >= g_nStrip) {
 	badStrip = true;
+      }
+      else { 
+	(stripId<=lastController0Strip) ? ++lowCount : ++highCount;
       }
     }
 
@@ -650,8 +636,9 @@ void TestReport::generateReport()
   (*m_report) << "@section version Software Version" << endl;
   (*m_report) << "@li EngineeringModel: @b " << m_emVersion << endl;
   (*m_report) << "@li TestReport: @b " << m_version << endl;
-  (*m_report) << "@li calibGenTKR: @b " << m_tkrCalibVersion << endl;
-  (*m_report) << "@li calibGenCAL: @b " << m_calCalibVersion << endl;
+  (*m_report) << "@section calibversion Serial no. of calibration constants (-9999 means no constants were used.)" << endl;
+  (*m_report) << "@li TKR: @b " << m_tkrCalibSerNo << endl;
+  (*m_report) << "@li CAL: @b " << m_calCalibSerNo << endl;
 
   (*m_report) << "@section summary Summary" << endl;
   if(m_nEvent == 0) {
@@ -693,7 +680,7 @@ void TestReport::generateDigiReport()
   // print trigger plots
   file = m_prefix;
   file += "_trigger";
-  att.set(file.c_str(), "Trigger word calculated by triggerAlg. The word is deduced by combining bit patterns from the following table. For example, an event with both the TKR trigger bit and the CAL Low trigger bit set in GEM has the condition summary word of @latex $2^{2} + 2^{1} = 6$ @endlatex @html 2<sup>2</sup> + 2<sup>1</sup> = 6 @endhtml.", "trigger", 1);
+  att.set(file.c_str(), "Trigger word calculated by triggerAlg. The word is deduced by combining bit patterns from the following table. For example, an event with both the TKR trigger bit and the CAL Low trigger bit set has the Glt word of @latex $2^{2} + 2^{3} = 12$ @endlatex @html 2<sup>2</sup> + 2<sup>3</sup> = 12 @endhtml.", "trigger", 1);
   producePlot(m_trigger, att);
   insertPlot(att);
   *(m_report) << "@latexonly \\nopagebreak @endlatexonly" << endl;
@@ -718,9 +705,7 @@ void TestReport::generateDigiReport()
   *(m_report) << "@li There are @b " << ToString(m_nEventBadStrip) << " events with strip ID either outside the physical range from 0 to 1535 or outside the range read by the GTRCs." << endl;
 
   *(m_report) << "@li There are @b " << ToString(m_nEventMoreStrip) << " events with more than 64 strips per GTRC. ";
-  if(!m_tkrSplitF.is_open()) {
-    *(m_report) << "<b>Warning: TKR split info was not found. Assuming all planes are split in the middle</b>";
-  }
+
   *(m_report) << endl << endl;
   
   produceNhits2DPlot();
@@ -1082,10 +1067,10 @@ void TestReport::printGltTriggerTable()
  
   table[1][0] = "Trigger";
   table[1][1] = "ACD Low";
-  table[1][2] = "TKR";
-  table[1][3] = "CAL Low";
-  table[1][4] = "CAL High";
-  table[1][5] = "ACD High";
+  table[1][2] = "ACD High";
+  table[1][3] = "TKR";
+  table[1][4] = "CAL Low";
+  table[1][5] = "CAL High";
   table[1][6] = "Throttle";
 
   TableDef t((string*) table, "Trigger bit used in triggerAlg calculation", "gltTriggerTable", nRow, nCol);
@@ -1254,21 +1239,6 @@ void TestReport::produceNDigiPlot()
   PlotAttribute att(file.c_str(), "Ratio of events with TKR trigger and at least 6 digis", "nDigi", 0);
   producePlot(m_nDigi, att);
   insertPlot(att);
-}
-
-bool TestReport::isLowEnd(int tower, int layer, int iView, int stripId)
-{
-  static const int nStrips = g_nStrip/g_nFEC;
-  if(stripId < nStrips*m_nFec[tower][layer][iView][0] && stripId >= 0) {
-    return true;
-  }
-  else if(stripId >= (g_nStrip-nStrips*m_nFec[tower][layer][iView][1]) 
-	  && stripId < g_nStrip) {
-    return false;
-  }
-  else { // should never happen
-    throw std::range_error("strip id outside of range");
-  }
 }
 
 void TestReport::produceAveTotPlots()
