@@ -321,6 +321,9 @@ class TestReport {
   /// trigger histogram
   TH1F* m_trigger;
 
+  /// no of bad events indicated in event summary data
+  unsigned m_nBadEvts;
+
   /// condition summary in GEM
   TH1F* m_condSummary;
 

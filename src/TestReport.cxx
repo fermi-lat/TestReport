@@ -19,7 +19,7 @@ TestReport::TestReport(const char* dir, const char* prefix,
 		       const char* version, const char* emVersion,
 		       const char*tkrV, const char* calV, const char* splitF)
   : m_dir(dir), m_prefix(prefix), m_version(version), m_emVersion(emVersion),
-    m_tkrCalibVersion(tkrV), m_calCalibVersion(calV),
+    m_tkrCalibVersion(tkrV), m_calCalibVersion(calV), m_nBadEvts(0),
     m_outputFile(0), m_mcFile(0), m_mcTree(0),
     m_mcBranch(0), m_mcEvent(0), m_reconFile(0), m_reconTree(0), 
     m_reconBranch(0), m_reconEvent(0), m_digiFile(0), m_digiTree(0),
@@ -330,6 +330,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 
     if(m_digiFile) {
       m_digiBranch->GetEntry(iEvent);
+
       analyzeDigiTree();
 
       UInt_t uPpcT = m_digiEvent->getEbfUpperPpcTimeBase();
@@ -452,6 +453,8 @@ void TestReport::analyzeDigiTree()
 {
   int trigger = m_digiEvent->getL1T().getTriggerWord();
   m_trigger->Fill(trigger);
+
+  if(m_digiEvent->getEventSummaryData().badEvent()) ++m_nBadEvts;
 
   int cond = m_digiEvent->getGem().getConditionSummary();
   m_condSummary->Fill(cond);
@@ -622,6 +625,7 @@ void TestReport::generateReport()
 
   (*m_report) << "In digi file @em " << m_digiFile->GetName() << endl;
   (*m_report) << "@li There are @b " << m_nEvent << " triggers " << endl;
+  (*m_report) << "@li There are @b " << m_nBadEvts << " bad events " << endl;
   (*m_report) << "@li Time of first trigger: <b>" << ctime((time_t*) (&m_startTime)) << " (GMT) </b>";
   (*m_report) << "@li Time of last trigger: <b>" << ctime((time_t*) (&m_endTime)) << " (GMT) </b>";
   (*m_report) << "@li Duration: <b>" << m_endTime - m_startTime << " seconds" << "</b>" << endl;

@@ -34,7 +34,7 @@ my $pdfFile = 'refman.pdf';
 my $htmlFile = 'index.html';
 my $pwd =  $ENV{PWD};
 
-my $cmtPath = "/nfs/farm/g/glast/u06/chen/svac:/nfs/farm/g/glast/u05/builds/rh9_gcc32/EngineeringModel/EngineeringModel-v3r0404p2";
+my $cmtPath = "/nfs/farm/g/glast/u06/chen/svac:/nfs/farm/g/glast/u05/builds/rh9_gcc32/EngineeringModel/EngineeringModel-v3r0406p1";
 my $cmtDir = "/nfs/farm/g/glast/u06/chen/svac/TestReport/v0/cmt";
 my $exeDir = "/nfs/farm/g/glast/u06/chen/svac/TestReport/v0/rh9_gcc32";
 my $doxyFile = "/nfs/farm/g/glast/u06/chen/svac/TestReport/v0/src/ReportDoxyfile";
@@ -52,7 +52,6 @@ print SHELLFILE qq{setenv latexHeader '$latexHeader' \n};
 print SHELLFILE qq{setenv testReportVersion '$testReportVersion' \n};
 print SHELLFILE qq{doxygen $doxyFile \n};
 print SHELLFILE qq{mv *.eps latex/ \n};
-print SHELLFILE qq{mv *.gif html/ \n};
 print SHELLFILE qq{cd latex \n};
 print SHELLFILE qq{latex $texFile \n};
 print SHELLFILE qq{latex $texFile \n};
