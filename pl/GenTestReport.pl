@@ -35,11 +35,13 @@ my $htmlFile = 'index.html';
 my $pwd =  $ENV{PWD};
 
 my $appRoot = '/nfs/farm/g/glast/u06/chen/svac';
-my $cmtPath = "$appRoot:/nfs/farm/g/glast/u09/builds/rh9_gcc32/EngineeringModel/EngineeringModel-v4r060302p6";
-my $cmtDir = "$appRoot/TestReport/v3r2p4/cmt";
-my $exeDir = "$appRoot/TestReport/v3r2p4/rh9_gcc32";
-my $doxyFile = "$appRoot/TestReport/v3r2p4/src/ReportDoxyfile";
-my $latexHeader = "$appRoot/TestReport/v3r2p4/src/latexHeader.tex";
+my $testReportVersion = 'v3r2p5';
+my $emVersion = 'v4r060302p6';
+my $cmtPath = "$appRoot:/nfs/farm/g/glast/u09/builds/rh9_gcc32/EngineeringModel/EngineeringModel-$emVersion";
+my $cmtDir = "$appRoot/TestReport/$testReportVersion/cmt";
+my $exeDir = "$appRoot/TestReport/$testReportVersion/rh9_gcc32";
+my $doxyFile = "$appRoot/TestReport/$testReportVersion/src/ReportDoxyfile";
+my $latexHeader = "$appRoot/TestReport/$testReportVersion/src/latexHeader.tex";
 
 my $shellFile = $reportDir.'/'.$prefix.'_report.scr';
 open(SHELLFILE, ">$shellFile") || die "Can't open $shellFile, abortted!";

@@ -11,6 +11,7 @@
 #include "mcRootData/McEvent.h"
 #include "reconRootData/ReconEvent.h"
 #include "digiRootData/DigiEvent.h"
+#include "enums/TriggerBits.h"
 
 /**
  * \class TestReport
@@ -332,6 +333,9 @@ class TestReport {
   /// trigger histogram
   TH1F* m_trigger;
 
+  /// number of events with different Glt trigger
+  long m_nEvtGltTrigger[enums::number_of_trigger_bits];
+
   /// no of bad events indicated in event summary data
   unsigned m_nBadEvts;
 
@@ -342,6 +346,9 @@ class TestReport {
 
   /// condition summary in GEM
   TH1F* m_condSummary;
+
+  /// number of events with different GEM trigger
+  long m_nEvtGemTrigger[enums::GEM_offset];
 
   /// number of events in the digi root file
   int m_nEvent;

@@ -118,6 +118,13 @@ TestReport::TestReport(const char* dir, const char* prefix,
     }
   }
 
+  for(int i = 0; i != enums::number_of_trigger_bits; ++i) {
+    m_nEvtGltTrigger[i] = 0; 
+  }
+
+  for(int i = 0; i != enums::GEM_offset; ++i) {
+    m_nEvtGemTrigger[i] = 0;
+  }
 
   m_nCalHit2D = new TH2F("nCalHit2D", "nhits distribution", 8, -0.5, 7.5, 16, -0.5, 15.5);
   att.set("Layer", "Tower");
@@ -468,8 +475,15 @@ void TestReport::analyzeReconTree()
 
 void TestReport::analyzeDigiTree()
 {
-  int trigger = m_digiEvent->getL1T().getTriggerWord();
+  unsigned int word = m_digiEvent->getL1T().getTriggerWord();
+  unsigned bitMask = 0;
+  int ibit = enums::number_of_trigger_bits;
+  while(ibit--) { bitMask |= 1<<ibit; }
+  int trigger = word & bitMask;
   m_trigger->Fill(trigger);
+  for(int i = 0; i != enums::number_of_trigger_bits; ++i) {
+    if( (trigger >> i) & 1) ++m_nEvtGltTrigger[i];
+  }
 
   if(m_digiEvent->getEventSummaryData().badEvent()) ++m_nBadEvts;
 
@@ -479,6 +493,11 @@ void TestReport::analyzeDigiTree()
 
   int cond = m_digiEvent->getGem().getConditionSummary();
   m_condSummary->Fill(cond);
+  for(int i = 0; i != enums::GEM_offset; ++i) {
+    if( (cond >> i) & 1) {
+      ++m_nEvtGemTrigger[i];
+    }
+  }
 
   // 1 count = 50 ns
   UInt_t deltaT = m_digiEvent->getGem().getDeltaEventTime();
@@ -1068,8 +1087,8 @@ void TestReport::printLatexTable(const TableDef& r)
 
 void TestReport::printGltTriggerTable()
 {
-  int nRow = 2;
-  int nCol = 6;
+  int nRow = 3;
+  int nCol = enums::number_of_trigger_bits+1;
   string table[nRow][nCol];
 
   table[0][0] = "Trigger bit";
@@ -1083,7 +1102,13 @@ void TestReport::printGltTriggerTable()
   table[1][3] = "CAL Low";
   table[1][4] = "CAL High";
   table[1][5] = "ACD High";
+  table[1][6] = "THROTTLE";
   
+  table[2][0] = "No. of events";
+  for(int i = 1; i != enums::number_of_trigger_bits+1; ++i) {
+    table[2][i] = ToString(m_nEvtGltTrigger[i-1]);
+  }
+
   TableDef t((string*) table, "Trigger bit used in triggerAlg calculation", "gltTriggerTable", nRow, nCol);
 
   printHtmlTable(t);
@@ -1092,8 +1117,8 @@ void TestReport::printGltTriggerTable()
 
 void TestReport::printCondSummaryTable()
 {
-  int nRow = 2;
-  int nCol = 8;
+  int nRow = 3;
+  int nCol = enums::GEM_offset+1;
   string table[nRow][nCol];
 
   table[0][0] = "Trigger bit";
@@ -1109,6 +1134,12 @@ void TestReport::printCondSummaryTable()
   table[1][5] = "CNO";
   table[1][6] = "Periodic";
   table[1][7] = "Solicited";
+  table[1][8] = "External";
+
+  table[2][0] = "No. of events";
+  for(int i = 1; i != enums::GEM_offset+1; ++i) {
+    table[2][i] = ToString(m_nEvtGemTrigger[i-1]);
+  }
 
   TableDef t((string*) table, "Condition summary word in GEM", "condSummaryTable", nRow, nCol);
 
