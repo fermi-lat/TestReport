@@ -6,6 +6,7 @@ author X. Chen <xchen@slac.stanford.edu>
 # tested using EngineeringModel package v1r030302p10
 
 use GlastPolicy v*
+use commonRootData v*
 use mcRootData v*
 use digiRootData v*
 use reconRootData v*
@@ -20,7 +21,7 @@ macro source "*.cxx" WIN32 "*.h *.cxx"
 
 macro_append ROOT_linkopts " -lHist -lGpad -lGraf -lGui -lGraf3d "
 
-macro testreport_linkopts "$(ROOT_linkopts) $(mcRootData_linkopts) $(digiRootData_linkopts) $(reconRootData_linkopts)"
+macro testreport_linkopts "$(ROOT_linkopts) $(commonRootData_linkopts) $(mcRootData_linkopts) $(digiRootData_linkopts) $(reconRootData_linkopts)"
 
 
 application TestReport *.cxx  
