@@ -326,8 +326,8 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
     m_nEvent = nDigi;
   }
 
-     int nEvent = 1000;
-     m_nEvent = nEvent;
+  //     int nEvent = 1000;
+  //     m_nEvent = nEvent;
   for(int iEvent = 0; iEvent != m_nEvent; ++iEvent) {
 
     if(m_mcEvent) m_mcEvent->Clear();
