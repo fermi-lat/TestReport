@@ -64,3 +64,7 @@ v3r2p7
 
 The title of the Gem delta event time histogram says: "Time interval between adjacent event in millsecond with a cut of 1 ms." It should be: "Time interval between adjacent events in milliseconds." There is no cut of 1 ms.Jira-SVAC-14
 
+
+October 27, 2005: awb
+v3r2p8	Fixed bug for 'Ratio of events with TKR trigger and less than 6 digis in each tower'.
+	Fixed some typos.
