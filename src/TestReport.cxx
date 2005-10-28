@@ -81,18 +81,18 @@ TestReport::TestReport(const char* dir, const char* prefix,
   for(int i = 0; i != g_nTower; ++i) {
     char name[] = "nHitss00";
     sprintf(name, "nHitss%02d", i);
-    char xTitle[] = "No. of strip hits in tower 00";
-    sprintf(xTitle, "No. of strip hits in tower %02d", i);
+    char xTitle[] = "Number of strip hits in tower 00";
+    sprintf(xTitle, "Number of strip hits in tower %02d", i);
     m_nHit[i] = new TH1F(name, xTitle, 20, 0., 20.);
-    att.set(xTitle, "No. of events", 0.1, 0.07, 0.6, 0.4);
+    att.set(xTitle, "Number of events", 0.1, 0.07, 0.6, 0.4);
     setHistParameters(m_nHit[i], att);
  
     char name1[] = "nLayer00";
     sprintf(name1, "nLayer%02d", i);
-    char xTitle1[] = "No. of hit planes in tower 00";
-    sprintf(xTitle1, "No. of hit planes in tower %02d", i);
+    char xTitle1[] = "Number of hit planes in tower 00";
+    sprintf(xTitle1, "Number of hit planes in tower %02d", i);
     m_nLayer[i] = new TH1F(name1, xTitle1, 37, -0.5, 36.5);
-    att.set(xTitle1, "No. of events", 0.1, 0.07, 0.6, 0.4);
+    att.set(xTitle1, "Number of events", 0.1, 0.07, 0.6, 0.4);
     setHistParameters(m_nLayer[i], att);
 
     m_nTkrEvent[i] = 0;
@@ -151,34 +151,34 @@ TestReport::TestReport(const char* dir, const char* prefix,
   setHistParameters(m_totAve2D, att);
 
   m_nTkrTrack = new TH1F("nTkrTrack", "Number of reconstructed tracks", 11, -0.5, 10.5);
-  att.set("No. of reconstructed tracks", "No. of events");
+  att.set("Number of reconstructed tracks", "Number of events");
   att.m_canRebin = false;
   setHistParameters(m_nTkrTrack, att);
 
   m_reconDirXY = new TH2F("reconDirXY", "Reconstructed dir xy distribution", 100, -1, 1, 100, -1, 1);
-  att.set("Reconstructed x direction", "Reconstructed y direction");
+  att.set("Reconstructed x direction", "Reconstructed Y direction");
   setHistParameters(m_reconDirXY, att);
 
-  m_reconDirZ = new TH1F("reconDirZ", "Reconstructed dir z distribution", 100, -1, 0.);
-  att.set("Reconstructed z direction", "No. of events");
+  m_reconDirZ = new TH1F("reconDirZ", "Reconstructed dir Z distribution", 100, -1, 0.);
+  att.set("Reconstructed z direction", "Number of events");
   setHistParameters(m_reconDirZ, att);
 
-  m_reconPosXY = new TH2F("reconPosXY", "Reconstructed dir xy position", 100, -1000, 1000, 100, -1000, 1000);
+  m_reconPosXY = new TH2F("reconPosXY", "Reconstructed dir XY position", 100, -1000, 1000, 100, -1000, 1000);
   att.set("Reconstructed x position", "Reconstructed y position");
   setHistParameters(m_reconPosXY, att);
 
-  m_reconPosZ = new TH1F("reconPosZ", "Reconstructed dir z position", 100, -100, 700.);
-  att.set("Reconstructed z position", "No. of events");
+  m_reconPosZ = new TH1F("reconPosZ", "Reconstructed dir Z position", 100, -100, 700.);
+  att.set("Reconstructed z position", "Number of events");
   att.m_canRebin = false;
   setHistParameters(m_reconPosZ, att);
 
   m_reconEne = new TH1F("reconEne", "Reconstructed energy", 100, 0., 400.);
-  att.set("Reconstructed energy(MeV)", "No. of events");
+  att.set("Reconstructed energy(MeV)", "Number of events");
   att.m_canRebin = false;
   setHistParameters(m_reconEne, att);
 
   m_calSumEne = new TH1F("calSumEne", "Cal energy", 100, 0., 400.);
-  att.set("Sum of crystal crystal energies in the CAL cluster(MeV).", "No. of events");
+  att.set("Sum of crystal crystal energies in the CAL cluster(MeV).", "Number of events");
   att.m_canRebin = false;
   setHistParameters(m_calSumEne, att);
 
@@ -191,20 +191,20 @@ TestReport::TestReport(const char* dir, const char* prefix,
   setHistParameters(m_zeroCalEneLayer2D, att);
 
   m_timeInterval = new TH1F("timeInterval", "Time interval between adjacent event in mill second", 100, 0., 3.);
-  att.set("Time interval between adjacent events(ms)", "No. of events");
+  att.set("Time interval between adjacent events(ms)", "Number of events");
   setHistParameters(m_timeInterval, att);
 
   m_timeIntervalCut = new TH1F("timeIntervalCut", "Time interval between adjacent event in millsecond with a cut of 1 millsecond", 100, 0., 1.);
-  att.set("Time interval between adjacent events(ms)", "No. of events");
+  att.set("Time interval between adjacent events(ms)", "Number of events");
   att.m_canRebin = false;
   setHistParameters(m_timeIntervalCut, att);
 
   m_timeIntervalGem = new TH1F("timeIntervalGem", "Time interval between adjacent event in mill second, the time is measured by GEM", 100, 0., 3.);
-  att.set("Time interval between adjacent events(ms)", "No. of events");
+  att.set("Time interval between adjacent events(ms)", "Number of events");
   setHistParameters(m_timeIntervalGem, att);
 
   m_alignCalTkr = new TH1F("alignCalTkr", "Distance between the reconstructed CAL cluster XY coordinates and the XY coordinates extrapolated from TKR", 50, 0., 10.);
-  att.set("Difference(mm)", "No. of events");
+  att.set("Difference(mm)", "Number of events");
   setHistParameters(m_alignCalTkr, att);
 }
 
@@ -512,7 +512,7 @@ void TestReport::analyzeDigiTree()
     tkrTrigger = true;
 
     for(int i = 0; i != g_nTower; ++i) {
-      if( (tkrVector >> i) && 1 ) ++m_nTkrEvent[i];
+      if( (tkrVector >> i) & 1 ) ++m_nTkrEvent[i];
     }
   }
   else {
@@ -620,7 +620,7 @@ void TestReport::analyzeDigiTree()
     m_nHit[i]->Fill(nHit[i]);
     m_nLayer[i]->Fill(nPlane[i]);
     if(nDigi[i] > maxNDigi) maxNDigi = nDigi[i];
-    if( ((tkrVector >> i) && 1) && nDigi[i] < 6) ++m_nTkrBadEvent[i];
+    if( ((tkrVector >> i) & 1) && nDigi[i] < 6) ++m_nTkrBadEvent[i];
   }
 
   if(tkrTrigger) {
@@ -656,7 +656,7 @@ void TestReport::generateReport()
   writeHeader();
 
   (*m_report) << "@section purpose Purpose" << endl;
-  (*m_report) << "This report is used in offline data analyses to identify apparent problems in cosmic ray muon and VDG data. <b>Warning, results from other tests(such as charge injection) should be interpreted with care.</b>" << endl;
+  (*m_report) << "This report is used in offline data analyses to identify apparent problems in cosmic ray muon and VDG data. <b>Warning! Results from other tests(such as charge injection) should be interpreted with care.</b>" << endl;
 
   (*m_report) << "@section version Software Version" << endl;
   (*m_report) << "@li EngineeringModel: @b " << m_emVersion << endl;
@@ -672,7 +672,7 @@ void TestReport::generateReport()
     return;
   } 
 
-  (*m_report) << "In digi file @em " << m_digiFile->GetName() << endl;
+  (*m_report) << "In the digi file @em " << m_digiFile->GetName() << endl;
   (*m_report) << "@li There are @b " << m_nEvent << " triggers. There should be " << m_nEvent+2 << " events recorded in the eLog database since LATTE adds two additional events in the process which are not triggered events."<< endl;
   (*m_report) << "@li There are @b " << m_nBadEvts << " bad events " << endl;
 
@@ -680,13 +680,13 @@ void TestReport::generateReport()
   (*m_report) << "@li There are @b " << m_nPacketErrors << " events with Packet errors " << endl;
   (*m_report) << "@li There are @b " << m_nTemErrors << " events with TEM errors " << endl;
 
-  (*m_report) << "@li Time of first trigger: <b>" << ctime((time_t*) (&m_startTime)) << " (GMT) </b>";
-  (*m_report) << "@li Time of last trigger: <b>" << ctime((time_t*) (&m_endTime)) << " (GMT) </b>";
+  (*m_report) << "@li Time of the first trigger: <b>" << ctime((time_t*) (&m_startTime)) << " (GMT) </b>";
+  (*m_report) << "@li Time of the last trigger: <b>" << ctime((time_t*) (&m_endTime)) << " (GMT) </b>";
   (*m_report) << "@li Duration: <b>" << m_endTime - m_startTime << " seconds" << "</b>" << endl;
   (*m_report) << "@li Rate: <b>" << double(m_nEvent)/(m_endTime - m_startTime) << " hz" << "</b>" << endl;
 
   if(m_reconFile) {
-    (*m_report) << "<p>Recon file @em " << m_reconFile->GetName() << "</p>" << endl;
+    (*m_report) << "<p>The Recon file is: @em " << m_reconFile->GetName() << "</p>" << endl;
     generateReconReport();
   }
 
@@ -702,7 +702,7 @@ void TestReport::generateDigiReport()
   // print condition summary plots
   string file = m_prefix;
   file += "_condSummary";
-  PlotAttribute att(file.c_str(), "GEM condition summary word. The word is deduced by combining bit patterns from the following table. For example, an event with both the TKR trigger bit and the CAL low trigger bit set in GEM has the condition summary word of @latex $2^{2} + 2^{1} = 6$ @endlatex @html 2<sup>2</sup> + 2<sup>1</sup> = 6 @endhtml", "condSummary", 1);
+  PlotAttribute att(file.c_str(), "GEM condition summary word. The word is deduced by combining bit patterns from the table shown below. For example, an event with both the TKR trigger bit and the CAL low trigger bit set in GEM has the condition summary word of @latex $2^{2} + 2^{1} = 6$ @endlatex @html 2<sup>2</sup> + 2<sup>1</sup> = 6 @endhtml", "condSummary", 1);
   producePlot(m_condSummary, att);
   insertPlot(att);
   *(m_report) << "@latexonly \\nopagebreak @endlatexonly" << endl;
@@ -711,7 +711,7 @@ void TestReport::generateDigiReport()
   // print trigger plots
   file = m_prefix;
   file += "_trigger";
-  att.set(file.c_str(), "Trigger word calculated by triggerAlg. The word is deduced by combining bit patterns from the following table. For example, an event with both the TKR trigger bit and the CAL Low trigger bit set has the Glt word of @latex $2^{1} + 2^{2} = 6$ @endlatex @html 2<sup>1</sup> + 2<sup>2</sup> = 6 @endhtml.", "trigger", 1);
+  att.set(file.c_str(), "Trigger word calculated by triggerAlg. The word is deduced by combining bit patterns from the table shown below. For example, an event with both the TKR trigger bit and the CAL Low trigger bit set has the GLT word of @latex $2^{1} + 2^{2} = 6$ @endlatex @html 2<sup>1</sup> + 2<sup>2</sup> = 6 @endhtml.", "trigger", 1);
   producePlot(m_trigger, att);
   insertPlot(att);
   *(m_report) << "@latexonly \\nopagebreak @endlatexonly" << endl;
@@ -773,10 +773,10 @@ void TestReport::generateDigiReport()
   insertPlot(att);
 
   *(m_report) << "@latexonly \\pagebreak @endlatexonly" << endl;
-  *(m_report) << "@subsection totInfo TOT info" << endl;
+  *(m_report) << "@subsection totInfo Time Over Threshold (TOT) information" << endl;
   *(m_report) << "@latexonly \\nopagebreak @endlatexonly" << endl;
   *(m_report) << "@li Fraction of events with saturated TOT value of " << g_satTot << " counts(1 count = 200ns): @b " << ToString(m_nEventSatTot/double(m_nEvent)) << endl;
-  *(m_report) << "@li Fraction of events with invalid TOT(outside range [0, " << g_satTot << "]): @b " << ToString(m_nEvtInvalidTot/double(m_nEvent)) << endl;
+  *(m_report) << "@li Fraction of events with invalid TOT (outside the range [0, " << g_satTot << "]): @b " << ToString(m_nEvtInvalidTot/double(m_nEvent)) << endl;
   *(m_report) << "@li Fraction of events with TOT==0 and nStrip!=0 for each Si plane: @b " << ToString(m_nEventZeroTot/double(m_nEvent)) << endl;
   *(m_report) << "@li Fraction of events with TOT!=0 and nStrip==0 for each Si plane: @b " << ToString(m_nEventBadTot/double(m_nEvent)) << endl;
 
@@ -801,7 +801,7 @@ void TestReport::generateReconReport()
   // print reconstructed track plots
   string file(m_prefix);
   file += "_nTkrTrack";
-  PlotAttribute att(file.c_str(), "Number of reconstructed tracks for all trigger types. This data is obtained from track collections stored in TkrRecon class.", "nTkrTrack", 1);
+  PlotAttribute att(file.c_str(), "Number of reconstructed tracks for all trigger types. This data is obtained from track collections stored in the TkrRecon class.", "nTkrTrack", 1);
   producePlot(m_nTkrTrack, att);
   insertPlot(att);
 
@@ -1104,12 +1104,12 @@ void TestReport::printGltTriggerTable()
   table[1][5] = "ACD High";
   table[1][6] = "THROTTLE";
   
-  table[2][0] = "No. of events";
+  table[2][0] = "Number of events";
   for(int i = 1; i != enums::number_of_trigger_bits+1; ++i) {
     table[2][i] = ToString(m_nEvtGltTrigger[i-1]);
   }
 
-  TableDef t((string*) table, "Trigger bit used in triggerAlg calculation", "gltTriggerTable", nRow, nCol);
+  TableDef t((string*) table, "Trigger bits used in TriggerAlg", "gltTriggerTable", nRow, nCol);
 
   printHtmlTable(t);
   printLatexTable(t);
@@ -1136,12 +1136,12 @@ void TestReport::printCondSummaryTable()
   table[1][7] = "Solicited";
   table[1][8] = "External";
 
-  table[2][0] = "No. of events";
+  table[2][0] = "Number of events";
   for(int i = 1; i != enums::GEM_offset+1; ++i) {
     table[2][i] = ToString(m_nEvtGemTrigger[i-1]);
   }
 
-  TableDef t((string*) table, "Condition summary word in GEM", "condSummaryTable", nRow, nCol);
+  TableDef t((string*) table, "GEM Condition summary word", "condSummaryTable", nRow, nCol);
 
   printHtmlTable(t);
   printLatexTable(t);
@@ -1159,10 +1159,10 @@ void TestReport::printNTrackTable()
 
   string table[d.m_nRow][d.m_nCol];
   d.m_table = (string*) table;
-  table[0][1] = "0 track"; 
+  table[0][1] = "0 tracks"; 
   table[0][2] = "1 track"; 
   table[0][3] = "2 tracks";
-  table[0][4] = "more than 2 tracks";
+  table[0][4] = "More than 2 tracks";
 
   table[1][0] = "Ratio";
   table[1][1] = ToString(m_nTkrTrack->GetBinContent(1)/double(m_nEvent));
@@ -1187,7 +1187,7 @@ void TestReport::printNDigiTable()
 
   string caption("Number of events with different number of TKR digis. There are ");
   caption += ToString(m_nTkrTrigger); 
-  caption += " events with 3 in a row TKR trigger in GEM.";
+  caption += " events with 3 in a row TKR trigger in the GEM.";
   d.m_caption = caption.c_str();
   d.m_label = "nEventDigi";
 
@@ -1206,7 +1206,7 @@ void TestReport::printNDigiTable()
     else {
       table[i][0] = ToString(i-1);
     }
-    table[i][1] =  ToString(m_nEventDigi[i-1]);  
+    table[i][1] = ToString(m_nEventDigi[i-1]);  
     table[i][2] = ToString(float(m_nEventDigi[i-1])/m_nTkrTrigger);
   }
 
@@ -1248,7 +1248,7 @@ void TestReport::printNDigiTowerTable()
     table[1][i] = ToString(bad[i-1]);
   }
 
-  TableDef t((string*) table, "Ratio of event with TKR trigger and less than 6 digis in each tower", "nDigiTowerTable", nRow, nCol);
+  TableDef t((string*) table, "Ratio of events with a TKR trigger and less than 6 digis in each tower", "nDigiTowerTable", nRow, nCol);
 
   printHtmlTable(t);
   printLatexTable(t);
@@ -1345,7 +1345,7 @@ void TestReport::produceNhits2DPlot()
 
   file = m_prefix;
   file += "_nZeroHit2d";
-  att.set(file.c_str(), "Fraction of events with 0 strip hits. Note the plot contains info for both end of the same plane. For example, bin at 0-0.5 along the X axis corresponds to value from GTRC close to strip 0 at plane 0, bin at 0.5-1. along the X axis corresponds to value from GTRC close to strip 1536 at plane 0", "nZeroHit2d");
+  att.set(file.c_str(), "Fraction of events with 0 strip hits. Note that the plot contains information from both ends of the same plane. For example, the bin at 0-0.5 along the X axis corresponds to the value from the GTRC close to strip 0 in plane 0, the bin at 0.5-1. along the X axis corresponds to the value from the GTRC close to strip 1536 in plane 0", "nZeroHit2d");
   producePlot(m_nZeroHit2D, att);
   insertPlot(att);
 }
@@ -1374,7 +1374,7 @@ void TestReport::produceCalNhits2DPlot()
 
   file = m_prefix;
   file += "_nZeroCalHit2d";
-  att.set(file.c_str(), "Fraction of events with zero hit in a particular CAL layer", "nZeroCalHit2d");
+  att.set(file.c_str(), "Fraction of events with zero hits in a particular CAL layer", "nZeroCalHit2d");
   producePlot(m_nZeroCalHit2D, att);
   insertPlot(att);
 }
@@ -1384,7 +1384,7 @@ void TestReport::produceZeroSatTot2DPlot()
   /*
   string file = m_prefix;
   file += "_totZero";
-  PlotAttribute att(file.c_str(), "Fraction of events with TOT value equal to zero in each plane (plane 0 is at bottom) in each tower. Note the plot contains info for both tot counters in the same plane. For example, bin at 0-0.5 along the X axis corresponds to tot value from GTRC close to strip 0 at plane 0, bin at 0.5-1. along the X axis corresponds to tot value from GTRC close to strip 1536 at plane 0", "satTot");
+  PlotAttribute att(file.c_str(), "Fraction of events with TOT equal to zero in each plane (plane 0 is at the bottom) in each tower. Note the plot contains info for both tot counters in the same plane. For example, bin at 0-0.5 along the X axis corresponds to tot value from GTRC close to strip 0 at plane 0, bin at 0.5-1. along the X axis corresponds to tot value from GTRC close to strip 1536 at plane 0", "satTot");
   att.m_nColor = 4;
   producePlot(m_totZero2D, att);
   insertPlot(att);
@@ -1404,7 +1404,7 @@ void TestReport::produceZeroSatTot2DPlot()
 
   string file = m_prefix;
   file += "_totSat";
-  PlotAttribute att(file.c_str(), "Fraction of events with saturated TOT value of 255 counts(1 count = 200 ns, plane 0 is at bottom). When calculating the fraction, the denominator is number of events with at least 1 hit in the corresponding region. The plot contains info for both tot counters in the same plane. For example, bin at tower 0, plane 0-0.5 corresponds to tot value from GTRC close to strip 0 at plane 0 in tower 0. Bin at tower 0, plane 0.5-1. corresponds to tot value from GTRC close to strip 1536 at plane 0 in tower 0", "satTot");
+  PlotAttribute att(file.c_str(), "Fraction of events with saturated TOT value of 255 counts (1 count = 200 ns, plane 0 is at the bottom). When calculating the fraction, the denominator is the number of events with at least 1 hit in the corresponding region. The plot contains information for both TOT counters in the same plane. For example, the bin at tower 0, plane 0-0.5 corresponds to the TOT value from the GTRC close to strip 0 in plane 0 in tower 0. The bin at tower 0, plane 0.5-1. corresponds to the TOT value from the GTRC close to strip 1536 in plane 0 in tower 0", "satTot");
   producePlot(m_totSat2D, att);
   insertPlot(att);
 }
@@ -1425,7 +1425,7 @@ void TestReport::produceTotNoise2DPlot()
 
   string file = m_prefix;
   file += "_totNoise";
-  PlotAttribute att(file.c_str(), "Fraction of events with TOT value equal to zero but nonzero number of strip hits(plane 0 is at bottom). When calculating the fraction, the denominator is number of events with at least 1 hit in the corresponding region. The plot contains info for both the TOT counters in the same plane. For example, bin at 0-0.5 along the X axis corresponds to tot value from GTRC close to strip 0 at plane 0, bin at 0.5-1. along the X axis corresponds to tot value from GTRC close to strip 1535 at plane 0", "TotNoise");
+  PlotAttribute att(file.c_str(), "Fraction of events with TOT equal to zero but nonzero number of strip hits (plane 0 is at the bottom). When calculating the fraction, the denominator is the number of events with at least 1 hit in the corresponding region. The plot contains information for both TOT counters in the same plane (one for each end). For example, the bin at 0-0.5 along the X axis corresponds to the TOT value from the GTRC close to strip 0 in plane 0. The bin at 0.5-1. along the X axis corresponds to the TOT value from the GTRC close to strip 1535 in plane 0", "TotNoise");
   producePlot(m_totNoise2D, att);
   insertPlot(att);
 }
@@ -1450,13 +1450,13 @@ void TestReport::produceReconDirPlots()
 {
   string file(m_prefix);
   file += "_reconDirXY";
-  PlotAttribute att(file.c_str(), "Reconstructed event direction along the X and the Y axis. Color scheme represents number of events in a bin. The values are obtained from first reconstructed vertex.", "reconDirXY");
+  PlotAttribute att(file.c_str(), "Reconstructed event direction along the X and the Y axis. The color scheme represents the number of events in a bin. The values are obtained from the first reconstructed vertex.", "reconDirXY");
   producePlot(m_reconDirXY, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_reconDirZ";
-  att.set(file.c_str(), "Reconstructed event direction along the Z axis.The value is obtained from first reconstructed vertex.", "reconDirZ");
+  att.set(file.c_str(), "Reconstructed event direction along the Z axis.The value is obtained from the first reconstructed vertex.", "reconDirZ");
   producePlot(m_reconDirZ, att);
   insertPlot(att);
 }
@@ -1465,13 +1465,13 @@ void TestReport::produceReconPosPlots()
 {
   string file(m_prefix);
   file += "_reconPosXY";
-  PlotAttribute att(file.c_str(), "Reconstructed event position along the X and the Y axis. Color scheme represents number of events in a bin. The values are obtained from first reconstructed vertex.", "reconPosXY");
+  PlotAttribute att(file.c_str(), "Reconstructed event position along the X and the Y axis. The color scheme represents the number of events in a bin. The values are obtained from the first reconstructed vertex.", "reconPosXY");
   producePlot(m_reconPosXY, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_reconPosZ";
-  att.set(file.c_str(), "Reconstructed event position along the Z axis. The value is obtained from first reconstructed vertex.", "reconPosZ", 1);
+  att.set(file.c_str(), "Reconstructed event position along the Z axis. The value is obtained from the first reconstructed vertex.", "reconPosZ", 1);
   att.m_statMode = 111111;
   producePlot(m_reconPosZ, att);
   insertPlot(att);
@@ -1481,7 +1481,7 @@ void TestReport::produceReconEnePlots()
 {
   string file(m_prefix);
   file += "_reconEne";
-  PlotAttribute att(file.c_str(), "Reconstructed event energy(MeV) assigned in first reconstructed vertex. By default, it is calculated based on number of hits in the tracker and amount of energies measured in the calorimeter.", "reconEne", 1);
+  PlotAttribute att(file.c_str(), "Reconstructed event energy (MeV) assigned to the first reconstructed vertex. By default, it is calculated based on the number of hits in the tracker and the amount of energy measured in the calorimeter.", "reconEne", 1);
   producePlot(m_reconEne, att);
   insertPlot(att);
 }
@@ -1490,7 +1490,7 @@ void TestReport::produceCalEneSum2DPlot()
 {
   string file = m_prefix;
   file += "_calSumEne";
-  PlotAttribute att(file.c_str(), "Sum of crystal energies in the CAL cluster(MeV). Note there is only one CAL cluster produced by CalRecon at the moment. Energy measured in each crystal is obtained by using the getEnergy() member function of the CalXtalRecData class.", "calSumEne", 1);
+  PlotAttribute att(file.c_str(), "Sum of crystal energies in the CAL cluster (MeV). Note that there is only one CAL cluster produced by CalRecon at the moment. Energy measured in each crystal is obtained by using the getEnergy() member function of the CalXtalRecData class.", "calSumEne", 1);
   producePlot(m_calSumEne, att);
   insertPlot(att);
 }
@@ -1510,7 +1510,7 @@ void TestReport::produceCalEneLayer2DPlot()
 
   string file(m_prefix);
   file += "_calEneLayer2d";
-  PlotAttribute att(file.c_str(), "Average energies(MeV) measured in each CAL layer, scaled by color Z axis. Note zero energy is not used in calculating the average. Energy measured in each crystal is obtained by using getEnergy() member function of the CalXtalRecData class.", "calEneLayer2d");
+  PlotAttribute att(file.c_str(), "Average energies (MeV) measured in each CAL layer, scaled by the color Z axis. Note that zero energy is not used in calculating the average. Energy measured in each crystal is obtained by using the getEnergy() member function of the CalXtalRecData class.", "calEneLayer2d");
   producePlot(m_calEneLayer2D, att);
   insertPlot(att);
 
@@ -1543,19 +1543,19 @@ void TestReport::produceTimeIntervalPlot()
 {
   string file(m_prefix);
   file += "_timeInterval";
-  PlotAttribute att(file.c_str(), "Time interval between adjacent event in millsecond. Note this interval is between the time when the event is built, NOT the trigger time. The time is measured by the 16MHZ clock in the power PC.", "timeInterval", true);
+  PlotAttribute att(file.c_str(), "Time interval between adjacent events in millseconds. Note that this interval is between the time when the events are built, NOT the GEM trigger time. The time is measured by the 16MHZ clock in the power PC.", "timeInterval", true);
   producePlot(m_timeInterval, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_timeIntervalCut";
-  att.set(file.c_str(), "Time interval between adjacent event in millsecond with a cut of 1 ms. Note this interval is between the time when the event is built, NOT the trigger time. The time is measured by the 16MHZ clock in the power PC.", "timeIntervalCut", true);
+  att.set(file.c_str(), "Time interval between adjacent events in millseconds with a cut of 1 ms. Note that this interval is between the time when the events are built, NOT the GEM trigger time. The time is measured by the 16MHZ clock in the power PC.", "timeIntervalCut", true);
   producePlot(m_timeIntervalCut, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_timeIntervalGem";
-  att.set(file.c_str(), "Time interval between adjacent event in millsecond. Note this interval time is measured in GEM. The time is stored in a 16 bit counter, each count is equal to 50 ns, so the time will be saturated at roughly 3.3 ms.", "timeIntervalGem", true);
+  att.set(file.c_str(), "Time interval between adjacent events in millseconds. Note that this interval is measured in the GEM. The time is stored in a 16 bit counter, each count is equal to 50 ns, so the time will saturate at roughly 3.3 ms.", "timeIntervalGem", true);
   producePlot(m_timeIntervalGem, att);
   insertPlot(att);
 }
@@ -1616,7 +1616,7 @@ void TestReport::produceAlignCalTkrPlot()
 {
   string file(m_prefix);
   file += "_alignCalTkr";
-  PlotAttribute att(file.c_str(), "Distance between the reconstructed CAL cluster XY coordinates and the XY coordinates extrapolated from TKR according to reconstructed track direction. The plot only contains events with more than 50 MeV energy deposited in CAL.", "alignCalTkr", true);
+  PlotAttribute att(file.c_str(), "Distance between the reconstructed CAL cluster XY coordinates and the XY coordinates extrapolated from TKR according to reconstructed track direction. The plot only contains events with more than 50 MeV energy deposited in the CAL.", "alignCalTkr", true);
   producePlot(m_alignCalTkr, att);
   insertPlot(att);
 }
