@@ -1608,7 +1608,7 @@ void TestReport::produceNHitPlane2DPlot()
 
   string file(m_prefix);
   file += "_nHitPlane2D";
-  PlotAttribute pAtt(file.c_str(), "Number of planes in a tower that have strip hits. If a tower is missing, the information is not included in the plot (bins are not filled).", "nHitPlane2D");
+  PlotAttribute pAtt(file.c_str(), "Number of planes in a tower that have strip hits. Events with no planes hit are not used. If a tower is missing, the information is not included in the plot (bins are not filled).", "nHitPlane2D");
   producePlot(&h2, pAtt);
   insertPlot(pAtt);
 }
