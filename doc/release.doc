@@ -68,3 +68,6 @@ The title of the Gem delta event time histogram says: "Time interval between adj
 October 27, 2005: awb
 v3r2p8	Fixed bug for 'Ratio of events with TKR trigger and less than 6 digis in each tower'.
 	Fixed some typos.
+
+November 4, 2005: awb
+v3r2p9	Changed 'Number of planes in a tower that have strip hits' to not include zero planes hit.
