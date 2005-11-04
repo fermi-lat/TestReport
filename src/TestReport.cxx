@@ -1590,16 +1590,17 @@ string TestReport::boldFaceHtml(const string& s)
 
 void TestReport::produceNHitPlane2DPlot()
 {
-  TH2F h2("nHitPlane2D", "number of hit planes distribution", 37, -0.5, 36.5, 16, -0.5, 15.5);
+  TH2F h2("nHitPlane2D", "number of hit planes distribution", 36, 0.5, 36.5, 16, -0.5, 15.5);
   HistAttribute att("Number of planes that have strip hits", "Tower");
   setHistParameters(&h2, att);
 
   for(int i = 0; i != g_nTower; ++i) {
-    for(int j = 0; j != g_nPlane+1; ++j) {
+    // Take out events with no planes hit:
+    for(int j = 1; j != g_nPlane+1; ++j) {
 
       // For missing towers, all events will have 0 planes that are hit.
       // For clarity of the plot, the corresponding bins won't be filled.
-      if(m_nLayer[i]->GetBinContent(j+1) != m_nEvent || j != 0) {
+      if(m_nLayer[i]->GetBinContent(j+1) != m_nEvent) {
 	h2.Fill(j, i, m_nLayer[i]->GetBinContent(j+1));
       }
     }
