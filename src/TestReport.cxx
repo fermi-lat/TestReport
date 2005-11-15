@@ -431,8 +431,8 @@ void TestReport::analyzeReconTree()
       // currently there is just one cluster in CAL
       CalCluster* calCluster = dynamic_cast<CalCluster*>(calClusterCol->At(0));
       if(calCluster) {
-	if(calCluster->getParams().getEnergySum() > 50)  muonThroughCal = true;
-	m_calSumEne->Fill(calCluster->getParams().getEnergySum());
+	if(calCluster->getParams().getEnergy() > 50)  muonThroughCal = true;
+	m_calSumEne->Fill(calCluster->getParams().getEnergy());
 	calPos = calCluster->getParams().getCentroid();
       }
     }
