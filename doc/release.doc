@@ -71,3 +71,6 @@ v3r2p8	Fixed bug for 'Ratio of events with TKR trigger and less than 6 digis in 
 
 November 4, 2005: awb
 v3r2p9	Changed 'Number of planes in a tower that have strip hits' to not include zero planes hit.
+
+November 15, 2005: awb
+v3r3	Updated code to handle new CalRecon.
