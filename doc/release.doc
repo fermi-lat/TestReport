@@ -74,3 +74,6 @@ v3r2p9	Changed 'Number of planes in a tower that have strip hits' to not include
 
 November 15, 2005: awb
 v3r3	Updated code to handle new CalRecon.
+
+November 15, 2005: awb
+v3r3p1	Fixed typo (getEnergy and not getEnergySum).
