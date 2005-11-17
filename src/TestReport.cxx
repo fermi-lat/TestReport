@@ -1479,6 +1479,7 @@ void TestReport::produceReconPosPlots()
   string file(m_prefix);
   file += "_reconPosXY";
   PlotAttribute att(file.c_str(), "Reconstructed event position along the X and the Y axis. The color scheme represents the number of events in a bin. The values are obtained from the first reconstructed vertex.", "reconPosXY");
+  att.m_statMode = 110011;
   producePlot(m_reconPosXY, att);
   insertPlot(att);
 
