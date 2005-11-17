@@ -77,3 +77,6 @@ v3r3	Updated code to handle new CalRecon.
 
 November 15, 2005: awb
 v3r3p1	Fixed typo (getEnergy and not getEnergySum).
+
+November 17, 2005: awb
+v3r3p2	Not allow outliers in recon position. Print over-/underflows.
