@@ -165,6 +165,8 @@ TestReport::TestReport(const char* dir, const char* prefix,
 
   m_reconPosXY = new TH2F("reconPosXY", "Reconstructed dir XY position", 100, -1000, 1000, 100, -1000, 1000);
   att.set("Reconstructed x position", "Reconstructed y position");
+  att.m_canRebin = false;
+  att.m_use2DStat = 1;
   setHistParameters(m_reconPosXY, att);
 
   m_reconPosZ = new TH1F("reconPosZ", "Reconstructed dir Z position", 100, -100, 700.);
@@ -245,7 +247,11 @@ void TestReport::setHistParameters(TH1* h, const HistAttribute& att)
   if(att.m_canRebin) h->SetBit(TH1::kCanRebin); 
 
   if(TH2F* h2 = dynamic_cast<TH2F*>(h)) {
-    h2->SetStats(kFALSE);
+    if (att.m_use2DStat) {
+      h2->SetStats(kTRUE);
+    } else {
+      h2->SetStats(kFALSE);
+    }
   }
 }
 
@@ -869,6 +875,13 @@ void TestReport::producePlot(TObject* h, const PlotAttribute& att)
       gStyle->SetPalette(1);
       //      gStyle->SetPalette(att.m_nColor, (int*) att.m_colors);
       gPad->SetRightMargin(0.15);
+      // 
+      gStyle->SetStatW(0.15);
+      gStyle->SetStatH(0.12);
+      gStyle->SetStatX(0.84);
+      gStyle->SetStatY(0.99);
+      gStyle->SetOptStat(att.m_statMode);
+      //
       h2->Draw("COLZ");
     }
   }

@@ -75,20 +75,22 @@ class TestReport {
     HistAttribute(const char* xTitle="", const char* yTitle="", 
 		  float axisTitleSize=0.04, float axisLabelSize=0.04, 
 		  float xTitleOffset=1, float yTitleOffset=1,
-		  bool canRebin=true) : 
+		  bool canRebin=true,  bool use2DStat=false) : 
       Attribute(xTitle, yTitle, axisTitleSize, axisLabelSize, xTitleOffset,
-		yTitleOffset), m_canRebin(canRebin) { }
+		yTitleOffset), m_canRebin(canRebin), m_use2DStat(use2DStat) { }
 
     void set(const char* xTitle="", const char* yTitle="", 
 	     float axisTitleSize=0.04, float axisLabelSize=0.04, 
-	     float xTitleOffset=1, float yTitleOffset=1, bool canRebin=true)  
+	     float xTitleOffset=1, float yTitleOffset=1, bool canRebin=true, bool use2DStat=false)  
     {
       Attribute::set(xTitle, yTitle, axisTitleSize, axisLabelSize, 
 		     xTitleOffset, yTitleOffset);
       m_canRebin = canRebin;
+      m_use2DStat = use2DStat;
     }
 
     bool m_canRebin;
+    bool m_use2DStat;
   };
 
   struct GraphAttribute : public Attribute{
