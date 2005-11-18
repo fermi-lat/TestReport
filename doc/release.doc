@@ -83,3 +83,7 @@ v3r3p2	Not allow outliers in recon position. Print over-/underflows.
 
 November 17, 2005: awb
 v3r3p3 Forgot to set correct stat option.
+
+November 17, 2005: awb
+v3r3p4 Fixed recon position XY style problem. 
+       Not allow outliers in TKR-CAL alignment.
