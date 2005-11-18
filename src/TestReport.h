@@ -175,7 +175,7 @@ class TestReport {
 
     /// mode controlling what are drawn in the stat box
     int m_statMode;
-    bool statBox;
+    bool m_statBox;
   };
 
   struct TableDef {
@@ -461,6 +461,10 @@ class TestReport {
 
   /// percentage of events with TKR trigger but less than 6 digis in a tower
   TGraph* m_nDigi;
+
+  // ACD parity errors:
+  unsigned int m_nAcdOddParityError;
+  unsigned int m_nAcdHeaderParityError;
 
   /// no. of events in each tower with TKR trigger
   int m_nTkrEvent[g_nTower];
