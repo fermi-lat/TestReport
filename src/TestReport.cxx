@@ -31,7 +31,7 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_nTkrTrigger(0), m_nEventBadStrip(0), m_nEventMoreStrip(0), 
     m_nEventSatTot(0), m_nEventZeroTot(0), m_nEvtInvalidTot(0),
     m_nEventBadTot(0), m_startTime(0),
-    m_endTime(0), m_nDigi(0)
+    m_endTime(0), m_nDigi(0), m_nAcdOddParityError(0), m_nAcdHeaderParityError(0)
 { 
   // initialize ROOT
   if(gROOT == 0) {
@@ -209,6 +209,14 @@ TestReport::TestReport(const char* dir, const char* prefix,
   att.set("Difference(mm)", "Number of events");
   att.m_canRebin = false;
   setHistParameters(m_alignCalTkr, att);
+
+  m_nAcdDigis = new TH1F("nAcdDigis","Number of ACD digis",10,0,10);
+  att.set("Number of ACD digis","Number of events");
+  setHistParameters(m_nAcdDigis,att);
+
+  m_AcdTileIdOnePMT = new TH1F("AcdTileIdOnePMT","ACD tile ID for single PMT digis",604,0,604);
+  att.set("ACD tile ID for single PMT digis","Number of events");
+  setHistParameters(m_AcdTileIdOnePMT,att);
 }
 
 TestReport::~TestReport()
@@ -659,6 +667,38 @@ void TestReport::analyzeDigiTree()
     }
   }
 
+
+  //
+  // ACD digis:
+  //
+  int tmpAcdOddParityError    = 0;
+  int tmpAcdHeaderParityError = 0;
+
+  const TObjArray* acdDigiCol = m_digiEvent->getAcdDigiCol();
+  assert(acdDigiCol != 0);
+
+  int nAcdDigis = acdDigiCol->GetLast()+1;
+  m_nAcdDigis->Fill(nAcdDigis);
+
+  for(int iDigi = 0; iDigi != nAcdDigis; ++iDigi) {
+
+    const AcdDigi* acdDigi = dynamic_cast<const AcdDigi*>(acdDigiCol->At(iDigi));
+    assert(acdDigi != 0);
+
+    int AcdID = acdDigi->getId().getId();
+
+    if (!(acdDigi->getPulseHeight(AcdDigi::A)) || !(acdDigi->getPulseHeight(AcdDigi::B))) m_AcdTileIdOnePMT->Fill(AcdID);
+    
+    if (acdDigi->getOddParityError(AcdDigi::A)) ++tmpAcdOddParityError;
+    if (acdDigi->getOddParityError(AcdDigi::B)) ++tmpAcdOddParityError;
+
+    if (acdDigi->getHeaderParityError(AcdDigi::A)) ++tmpAcdHeaderParityError;
+    if (acdDigi->getHeaderParityError(AcdDigi::B)) ++tmpAcdHeaderParityError;
+  }
+
+  if (tmpAcdOddParityError)    ++m_nAcdOddParityError;
+  if (tmpAcdHeaderParityError) ++m_nAcdHeaderParityError;
+
 }
 
 void TestReport::generateReport()
@@ -689,6 +729,9 @@ void TestReport::generateReport()
   (*m_report) << "@li There are @b " << m_nTrgParityErrors << " events with Trigger Parity errors " << endl;
   (*m_report) << "@li There are @b " << m_nPacketErrors << " events with Packet errors " << endl;
   (*m_report) << "@li There are @b " << m_nTemErrors << " events with TEM errors " << endl;
+
+  (*m_report) << "@li There are @b " << m_nAcdOddParityError    << " events with ACD Odd Parity errors " << endl;
+  (*m_report) << "@li There are @b " << m_nAcdHeaderParityError << " events with ACD Header Parity errors " << endl;
 
   (*m_report) << "@li Time of the first trigger: <b>" << ctime((time_t*) (&m_startTime)) << " (GMT) </b>";
   (*m_report) << "@li Time of the last trigger: <b>" << ctime((time_t*) (&m_endTime)) << " (GMT) </b>";
@@ -801,6 +844,10 @@ void TestReport::generateDigiReport()
   (*m_report) << "@section calDigi CAL Digitization" << endl;
 
   produceCalNhits2DPlot();
+
+  // ACD digis:
+  (*m_report) << "@section acdDigi ACD Digitization" << endl;
+  produceAcdDigisPlots();
 
 }
 
@@ -1645,6 +1692,24 @@ void TestReport::produceAlignCalTkrPlot()
   producePlot(m_alignCalTkr, att);
   insertPlot(att);
 }
+
+// ACD digis:
+void TestReport::produceAcdDigisPlots()
+{
+  string file(m_prefix);
+
+  file += "_nAcdDigis";
+  PlotAttribute att(file.c_str(), "Number of ACD digis.", "nAcdDigis");
+  att.m_statMode = 111111;
+  producePlot(m_nAcdDigis, att);
+  insertPlot(att);
+
+  file += "_AcdTileIdOnePMT";
+  att.set(file.c_str(), "ACD tile ID for single PMT digis.", "AcdTileIdOnePMT");
+  producePlot(m_AcdTileIdOnePMT, att);
+  insertPlot(att);
+}
+
 
 string TestReport::eraseLatexStr(const std::string& s)
 {

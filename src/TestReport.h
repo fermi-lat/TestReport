@@ -249,6 +249,9 @@ class TestReport {
   /// produce plots of histogram m_alignCalTkr
   void produceAlignCalTkrPlot();
 
+  /// Produce plots of histogram m_nAcdDigis
+  void produceAcdDigisPlots();
+
   /// set some common parameters for a 1D histogram
   void setHistParameters(TH1* h, const HistAttribute& att);
 
@@ -502,5 +505,10 @@ class TestReport {
   /// position and the position extrapolated from the reconstructed track 
   /// in TKR
   TH1F* m_alignCalTkr;
+
+
+  // Histograms for the ACD digis:
+  TH1F* m_nAcdDigis;
+  TH1F* m_AcdTileIdOnePMT;
 };
 #endif
