@@ -169,7 +169,7 @@ TestReport::TestReport(const char* dir, const char* prefix,
   att.m_use2DStat = 1;
   setHistParameters(m_reconPosXY, att);
 
-  m_reconPosZ = new TH1F("reconPosZ", "Reconstructed dir Z position", 100, -100, 700.);
+  m_reconPosZ = new TH1F("reconPosZ", "Reconstructed dir Z position", 100, -100, 750.);
   att.set("Reconstructed z position", "Number of events");
   att.m_canRebin = false;
   setHistParameters(m_reconPosZ, att);
@@ -205,7 +205,7 @@ TestReport::TestReport(const char* dir, const char* prefix,
   att.set("Time interval between adjacent events(ms)", "Number of events");
   setHistParameters(m_timeIntervalGem, att);
 
-  m_alignCalTkr = new TH1F("alignCalTkr", "Distance between the reconstructed CAL cluster XY coordinates and the XY coordinates extrapolated from TKR", 50, 0., 10.);
+  m_alignCalTkr = new TH1F("alignCalTkr", "Distance between the reconstructed CAL cluster XY coordinates and the XY coordinates extrapolated from TKR", 50, 0., 100.);
   att.set("Difference(mm)", "Number of events");
   att.m_canRebin = false;
   setHistParameters(m_alignCalTkr, att);
@@ -864,6 +864,8 @@ void TestReport::producePlot(TObject* h, const PlotAttribute& att)
   gStyle->SetTitleFontSize();
   gStyle->SetStatW(0.2);
   gStyle->SetStatH(0.16);
+  gStyle->SetStatX(1.0);
+  gStyle->SetStatY(1.0);
   gStyle->SetPalette();
 
   if(att.m_yLog) gPad->SetLogy();
@@ -880,12 +882,12 @@ void TestReport::producePlot(TObject* h, const PlotAttribute& att)
       //      gStyle->SetPalette(att.m_nColor, (int*) att.m_colors);
       gPad->SetRightMargin(0.15);
       // 
-      //if (att.m_statMode == 110011) {
-      //  gStyle->SetStatW(0.15);
-      //  gStyle->SetStatH(0.12);
-      //  gStyle->SetStatX(0.84);
-      //  gStyle->SetStatY(0.99);
-      //}
+      if (att.m_statBox) {
+        gStyle->SetStatW(0.15);
+        gStyle->SetStatH(0.12);
+        gStyle->SetStatX(0.84);
+        gStyle->SetStatY(0.99);
+      }
       gStyle->SetOptStat(att.m_statMode);
       //
       h2->Draw("COLZ");
@@ -1486,6 +1488,7 @@ void TestReport::produceReconPosPlots()
   file += "_reconPosXY";
   PlotAttribute att(file.c_str(), "Reconstructed event position along the X and the Y axis. The color scheme represents the number of events in a bin. The values are obtained from the first reconstructed vertex.", "reconPosXY");
   att.m_statMode = 110011;
+  att.m_statBox = 1;
   producePlot(m_reconPosXY, att);
   insertPlot(att);
 

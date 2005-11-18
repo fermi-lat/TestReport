@@ -119,10 +119,10 @@ class TestReport {
     PlotAttribute::PlotAttribute(const char* file=0, const char* caption=0,
 				 const char* label=0, bool yLog=0,
 				 float height=10, float width=15, int x=606,
-				 int y=410, int stat=1111) : 
+				 int y=410, int stat=1111, bool statBox=0) : 
       m_file(file), m_caption(caption), m_label(label), m_yLog(yLog),
 	 m_height(height), m_width(width), m_xPixel(x), m_yPixel(y),
-	 m_statMode(stat)
+	 m_statMode(stat), m_statBox(statBox)
     { 
       m_2dPlotType = COLZ;
       m_nColor = 3;
@@ -136,7 +136,7 @@ class TestReport {
 
     void set(const char* file=0, const char* caption=0, const char* label=0, 
 	     bool yLog=0, float height=10, float width=15, int x=606, 
-	     int y=410, int stat=1111)
+	     int y=410, int stat=1111, bool statBox=0)
     {
       m_file = file;
       m_caption = caption;
@@ -149,6 +149,7 @@ class TestReport {
       m_nColor = 3;
       m_2dPlotType = COLZ;
       m_statMode = stat;
+      m_statBox = statBox;
     }
 
     /// name of file to be produced, note file type such as ".eps" is not
@@ -174,6 +175,7 @@ class TestReport {
 
     /// mode controlling what are drawn in the stat box
     int m_statMode;
+    bool statBox;
   };
 
   struct TableDef {
