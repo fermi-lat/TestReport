@@ -35,11 +35,11 @@ my $htmlFile = 'index.html';
 my $pwd =  $ENV{PWD};
 
 my $appRoot = '/nfs/farm/g/glast/u06/chen/svac';
-my $testReportVersion = 'v3r2p5';
-my $emVersion = 'v4r060302p6';
-my $cmtPath = "$appRoot:/nfs/farm/g/glast/u09/builds/rh9_gcc32/EngineeringModel/EngineeringModel-$emVersion";
+my $testReportVersion = 'v3r4';
+my $emVersion = 'v5r0703p1';
+my $cmtPath = "$appRoot:/nfs/farm/g/glast/u09/builds/rh9_gcc32opt/EngineeringModel/EngineeringModel-$emVersion";
 my $cmtDir = "$appRoot/TestReport/$testReportVersion/cmt";
-my $exeDir = "$appRoot/TestReport/$testReportVersion/rh9_gcc32";
+my $exeDir = "$appRoot/TestReport/$testReportVersion/rh9_gcc32opt";
 my $doxyFile = "$appRoot/TestReport/$testReportVersion/src/ReportDoxyfile";
 my $latexHeader = "$appRoot/TestReport/$testReportVersion/src/latexHeader.tex";
 
