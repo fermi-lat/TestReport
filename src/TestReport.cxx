@@ -832,9 +832,6 @@ void TestReport::generateReconReport()
   (*m_report) << "@section align Alignment between TKR and CAL Reconstruction" << endl;
 
   produceAlignCalTkrPlot();
-
-  // For a different style:
-  produceReconPosXYPlots();
 }
 
 void TestReport::writeHeader()
@@ -883,10 +880,10 @@ void TestReport::producePlot(TObject* h, const PlotAttribute& att)
       //      gStyle->SetPalette(att.m_nColor, (int*) att.m_colors);
       gPad->SetRightMargin(0.15);
       // 
-      gStyle->SetStatW(0.15);
-      gStyle->SetStatH(0.12);
-      gStyle->SetStatX(0.84);
-      gStyle->SetStatY(0.99);
+      //gStyle->SetStatW(0.15);
+      //gStyle->SetStatH(0.12);
+      //gStyle->SetStatX(0.84);
+      //gStyle->SetStatY(0.99);
       gStyle->SetOptStat(att.m_statMode);
       //
       h2->Draw("COLZ");
@@ -1484,22 +1481,17 @@ void TestReport::produceReconDirPlots()
 void TestReport::produceReconPosPlots()
 {
   string file(m_prefix);
-  file = m_prefix;
-  file += "_reconPosZ";
-  PlotAttribute att(file.c_str(), "Reconstructed event position along the Z axis. The value is obtained from the first reconstructed vertex.", "reconPosZ", 1);
-  att.m_statMode = 111111;
-  producePlot(m_reconPosZ, att);
-  insertPlot(att);
-}
-
-
-void TestReport::produceReconPosXYPlots()
-{
-  string file(m_prefix);
   file += "_reconPosXY";
   PlotAttribute att(file.c_str(), "Reconstructed event position along the X and the Y axis. The color scheme represents the number of events in a bin. The values are obtained from the first reconstructed vertex.", "reconPosXY");
   att.m_statMode = 110011;
   producePlot(m_reconPosXY, att);
+  insertPlot(att);
+
+  file = m_prefix;
+  file += "_reconPosZ";
+  att.set(file.c_str(), "Reconstructed event position along the Z axis. The value is obtained from the first reconstructed vertex.", "reconPosZ", 1);
+  att.m_statMode = 111111;
+  producePlot(m_reconPosZ, att);
   insertPlot(att);
 }
 

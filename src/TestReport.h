@@ -238,8 +238,6 @@ class TestReport {
 
   void produceReconPosPlots();
 
-  void produceReconPosXYPlots();
-
   void produceReconEnePlots();
 
   void produceTimeIntervalPlot();
