@@ -207,6 +207,7 @@ TestReport::TestReport(const char* dir, const char* prefix,
 
   m_alignCalTkr = new TH1F("alignCalTkr", "Distance between the reconstructed CAL cluster XY coordinates and the XY coordinates extrapolated from TKR", 50, 0., 10.);
   att.set("Difference(mm)", "Number of events");
+  att.m_canRebin = false;
   setHistParameters(m_alignCalTkr, att);
 }
 
@@ -828,6 +829,9 @@ void TestReport::generateReconReport()
   (*m_report) << "@section align Alignment between TKR and CAL Reconstruction" << endl;
 
   produceAlignCalTkrPlot();
+
+  // For a different style:
+  produceReconPosXYPlots
 }
 
 void TestReport::writeHeader()
@@ -1477,17 +1481,22 @@ void TestReport::produceReconDirPlots()
 void TestReport::produceReconPosPlots()
 {
   string file(m_prefix);
+  file = m_prefix;
+  file += "_reconPosZ";
+  PlotAttribute att(file.c_str(), "Reconstructed event position along the Z axis. The value is obtained from the first reconstructed vertex.", "reconPosZ", 1);
+  att.m_statMode = 111111;
+  producePlot(m_reconPosZ, att);
+  insertPlot(att);
+}
+
+
+void TestReport::produceReconPosXYPlots()
+{
+  string file(m_prefix);
   file += "_reconPosXY";
   PlotAttribute att(file.c_str(), "Reconstructed event position along the X and the Y axis. The color scheme represents the number of events in a bin. The values are obtained from the first reconstructed vertex.", "reconPosXY");
   att.m_statMode = 110011;
   producePlot(m_reconPosXY, att);
-  insertPlot(att);
-
-  file = m_prefix;
-  file += "_reconPosZ";
-  att.set(file.c_str(), "Reconstructed event position along the Z axis. The value is obtained from the first reconstructed vertex.", "reconPosZ", 1);
-  att.m_statMode = 111111;
-  producePlot(m_reconPosZ, att);
   insertPlot(att);
 }
 
@@ -1632,6 +1641,7 @@ void TestReport::produceAlignCalTkrPlot()
   string file(m_prefix);
   file += "_alignCalTkr";
   PlotAttribute att(file.c_str(), "Distance between the reconstructed CAL cluster XY coordinates and the XY coordinates extrapolated from TKR according to reconstructed track direction. The plot only contains events with more than 50 MeV energy deposited in the CAL.", "alignCalTkr", true);
+  att.m_statMode = 111111;
   producePlot(m_alignCalTkr, att);
   insertPlot(att);
 }
