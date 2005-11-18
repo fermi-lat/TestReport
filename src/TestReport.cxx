@@ -880,10 +880,12 @@ void TestReport::producePlot(TObject* h, const PlotAttribute& att)
       //      gStyle->SetPalette(att.m_nColor, (int*) att.m_colors);
       gPad->SetRightMargin(0.15);
       // 
-      //gStyle->SetStatW(0.15);
-      //gStyle->SetStatH(0.12);
-      //gStyle->SetStatX(0.84);
-      //gStyle->SetStatY(0.99);
+      //if (att.m_statMode == 110011) {
+      //  gStyle->SetStatW(0.15);
+      //  gStyle->SetStatH(0.12);
+      //  gStyle->SetStatX(0.84);
+      //  gStyle->SetStatY(0.99);
+      //}
       gStyle->SetOptStat(att.m_statMode);
       //
       h2->Draw("COLZ");
