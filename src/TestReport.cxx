@@ -326,6 +326,9 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
     m_nEvent = nDigi;
   }
 
+  // awb:
+  m_nEvent = 1000;
+
   //         int nEvent = 100;
   //       m_nEvent = nEvent;
   for(int iEvent = 0; iEvent != m_nEvent; ++iEvent) {
@@ -831,7 +834,7 @@ void TestReport::generateReconReport()
   produceAlignCalTkrPlot();
 
   // For a different style:
-  produceReconPosXYPlots
+  produceReconPosXYPlots();
 }
 
 void TestReport::writeHeader()
