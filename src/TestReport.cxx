@@ -223,54 +223,67 @@ TestReport::TestReport(const char* dir, const char* prefix,
 
   m_AcdTileIdOnePMT = new TH1F("AcdTileIdOnePMT","ACD tile ID for single PMT digis",128,-0.5,127.5);
   att.set("ACD tile ID for single PMT digis","Number of events");
+  att.m_canRebin = false;
   setHistParameters(m_AcdTileIdOnePMT,att);
 
   m_AcdTileIdOneVeto = new TH1F("AcdTileIdOneVeto","ACD tile ID for single Veto digis",128,-0.5,127.5);
   att.set("ACD tile ID for single Veto digis","Number of events");
+  att.m_canRebin = false;
   setHistParameters(m_AcdTileIdOneVeto,att);
 
   m_AcdHitMap = new TH1F("AcdHitMap","ACD tile ID for Hits",128,-0.5,127.5);
   att.set("ACD tile ID for hits","Number of events");
+  att.m_canRebin = false;
   setHistParameters(m_AcdHitMap,att);
  
   m_AcdVetoMap = new TH1F("AcdVetoMap","ACD tile ID for Vetos",128,-0.5,127.5);
   att.set("ACD tile ID for hits","Number of events");
+  att.m_canRebin = false;
   setHistParameters(m_AcdVetoMap,att);
   
   m_AcdPhaMapA = new TH2F("AcdPhaMapA","ACD tile ID for Phas A",128,-0.5,127.5,256,0,4096);
   att.set("ACD tile ID for hits","Number of events");
+  att.m_canRebin = false;
   setHistParameters(m_AcdPhaMapA,att);
 
   m_AcdPhaMapB = new TH2F("AcdPhaMapB","ACD tile ID for Phas B",128,-0.5,127.5,256,0,4096);
   att.set("ACD tile ID for hits","Number of events");
+  att.m_canRebin = false;
   setHistParameters(m_AcdPhaMapB,att);
 
   m_AcdEfficMap = new TH1F("AcdEfficMap","ACD Effic by Tile ID",128,-0.5,127.5); 
   att.set("ACD tile ID for hits","Number of events");
+  att.m_canRebin = false;
   setHistParameters(m_AcdEfficMap,att);
 
   m_AcdInEfficMap = new TH1F("AcdInEfficMap","ACD InEffic by Tile ID",128,-0.5,127.5); 
   att.set("ACD tile ID for hits","Number of events");
+  att.m_canRebin = false;
   setHistParameters(m_AcdInEfficMap,att);
   
   m_AcdMissMapTop = new TH2F("AcdMissMapTop","ACD X-Y location for misses",200,-800.,800.,200,-800.,800.);
   att.set("ACD X-Y location for misses","Number of events");
+  att.m_canRebin = false;
   setHistParameters(m_AcdMissMapTop,att);
 
   m_AcdMissMapMinusX = new TH2F("AcdMissMapMinusX","ACD Y-Z location for misses",200,-800.,800.,200,0.,800.);
   att.set("ACD Y-Z location for misses","Number of events");
+  att.m_canRebin = false;
   setHistParameters(m_AcdMissMapMinusX,att);
 
   m_AcdMissMapMinusY = new TH2F("AcdMissMapMinusY","ACD X-Z location for misses",200,-800.,800.,200,0.,800.);
   att.set("ACD X-Z location for misses","Number of events");
+  att.m_canRebin = false;
   setHistParameters(m_AcdMissMapMinusY,att);
 
   m_AcdMissMapPlusX = new TH2F("AcdMissMapPlusX","ACD Y-Z location for misses",200,-800.,800.,200,0.,800.);
   att.set("ACD Y-Z location for misses","Number of events");
+  att.m_canRebin = false;
   setHistParameters(m_AcdMissMapPlusX,att);
 
   m_AcdMissMapPlusY = new TH2F("AcdMissMapPlusY","ACD X-Z location for misses",200,-800.,800.,200,0.,800.);
   att.set("ACD X-Z location for misses","Number of events");
+  att.m_canRebin = false;
   setHistParameters(m_AcdMissMapPlusY,att);
   
 }
@@ -1815,6 +1828,7 @@ void TestReport::produceAcdDigiPlots()
   file = m_prefix;
   file += "_AcdTileIdOnePMT";
   att.set(file.c_str(), "ACD tile ID for digis where only a single PMT fired", "AcdTileIdOnePMT");
+  att.m_statMode = 100000;
   producePlot(m_AcdTileIdOnePMT, att);
   insertPlot(att);
 
@@ -1857,13 +1871,14 @@ void TestReport::produceAcdReconPlots()
 
   file += "_AcdEfficMap";
   PlotAttribute att(file.c_str(), "ACD tile ID for intersections with hits.", "AcdEfficMap");
-  att.m_statMode = 111111;
+  att.m_statMode = 100000;
   producePlot(m_AcdEfficMap, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_AcdInEfficMap";
   att.set(file.c_str(), "ACD tile ID for intersections without hits.", "AcdInEfficMap");
+  att.m_statMode = 100000;
   producePlot(m_AcdInEfficMap, att);
   insertPlot(att);
 
