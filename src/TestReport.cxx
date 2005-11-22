@@ -31,7 +31,14 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_nTkrTrigger(0), m_nEventBadStrip(0), m_nEventMoreStrip(0), 
     m_nEventSatTot(0), m_nEventZeroTot(0), m_nEvtInvalidTot(0),
     m_nEventBadTot(0), m_startTime(0),
-    m_endTime(0), m_nDigi(0), m_nAcdOddParityError(0), m_nAcdHeaderParityError(0)
+    m_endTime(0), m_nDigi(0), m_nAcdOddParityError(0), m_nAcdHeaderParityError(0),
+    m_AcdTileIdOnePMT(0), m_AcdTileIdOneVeto(0),
+    m_AcdHitMap(0), m_AcdVetoMap(0),
+    m_AcdPhaMapA(0), m_AcdPhaMapB(0),
+    m_AcdEfficMap(0),m_AcdInEfficMap(0),
+    m_AcdMissMapTop(0), 
+    m_AcdMissMapMinusX(0), m_AcdMissMapMinusY(0),
+    m_AcdMissMapPlusX(0), m_AcdMissMapPlusY(0)
 { 
   // initialize ROOT
   if(gROOT == 0) {
@@ -214,9 +221,58 @@ TestReport::TestReport(const char* dir, const char* prefix,
   att.set("Number of ACD digis","Number of events");
   setHistParameters(m_nAcdDigis,att);
 
-  m_AcdTileIdOnePMT = new TH1F("AcdTileIdOnePMT","ACD tile ID for single PMT digis",604,0,604);
+  m_AcdTileIdOnePMT = new TH1F("AcdTileIdOnePMT","ACD tile ID for single PMT digis",128,-0.5,127.5);
   att.set("ACD tile ID for single PMT digis","Number of events");
   setHistParameters(m_AcdTileIdOnePMT,att);
+
+  m_AcdTileIdOneVeto = new TH1F("AcdTileIdOneVeto","ACD tile ID for single Veto digis",128,-0.5,127.5);
+  att.set("ACD tile ID for single Veto digis","Number of events");
+  setHistParameters(m_AcdTileIdOneVeto,att);
+
+  m_AcdHitMap = new TH1F("AcdHitMap","ACD tile ID for Hits",128,-0.5,127.5);
+  att.set("ACD tile ID for hits","Number of events");
+  setHistParameters(m_AcdHitMap,att);
+ 
+  m_AcdVetoMap = new TH1F("AcdVetoMap","ACD tile ID for Vetos",128,-0.5,127.5);
+  att.set("ACD tile ID for hits","Number of events");
+  setHistParameters(m_AcdVetoMap,att);
+  
+  m_AcdPhaMapA = new TH2F("AcdPhaMapA","ACD tile ID for Phas A",128,-0.5,127.5,256,0,4096);
+  att.set("ACD tile ID for hits","Number of events");
+  setHistParameters(m_AcdPhaMapA,att);
+
+  m_AcdPhaMapB = new TH2F("AcdPhaMapB","ACD tile ID for Phas B",128,-0.5,127.5,256,0,4096);
+  att.set("ACD tile ID for hits","Number of events");
+  setHistParameters(m_AcdPhaMapB,att);
+
+  m_AcdEfficMap = new TH1F("AcdEfficMap","ACD Effic by Tile ID",128,-0.5,127.5); 
+  att.set("ACD tile ID for hits","Number of events");
+  setHistParameters(m_AcdEfficMap,att);
+
+  m_AcdInEfficMap = new TH1F("AcdInEfficMap","ACD InEffic by Tile ID",128,-0.5,127.5); 
+  att.set("ACD tile ID for hits","Number of events");
+  setHistParameters(m_AcdInEfficMap,att);
+  
+  m_AcdMissMapTop = new TH2F("AcdMissMapTop","ACD X-Y location for misses",200,-800.,800.,200,-800.,800.);
+  att.set("ACD X-Y location for misses","Number of events");
+  setHistParameters(m_AcdMissMapTop,att);
+
+  m_AcdMissMapMinusX = new TH2F("AcdMissMapMinusX","ACD Y-Z location for misses",200,-800.,800.,200,0.,800.);
+  att.set("ACD Y-Z location for misses","Number of events");
+  setHistParameters(m_AcdMissMapMinusX,att);
+
+  m_AcdMissMapMinusY = new TH2F("AcdMissMapMinusY","ACD X-Z location for misses",200,-800.,800.,200,0.,800.);
+  att.set("ACD X-Z location for misses","Number of events");
+  setHistParameters(m_AcdMissMapMinusY,att);
+
+  m_AcdMissMapPlusX = new TH2F("AcdMissMapPlusX","ACD Y-Z location for misses",200,-800.,800.,200,0.,800.);
+  att.set("ACD Y-Z location for misses","Number of events");
+  setHistParameters(m_AcdMissMapPlusX,att);
+
+  m_AcdMissMapPlusY = new TH2F("AcdMissMapPlusY","ACD X-Z location for misses",200,-800.,800.,200,0.,800.);
+  att.set("ACD X-Z location for misses","Number of events");
+  setHistParameters(m_AcdMissMapPlusY,att);
+  
 }
 
 TestReport::~TestReport()
@@ -335,11 +391,15 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   }
 
   // For testing:
-  // int nEvent = 100;
-  // m_nEvent = nEvent;
+  int nEvent = 500;
+  m_nEvent = nEvent;
 
 
   for(int iEvent = 0; iEvent != m_nEvent; ++iEvent) {
+
+    if ( iEvent % 100 == 0 ) {
+      cout << iEvent << endl;
+    }
 
     if(m_mcEvent) m_mcEvent->Clear();
     if(m_digiEvent) m_digiEvent->Clear();
@@ -487,6 +547,35 @@ void TestReport::analyzeReconTree()
     double distance = sqrt((x-calPos.x())*(x-calPos.x()) + (y-calPos.y())*(y-calPos.y()));
 
     m_alignCalTkr->Fill(distance);
+  }
+
+  AcdRecon* acdRecon = m_reconEvent->getAcdRecon();
+  if ( acdRecon ) {
+    UInt_t nAcdInter = acdRecon->nAcdIntersections();
+    for ( UInt_t iAcdInter(0); iAcdInter < nAcdInter; iAcdInter++ ) {
+      const AcdTkrIntersection* acdInter = acdRecon->getAcdTkrIntersection(iAcdInter);
+      UShort_t acdGemId = acdInter->getTileId().getGemId();
+      if ( acdInter->tileHit() ) {
+	m_AcdEfficMap->Fill( acdGemId );
+      } else {
+	m_AcdInEfficMap->Fill( acdGemId );
+	const TVector3& missPos = acdInter->getGlobalPosition();
+	UInt_t face = acdInter->getTileId().getFace();
+	switch ( face ) {
+	case 0:
+	  m_AcdMissMapTop->Fill( missPos.X(), missPos.Y() );
+	  break;
+	case 1:
+	case 3: 
+	  m_AcdMissMapTop->Fill( missPos.Y(), missPos.Z() );
+	  break;
+	case 2:
+	case 4: 
+	  m_AcdMissMapTop->Fill( missPos.X(), missPos.Z() );
+	  break;
+	}
+      }
+    }
   }
 }
 
@@ -685,9 +774,25 @@ void TestReport::analyzeDigiTree()
     const AcdDigi* acdDigi = dynamic_cast<const AcdDigi*>(acdDigiCol->At(iDigi));
     assert(acdDigi != 0);
 
-    int AcdID = acdDigi->getId().getId();
+    int AcdGemID = acdDigi->getId().getGemId();
 
-    if (!(acdDigi->getPulseHeight(AcdDigi::A)) || !(acdDigi->getPulseHeight(AcdDigi::B))) m_AcdTileIdOnePMT->Fill(AcdID);
+    // add to hit map
+    m_AcdHitMap->Fill(AcdGemID);
+
+    // Get the hit map & veto flags
+    Bool_t hitPmtA = acdDigi->getLowDiscrim(AcdDigi::A);
+    Bool_t hitPmtB = acdDigi->getLowDiscrim(AcdDigi::B);
+    Bool_t singlePmt = (hitPmtA && ! hitPmtB) || (!hitPmtA && hitPmtB);
+    Bool_t vetoA = acdDigi->getVeto(AcdDigi::A);
+    Bool_t vetoB = acdDigi->getVeto(AcdDigi::B);
+    Bool_t singleVeto = (vetoA && !vetoB) || (!vetoA && vetoB);
+
+    if ( singlePmt ) m_AcdTileIdOnePMT->Fill(AcdGemID);
+    if ( singleVeto ) m_AcdTileIdOneVeto->Fill(AcdGemID);
+    if ( vetoA || vetoB ) m_AcdVetoMap->Fill(AcdGemID);
+
+    m_AcdPhaMapA->Fill(AcdGemID, acdDigi->getPulseHeight(AcdDigi::A) );
+    m_AcdPhaMapB->Fill(AcdGemID, acdDigi->getPulseHeight(AcdDigi::B) );      
     
     if (acdDigi->getOddParityError(AcdDigi::A)) ++tmpAcdOddParityError;
     if (acdDigi->getOddParityError(AcdDigi::B)) ++tmpAcdOddParityError;
@@ -847,7 +952,7 @@ void TestReport::generateDigiReport()
 
   // ACD digis:
   (*m_report) << "@section acdDigi ACD Digitization" << endl;
-  produceAcdDigisPlots();
+  produceAcdDigiPlots();
 
 }
 
@@ -879,6 +984,9 @@ void TestReport::generateReconReport()
   (*m_report) << "@section align Alignment between TKR and CAL Reconstruction" << endl;
 
   produceAlignCalTkrPlot();
+
+  produceAcdReconPlots();
+
 }
 
 void TestReport::writeHeader()
@@ -1694,7 +1802,7 @@ void TestReport::produceAlignCalTkrPlot()
 }
 
 // ACD digis:
-void TestReport::produceAcdDigisPlots()
+void TestReport::produceAcdDigiPlots()
 {
   string file(m_prefix);
 
@@ -1704,10 +1812,91 @@ void TestReport::produceAcdDigisPlots()
   producePlot(m_nAcdDigis, att);
   insertPlot(att);
 
+  file = m_prefix;
   file += "_AcdTileIdOnePMT";
-  att.set(file.c_str(), "ACD tile ID for single PMT digis.", "AcdTileIdOnePMT");
+  att.set(file.c_str(), "ACD tile ID for digis where only a single PMT fired", "AcdTileIdOnePMT");
   producePlot(m_AcdTileIdOnePMT, att);
   insertPlot(att);
+
+  file = m_prefix;
+  file += "_AcdTileIdOneVeto";
+  att.set(file.c_str(), "ACD tile ID for digis where only a single VETO discriminator fired.", "AcdTileIdOneVeto");
+  producePlot(m_AcdTileIdOneVeto, att);
+  insertPlot(att);
+  
+  file = m_prefix;
+  file += "_AcdHitMap";
+  att.set(file.c_str(), "ACD tile ID hit map.", "AcdHitMap" );
+  producePlot(m_AcdHitMap, att);
+  insertPlot(att);
+
+  file = m_prefix;
+  file += "_AcdVetoMap";
+  att.set(file.c_str(), "ACD tile ID veto map.", "AcdVetoMap" );
+  producePlot(m_AcdVetoMap, att);
+  insertPlot(att);
+
+  file = m_prefix;
+  file += "_AcdPhaMapA";
+  att.set(file.c_str(), "ACD PHA map -- A PMTs.", "AcdPhaMapA" );
+  producePlot(m_AcdPhaMapA, att);
+  insertPlot(att);
+
+  file = m_prefix;  
+  file += "_AcdPhaMapB";
+  att.set(file.c_str(), "ACD PHA map -- B PMTs.", "AcdPhaMapB" );
+  producePlot(m_AcdPhaMapB, att);
+  insertPlot(att);
+}
+
+
+// ACD recon:
+void TestReport::produceAcdReconPlots()
+{
+  string file(m_prefix);
+
+  file += "_AcdEfficMap";
+  PlotAttribute att(file.c_str(), "ACD tile ID for intersections with hits.", "AcdEfficMap");
+  att.m_statMode = 111111;
+  producePlot(m_AcdEfficMap, att);
+  insertPlot(att);
+
+  file = m_prefix;
+  file += "_AcdInEfficMap";
+  att.set(file.c_str(), "ACD tile ID for intersections without hits.", "AcdInEfficMap");
+  producePlot(m_AcdInEfficMap, att);
+  insertPlot(att);
+
+  file = m_prefix;
+  file += "_AcdMissMapTop";
+  att.set(file.c_str(), "X-Y postions for intersections without hits: top of ACD", "AcdMissMapTop" );
+  producePlot(m_AcdMissMapTop, att);
+  insertPlot(att);
+
+  file = m_prefix;
+  file += "_AcdMissMapMinusX";
+  att.set(file.c_str(), "Y-Z postions for intersections without hits: -X side of ACD", "AcdMissMapMinusX" );
+  producePlot(m_AcdMissMapMinusX, att);
+  insertPlot(att);
+
+  file = m_prefix;
+  file += "_AcdMissMapMinusY";
+  att.set(file.c_str(), "X-Z postions for intersections without hits: -Y side of ACD", "AcdMissMapMinusY" );
+  producePlot(m_AcdMissMapMinusY, att);
+  insertPlot(att);
+  
+  file = m_prefix;
+  file += "_AcdMissMapPlusX";
+  att.set(file.c_str(), "Y-Z postions for intersections without hits: -X side of ACD", "AcdMissMapPlusX" );
+  producePlot(m_AcdMissMapPlusX, att);
+  insertPlot(att);
+
+  file = m_prefix;
+  file += "_AcdMissMapPlusY";
+  att.set(file.c_str(), "X-Z postions for intersections without hits: -Y side of ACD", "AcdMissMapPlusY" );
+  producePlot(m_AcdMissMapPlusY, att);
+  insertPlot(att);
+
 }
 
 

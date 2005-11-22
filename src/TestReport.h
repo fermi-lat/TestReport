@@ -250,7 +250,10 @@ class TestReport {
   void produceAlignCalTkrPlot();
 
   /// Produce plots of histogram m_nAcdDigis
-  void produceAcdDigisPlots();
+  void produceAcdDigiPlots();
+
+  /// Produce plots of histogram m_nAcdDigis
+  void produceAcdReconPlots();
 
   /// set some common parameters for a 1D histogram
   void setHistParameters(TH1* h, const HistAttribute& att);
@@ -510,9 +513,26 @@ class TestReport {
   /// in TKR
   TH1F* m_alignCalTkr;
 
-
   // Histograms for the ACD digis:
   TH1F* m_nAcdDigis;
+
   TH1F* m_AcdTileIdOnePMT;
+  TH1F* m_AcdTileIdOneVeto;
+
+  TH1F* m_AcdHitMap;
+  TH1F* m_AcdVetoMap;
+  
+  TH2F* m_AcdPhaMapA;
+  TH2F* m_AcdPhaMapB;
+
+  TH1F* m_AcdEfficMap;
+  TH1F* m_AcdInEfficMap;
+
+  TH2F* m_AcdMissMapTop;
+  TH2F* m_AcdMissMapMinusX;
+  TH2F* m_AcdMissMapMinusY;
+  TH2F* m_AcdMissMapPlusX;
+  TH2F* m_AcdMissMapPlusY;  
+
 };
 #endif
