@@ -10,6 +10,7 @@
 #include "ToString.h"
 #include "TStyle.h"
 #include "TLine.h"
+#include "TFrame.h"
 #include "TLatex.h"
 #include "Geo.h"
 
@@ -404,7 +405,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   }
 
   // For testing:
-  int nEvent = 5000;
+  int nEvent = 500;
   m_nEvent = nEvent;
 
 
@@ -448,7 +449,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 
 	double interval;
 
-	// note a long can only hold 32 bit
+// note a long can only hold 32 bit
 	static const long temp = 256*256*256*255;
 
 	if(lPpcT < prevLPpcT) { // roll over
@@ -1044,9 +1045,9 @@ void TestReport::producePlot(TObject* h, const PlotAttribute& att)
   gStyle->SetPalette();
 
   if(att.m_yLog) gPad->SetLogy();
- 
+
   Double_t minY(0.);
-  Double_t maxY(1.);
+  Double_t maxY(0.);
 
   if(TGraph* gr = dynamic_cast<TGraph*>(h)) {
     gr->Draw("A*");
@@ -1069,9 +1070,9 @@ void TestReport::producePlot(TObject* h, const PlotAttribute& att)
       gStyle->SetOptStat(att.m_statMode);
       //
       h2->Draw("COLZ");
+      minY = h2->GetYaxis()->GetXmin();
+      maxY = h2->GetYaxis()->GetXmax();
     }
-    minY = 0.;
-    maxY = 4096.;
   }
   else{
     TH1* h1 = dynamic_cast<TH1*>(h);
@@ -1082,7 +1083,6 @@ void TestReport::producePlot(TObject* h, const PlotAttribute& att)
     gStyle->SetOptStat(att.m_statMode);
     h->Draw();
   }
-
 
   // For some of TKR plots, draw additional lines and texts to distinguish
   // among no converter, thin converter and thick converter.
@@ -1116,6 +1116,13 @@ void TestReport::producePlot(TObject* h, const PlotAttribute& att)
   TLine lAcd4(63.5,minY,63.5,maxY);
   TLine lAcd5(95.5,minY,95.5,maxY);
 
+  TLatex texAcd1(8, maxY, "-Y");
+  TLatex texAcd2(24, maxY, "+Y");
+  TLatex texAcd3(40, maxY, "-X");
+  TLatex texAcd4(56, maxY, "+X");
+  TLatex texAcd5(72, maxY, "TOP");
+  TLatex texAcd6(100, maxY, "Rib.& NA");  
+
   if(h == m_AcdTileIdOnePMT ||
      h == m_AcdTileIdOneVeto ||
      h == m_AcdHitMap ||
@@ -1124,11 +1131,8 @@ void TestReport::producePlot(TObject* h, const PlotAttribute& att)
      h == m_AcdPhaMapB ||
      h == m_AcdEfficMap ||
      h == m_AcdInEfficMap ) {
-    lAcd1.Draw();
-    lAcd2.Draw();
-    lAcd3.Draw();
-    lAcd4.Draw();
-    lAcd5.Draw();
+    lAcd1.Draw(); lAcd2.Draw(); lAcd3.Draw(); lAcd4.Draw(); lAcd5.Draw();
+    texAcd1.Draw(); texAcd2.Draw(); texAcd3.Draw(); texAcd4.Draw(); texAcd5.Draw(); texAcd6.Draw();
   }
 
   // FIXME -- should draw the tile edges on the miss maps
@@ -1878,28 +1882,28 @@ void TestReport::produceAcdDigiPlots()
   file = m_prefix;
   file += "_AcdHitMap";
   att.set(file.c_str(), "ACD Gem ID for all hits", "AcdHitMap" );
-  att.m_statMode = 1;
+  att.m_statMode = 0;
   producePlot(m_AcdHitMap, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_AcdVetoMap";
   att.set(file.c_str(), "ACD tile ID for all this above Veto threshold.", "AcdVetoMap" );
-  att.m_statMode = 1;
+  att.m_statMode = 0;
   producePlot(m_AcdVetoMap, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_AcdTileIdOnePMT";
   att.set(file.c_str(), "ACD Gem ID for digis where only 1 of 2 PMTs on a tile fired", "AcdTileIdOnePMT");
-  att.m_statMode = 1;
+  att.m_statMode = 0;
   producePlot(m_AcdTileIdOnePMT, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_AcdTileIdOneVeto";
   att.set(file.c_str(), "ACD Gem ID for digis where only 1 of 2 Veto line one a tile fired", "AcdTileIdOneVeto");
-  att.m_statMode = 1;
+  att.m_statMode = 0;
   producePlot(m_AcdTileIdOneVeto, att);
   insertPlot(att);
   
@@ -1926,14 +1930,14 @@ void TestReport::produceAcdReconPlots()
 
   file += "_AcdEfficMap";
   PlotAttribute att(file.c_str(), "ACD GEM ID for track extrapolations matched to tiles WITH hits. ", "AcdEfficMap");
-  att.m_statMode = 100001;
+  att.m_statMode = 0;
   producePlot(m_AcdEfficMap, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_AcdInEfficMap";
   att.set(file.c_str(), "ACD GEM ID for track extrapolations NOT MATCHED with hits.", "AcdInEfficMap");
-  att.m_statMode = 100001;
+  att.m_statMode = 0;
   producePlot(m_AcdInEfficMap, att);
   insertPlot(att);
   
