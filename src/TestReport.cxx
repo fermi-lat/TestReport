@@ -404,7 +404,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   }
 
   // For testing:
-  int nEvent = 500;
+  int nEvent = 5000;
   m_nEvent = nEvent;
 
 
@@ -579,12 +579,16 @@ void TestReport::analyzeReconTree()
 	  m_AcdMissMapTop->Fill( missPos.X(), missPos.Y() );
 	  break;
 	case 1:
-	case 3: 
-	  m_AcdMissMapTop->Fill( missPos.Y(), missPos.Z() );
+	  m_AcdMissMapMinusX->Fill( missPos.Y(), missPos.Z() );
 	  break;
-	case 2:
+	case 2: 
+	  m_AcdMissMapMinusY->Fill( missPos.X(), missPos.Z() );
+	  break;
+	case 3:
+	  m_AcdMissMapPlusX->Fill( missPos.Y(), missPos.Z() );
+	  break;
 	case 4: 
-	  m_AcdMissMapTop->Fill( missPos.X(), missPos.Z() );
+	  m_AcdMissMapPlusY->Fill( missPos.X(), missPos.Z() );
 	  break;
 	}
       }
@@ -965,6 +969,7 @@ void TestReport::generateDigiReport()
 
   // ACD digis:
   (*m_report) << "@section acdDigi ACD Digitization" << endl;
+
   produceAcdDigiPlots();
 
 }
@@ -997,6 +1002,8 @@ void TestReport::generateReconReport()
   (*m_report) << "@section align Alignment between TKR and CAL Reconstruction" << endl;
 
   produceAlignCalTkrPlot();
+
+  (*m_report) << "@section align Track Extrapolation to ACD" << endl;
 
   produceAcdReconPlots();
 
@@ -1038,6 +1045,9 @@ void TestReport::producePlot(TObject* h, const PlotAttribute& att)
 
   if(att.m_yLog) gPad->SetLogy();
  
+  Double_t minY(0.);
+  Double_t maxY(1.);
+
   if(TGraph* gr = dynamic_cast<TGraph*>(h)) {
     gr->Draw("A*");
   }
@@ -1060,8 +1070,15 @@ void TestReport::producePlot(TObject* h, const PlotAttribute& att)
       //
       h2->Draw("COLZ");
     }
+    minY = 0.;
+    maxY = 4096.;
   }
   else{
+    TH1* h1 = dynamic_cast<TH1*>(h);
+    if ( h1 != 0 ) {
+      minY = h1->GetMinimum();
+      maxY = h1->GetMaximum();
+    }
     gStyle->SetOptStat(att.m_statMode);
     h->Draw();
   }
@@ -1085,6 +1102,37 @@ void TestReport::producePlot(TObject* h, const PlotAttribute& att)
     tex2.Draw();
     tex3.Draw();
   }
+
+
+  // For all of the ACD Gem ID plots, draw additional lines and texts to distinguish
+  // among top & sides
+
+  // Because of the memory management of TLine reasons, the following variables must be outside the if
+  // scope in order for lines and texts to be drawn on the canvas  
+    
+  TLine lAcd1(15.5,minY,15.5,maxY);
+  TLine lAcd2(31.5,minY,31.5,maxY);
+  TLine lAcd3(47.5,minY,47.5,maxY);
+  TLine lAcd4(63.5,minY,63.5,maxY);
+  TLine lAcd5(95.5,minY,95.5,maxY);
+
+  if(h == m_AcdTileIdOnePMT ||
+     h == m_AcdTileIdOneVeto ||
+     h == m_AcdHitMap ||
+     h == m_AcdVetoMap ||
+     h == m_AcdPhaMapA ||
+     h == m_AcdPhaMapB ||
+     h == m_AcdEfficMap ||
+     h == m_AcdInEfficMap ) {
+    lAcd1.Draw();
+    lAcd2.Draw();
+    lAcd3.Draw();
+    lAcd4.Draw();
+    lAcd5.Draw();
+  }
+
+  // FIXME -- should draw the tile edges on the miss maps
+
 
   string epsFile(m_dir);
   epsFile += "/";
@@ -1817,6 +1865,8 @@ void TestReport::produceAlignCalTkrPlot()
 // ACD digis:
 void TestReport::produceAcdDigiPlots()
 {
+
+
   string file(m_prefix);
 
   file += "_nAcdDigis";
@@ -1826,30 +1876,33 @@ void TestReport::produceAcdDigiPlots()
   insertPlot(att);
 
   file = m_prefix;
-  file += "_AcdTileIdOnePMT";
-  att.set(file.c_str(), "ACD tile ID for digis where only a single PMT fired", "AcdTileIdOnePMT");
-  att.m_statMode = 100000;
-  producePlot(m_AcdTileIdOnePMT, att);
-  insertPlot(att);
-
-  file = m_prefix;
-  file += "_AcdTileIdOneVeto";
-  att.set(file.c_str(), "ACD tile ID for digis where only a single VETO discriminator fired.", "AcdTileIdOneVeto");
-  producePlot(m_AcdTileIdOneVeto, att);
-  insertPlot(att);
-  
-  file = m_prefix;
   file += "_AcdHitMap";
-  att.set(file.c_str(), "ACD tile ID hit map.", "AcdHitMap" );
+  att.set(file.c_str(), "ACD Gem ID for all hits", "AcdHitMap" );
+  att.m_statMode = 1;
   producePlot(m_AcdHitMap, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_AcdVetoMap";
-  att.set(file.c_str(), "ACD tile ID veto map.", "AcdVetoMap" );
+  att.set(file.c_str(), "ACD tile ID for all this above Veto threshold.", "AcdVetoMap" );
+  att.m_statMode = 1;
   producePlot(m_AcdVetoMap, att);
   insertPlot(att);
 
+  file = m_prefix;
+  file += "_AcdTileIdOnePMT";
+  att.set(file.c_str(), "ACD Gem ID for digis where only 1 of 2 PMTs on a tile fired", "AcdTileIdOnePMT");
+  att.m_statMode = 1;
+  producePlot(m_AcdTileIdOnePMT, att);
+  insertPlot(att);
+
+  file = m_prefix;
+  file += "_AcdTileIdOneVeto";
+  att.set(file.c_str(), "ACD Gem ID for digis where only 1 of 2 Veto line one a tile fired", "AcdTileIdOneVeto");
+  att.m_statMode = 1;
+  producePlot(m_AcdTileIdOneVeto, att);
+  insertPlot(att);
+  
   file = m_prefix;
   file += "_AcdPhaMapA";
   att.set(file.c_str(), "ACD PHA map -- A PMTs.", "AcdPhaMapA" );
@@ -1867,48 +1920,51 @@ void TestReport::produceAcdDigiPlots()
 // ACD recon:
 void TestReport::produceAcdReconPlots()
 {
+
+
   string file(m_prefix);
 
   file += "_AcdEfficMap";
-  PlotAttribute att(file.c_str(), "ACD tile ID for intersections with hits.", "AcdEfficMap");
-  att.m_statMode = 100000;
+  PlotAttribute att(file.c_str(), "ACD GEM ID for track extrapolations matched to tiles WITH hits. ", "AcdEfficMap");
+  att.m_statMode = 100001;
   producePlot(m_AcdEfficMap, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_AcdInEfficMap";
-  att.set(file.c_str(), "ACD tile ID for intersections without hits.", "AcdInEfficMap");
-  att.m_statMode = 100000;
+  att.set(file.c_str(), "ACD GEM ID for track extrapolations NOT MATCHED with hits.", "AcdInEfficMap");
+  att.m_statMode = 100001;
   producePlot(m_AcdInEfficMap, att);
   insertPlot(att);
+  
 
   file = m_prefix;
   file += "_AcdMissMapTop";
-  att.set(file.c_str(), "X-Y postions for intersections without hits: top of ACD", "AcdMissMapTop" );
+  att.set(file.c_str(), "GLOBAL X-Y postions for track extrapolations NOT MATCHED hits: top of ACD", "AcdMissMapTop" );
   producePlot(m_AcdMissMapTop, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_AcdMissMapMinusX";
-  att.set(file.c_str(), "Y-Z postions for intersections without hits: -X side of ACD", "AcdMissMapMinusX" );
+  att.set(file.c_str(), "GLOBAL Y-Z postions for track extrapolations NOT MATCHED hits: -X side of ACD", "AcdMissMapMinusX" );
   producePlot(m_AcdMissMapMinusX, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_AcdMissMapMinusY";
-  att.set(file.c_str(), "X-Z postions for intersections without hits: -Y side of ACD", "AcdMissMapMinusY" );
+  att.set(file.c_str(), "GLOBAL X-Z postions for track extrapolations NOT MATCHED hits: -Y side of ACD", "AcdMissMapMinusY" );
   producePlot(m_AcdMissMapMinusY, att);
   insertPlot(att);
   
   file = m_prefix;
   file += "_AcdMissMapPlusX";
-  att.set(file.c_str(), "Y-Z postions for intersections without hits: -X side of ACD", "AcdMissMapPlusX" );
+  att.set(file.c_str(), "GLOBAL Y-Z postions for track extrapolations NOT MATCHED hits: +X side of ACD", "AcdMissMapPlusX" );
   producePlot(m_AcdMissMapPlusX, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_AcdMissMapPlusY";
-  att.set(file.c_str(), "X-Z postions for intersections without hits: -Y side of ACD", "AcdMissMapPlusY" );
+  att.set(file.c_str(), "GLOBAL X-Z postions for track extrapolations NOT MATCHED hits: +Y side of ACD", "AcdMissMapPlusY" );
   producePlot(m_AcdMissMapPlusY, att);
   insertPlot(att);
 
