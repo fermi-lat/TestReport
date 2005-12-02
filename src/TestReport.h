@@ -286,6 +286,9 @@ class TestReport {
   /// apply \ in front of some latex special characters 
   void applyDash(std::string* x, int n) const;
 
+  /// convert to the dense acd notation
+  static UShort_t getGemId(UInt_t id);
+  
   /// used in producing caption for a plot in a latex file. It will put the
   /// first sentence in the caption to be bold face.
   std::string boldFaceLatex(const std::string& s);
