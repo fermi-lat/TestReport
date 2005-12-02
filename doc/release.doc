@@ -105,3 +105,6 @@ v3r4	Added some ACD histograms for digis.
 
 December 2, 2005: eac
 v3r4p1	Added some comments to ACD histograms.
+
+December 2, 2005: awb
+v3r4p2	Corrected cmt/requirements version number.
