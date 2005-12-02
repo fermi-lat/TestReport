@@ -18,6 +18,44 @@ using std::cout;
 using std::endl;
 using std::string;
 
+Float_t TestReport::efficDivide(TH1& top, const TH1& bot, Bool_t inEffic) {
+
+  Int_t nt = top.GetNbinsX();
+  Int_t nb = bot.GetNbinsX();
+  if ( nt != nb ) return -1.;
+
+  Float_t iT(0.);
+  Float_t iB(0.);
+
+  for ( UInt_t i(1); i <= nt; i++ ) {
+    Float_t vT = top.GetBinContent(i);
+    Float_t n = bot.GetBinContent(i);
+    iT += vT;
+    iB += n;
+    if ( vT > n ) return -2.;
+    if ( n == 0 )  {
+      top.SetBinContent(i,0.0);
+      top.SetBinError(i,0.0);
+      continue;
+    }
+    // sneak in 1/2 an event to distinguish perfect channels from channels w/ no data.
+    if ( vT < 0.5 ) {
+      vT = 0.5;
+    }
+    Float_t p = vT / n;
+    Float_t q = 1. - p;
+    Float_t npq = n*p*q;
+    Float_t err = TMath::Sqrt(npq) / n;
+    top.SetBinContent(i, inEffic ? q : p);
+    top.SetBinError(i,err);
+  }
+
+  top.SetMinimum(0.);
+  top.SetMaximum(1.);
+  
+  return fabs(iB) > 1e-9 ? iT / iB : 0.;
+}
+
 TestReport::TestReport(const char* dir, const char* prefix, 
 		       const char* version, const char* emVersion,
 		       const char*tkrCalibSerNo, const char* calCalibSerNo)
@@ -405,7 +443,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   }
 
   // For testing:
-  int nEvent = 500;
+  int nEvent = 5000;
   m_nEvent = nEvent;
 
 
@@ -1004,9 +1042,9 @@ void TestReport::generateReconReport()
 
   produceAlignCalTkrPlot();
 
-  (*m_report) << "@section align Track Extrapolation to ACD" << endl;
+  (*m_report) << "@section acdTkrRecon Track extrapolation to ACD" << endl;
 
-  produceAcdReconPlots();
+  produceAcdTkrReconPlots();
 
 }
 
@@ -1114,14 +1152,16 @@ void TestReport::producePlot(TObject* h, const PlotAttribute& att)
   TLine lAcd2(31.5,minY,31.5,maxY);
   TLine lAcd3(47.5,minY,47.5,maxY);
   TLine lAcd4(63.5,minY,63.5,maxY);
-  TLine lAcd5(95.5,minY,95.5,maxY);
+  TLine lAcd5(88.5,minY,88.5,maxY);
+  TLine lAcd6(95.5,minY,95.5,maxY);
+  TLine lAcd7(103.5,minY,103.5,maxY);
 
-  TLatex texAcd1(8, maxY, "-Y");
-  TLatex texAcd2(24, maxY, "+Y");
-  TLatex texAcd3(40, maxY, "-X");
-  TLatex texAcd4(56, maxY, "+X");
-  TLatex texAcd5(72, maxY, "TOP");
-  TLatex texAcd6(100, maxY, "Rib.& NA");  
+  TLatex texAcd1(5, maxY, "-Y");
+  TLatex texAcd2(21, maxY, "+Y");
+  TLatex texAcd3(37, maxY, "-X");
+  TLatex texAcd4(53, maxY, "+X");
+  TLatex texAcd5(69, maxY, "TOP");
+  TLatex texAcd6(99, maxY, "Rb");  
 
   if(h == m_AcdTileIdOnePMT ||
      h == m_AcdTileIdOneVeto ||
@@ -1129,9 +1169,8 @@ void TestReport::producePlot(TObject* h, const PlotAttribute& att)
      h == m_AcdVetoMap ||
      h == m_AcdPhaMapA ||
      h == m_AcdPhaMapB ||
-     h == m_AcdEfficMap ||
      h == m_AcdInEfficMap ) {
-    lAcd1.Draw(); lAcd2.Draw(); lAcd3.Draw(); lAcd4.Draw(); lAcd5.Draw();
+    lAcd1.Draw(); lAcd2.Draw(); lAcd3.Draw(); lAcd4.Draw(); lAcd5.Draw(); lAcd6.Draw(); lAcd7.Draw(); 
     texAcd1.Draw(); texAcd2.Draw(); texAcd3.Draw(); texAcd4.Draw(); texAcd5.Draw(); texAcd6.Draw();
   }
 
@@ -1870,6 +1909,10 @@ void TestReport::produceAlignCalTkrPlot()
 void TestReport::produceAcdDigiPlots()
 {
 
+  // divide out some plots to have effics
+  Float_t vetoToHitRatio = efficDivide(*m_AcdVetoMap,*m_AcdHitMap,kTRUE);
+  Float_t singlePmtRatio = efficDivide(*m_AcdTileIdOnePMT,*m_AcdHitMap);
+  Float_t singleVetoRatio = efficDivide(*m_AcdTileIdOneVeto,*m_AcdHitMap);
 
   string file(m_prefix);
 
@@ -1884,25 +1927,25 @@ void TestReport::produceAcdDigiPlots()
   att.set(file.c_str(), "ACD Gem ID for all hits", "AcdHitMap" );
   att.m_statMode = 0;
   producePlot(m_AcdHitMap, att);
-  insertPlot(att);
+  insertPlot(att);  
 
   file = m_prefix;
   file += "_AcdVetoMap";
-  att.set(file.c_str(), "ACD tile ID for all this above Veto threshold.", "AcdVetoMap" );
+  att.set(file.c_str(), "Fraction of hits below Veto threshold.  By ACD Gem ID.", "AcdVetoMap" );
   att.m_statMode = 0;
   producePlot(m_AcdVetoMap, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_AcdTileIdOnePMT";
-  att.set(file.c_str(), "ACD Gem ID for digis where only 1 of 2 PMTs on a tile fired", "AcdTileIdOnePMT");
+  att.set(file.c_str(), "Fraction of hits where only 1 PMT in a tile fired.  By ACD Gem ID", "AcdTileIdOnePMT");
   att.m_statMode = 0;
   producePlot(m_AcdTileIdOnePMT, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_AcdTileIdOneVeto";
-  att.set(file.c_str(), "ACD Gem ID for digis where only 1 of 2 Veto line one a tile fired", "AcdTileIdOneVeto");
+  att.set(file.c_str(), "Fraction of hits where only 1 PMT in a tile was above Veto threshold.  By ACD Gem ID", "AcdTileIdOneVeto");
   att.m_statMode = 0;
   producePlot(m_AcdTileIdOneVeto, att);
   insertPlot(att);
@@ -1922,25 +1965,23 @@ void TestReport::produceAcdDigiPlots()
 
 
 // ACD recon:
-void TestReport::produceAcdReconPlots()
+void TestReport::produceAcdTkrReconPlots()
 {
+  
+  // divide out some plots to have effics
+  m_AcdEfficMap->Add(m_AcdInEfficMap);
 
+  Float_t inEfficRatio = efficDivide(*m_AcdInEfficMap,*m_AcdEfficMap);
 
   string file(m_prefix);
 
-  file += "_AcdEfficMap";
-  PlotAttribute att(file.c_str(), "ACD GEM ID for track extrapolations matched to tiles WITH hits. ", "AcdEfficMap");
-  att.m_statMode = 0;
-  producePlot(m_AcdEfficMap, att);
-  insertPlot(att);
-
   file = m_prefix;
   file += "_AcdInEfficMap";
-  att.set(file.c_str(), "ACD GEM ID for track extrapolations NOT MATCHED with hits.", "AcdInEfficMap");
+  
+  PlotAttribute att(file.c_str(), "Fraction of tracks extapolated to tile NOT MATCHED with hits.  By ACD Gem ID.", "AcdInEfficMap");
   att.m_statMode = 0;
   producePlot(m_AcdInEfficMap, att);
-  insertPlot(att);
-  
+  insertPlot(att);  
 
   file = m_prefix;
   file += "_AcdMissMapTop";

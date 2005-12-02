@@ -23,6 +23,10 @@ class TestReport {
 
  public:
 
+  static Float_t efficDivide(TH1& top, const TH1& bottom, Bool_t inEffic = kFALSE);
+
+ public:
+
   TestReport(const char* dir, const char* prefix, const char* version,
 	     const char* emVersion, const char*tkrCalibSerNo, 
 	     const char* calCalibSerNo);
@@ -253,7 +257,7 @@ class TestReport {
   void produceAcdDigiPlots();
 
   /// Produce plots of histogram m_nAcdDigis
-  void produceAcdReconPlots();
+  void produceAcdTkrReconPlots();
 
   /// set some common parameters for a 1D histogram
   void setHistParameters(TH1* h, const HistAttribute& att);
