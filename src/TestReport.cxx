@@ -462,8 +462,8 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   }
 
   // For testing:
-  int nEvent = 5000;
-  m_nEvent = nEvent;
+  //int nEvent = 5000;
+  //m_nEvent = nEvent;
 
 
   for(int iEvent = 0; iEvent != m_nEvent; ++iEvent) {
