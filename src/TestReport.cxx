@@ -468,7 +468,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 
   for(int iEvent = 0; iEvent != m_nEvent; ++iEvent) {
 
-    if ( iEvent % 100 == 0 ) {
+    if ( iEvent % 1000 == 0 ) {
       cout << iEvent << endl;
     }
 
