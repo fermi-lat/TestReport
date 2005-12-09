@@ -111,3 +111,6 @@ v3r4p2	Corrected cmt/requirements version number.
 
 December 2, 2005: awb
 v3r4p3	Remove dependence on new version of AcdId.h
+
+December 9, 2005: awb
+v3r4p4 	Removed hardcoded number of events (for testing only).
