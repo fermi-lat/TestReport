@@ -117,3 +117,8 @@ v3r4p4 	Removed hardcoded number of events (for testing only).
 
 December 9, 2005: awb
 v3r4p5 	Print out every 1000th event instead of every 100th.
+
+December 19, 2005: awb
+v3r4p6	Added GEM discarded histograms. 
+ 	Added histograms for number of triggers per tower.
+
