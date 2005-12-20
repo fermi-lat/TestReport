@@ -459,6 +459,19 @@ class TestReport {
   /// time of last trigger
   UInt_t m_endTime;
 
+  // GEM discarded events:
+  TH1F* m_gemDiscarded;
+  TH1F* m_gemDiscardedTime;
+
+  // Number of triggers per tower:
+  TH1F* m_tkrPerTower;
+  TH1F* m_calLoPerTower;
+  TH1F* m_calHiPerTower;
+
+  int m_tkrPerTowerArray[g_nTower];
+  int m_calLoPerTowerArray[g_nTower];
+  int m_calHiPerTowerArray[g_nTower];
+
   /// histogram of time between adjacent event in mili second
   TH1F* m_timeInterval;
 
