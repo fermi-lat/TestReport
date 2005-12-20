@@ -246,6 +246,10 @@ class TestReport {
 
   void produceReconEnePlots();
 
+  void produceGemDiscardedPlot();
+
+  void produceTriggerPerTowerPlot();
+
   void produceTimeIntervalPlot();
 
   void produceNHitPlane2DPlot();
