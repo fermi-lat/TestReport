@@ -987,7 +987,7 @@ void TestReport::generateReport()
   (*m_report) << "@li There are @b " << m_nTemErrors << " events with TEM errors " << endl;
 
   (*m_report) << "@li There are @b " << m_nAcdOddParityError    << " events with ACD Odd Parity errors " << endl;
-  (*m_report) << "@li There are @b " << m_nAcdHeaderParityError << " events with ACD Header Parity errors. This should never happen! " << endl;
+  (*m_report) << "@li There are @b " << m_nAcdHeaderParityError << " events with ACD 'Header Parity errors'." << endl;
 
   (*m_report) << "@li Time of the first trigger: <b>" << ctime((time_t*) (&m_startTime)) << " (GMT) </b>";
   (*m_report) << "@li Time of the last trigger: <b>" << ctime((time_t*) (&m_endTime)) << " (GMT) </b>";
