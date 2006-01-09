@@ -676,7 +676,7 @@ void TestReport::analyzeReconTree()
     for ( UInt_t iAcdInter(0); iAcdInter < nAcdInter; iAcdInter++ ) {
       const AcdTkrIntersection* acdInter = acdRecon->getAcdTkrIntersection(iAcdInter);
       if ( acdInter->getTrackIndex() != 0 ) continue;
-      if ( acdInter->getArcLengthToIntersection() != 0 ) continue;
+      if ( acdInter->getArcLengthToIntersection() < 0 ) continue;
       UShort_t acdGemId = getGemId( acdInter->getTileId().getId() );
       if ( acdInter->tileHit() ) {
 	m_AcdEfficMap->Fill( acdGemId );

@@ -124,3 +124,6 @@ v3r4p6	Added GEM discarded histograms.
 
 January 8, 2006: eac 
 v3r4p7	 Only accumlate AcdRecon stats for single track events. 
+
+January 9, 2006: eac 
+v3r4p7	 Fix stupid typo in Track selection of AcdRecon stats. 
