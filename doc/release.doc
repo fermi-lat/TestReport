@@ -122,3 +122,5 @@ December 19, 2005: awb
 v3r4p6	Added GEM discarded histograms. 
  	Added histograms for number of triggers per tower.
 
+January 8, 2006: eac 
+v3r4p7	 Only accumlate AcdRecon stats for single track events. 

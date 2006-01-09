@@ -597,8 +597,11 @@ void TestReport::analyzeReconTree()
  
   TVector3 pos, dir;
 
+  Int_t nTk = 0;
+
   if(tkrRecon) {
     m_nTkrTrack->Fill(tkrRecon->getTrackCol()->GetLast()+1);
+    nTk = tkrRecon->getTrackCol()->GetLast()+1;
 
     TObjArray* vertices = tkrRecon->getVertexCol();
     if(tkrRecon->getVertexCol()->GetLast() >= 0) {
@@ -668,10 +671,12 @@ void TestReport::analyzeReconTree()
   }
 
   AcdRecon* acdRecon = m_reconEvent->getAcdRecon();
-  if ( acdRecon ) {
+  if ( acdRecon && nTk == 1) {
     UInt_t nAcdInter = acdRecon->nAcdIntersections();
     for ( UInt_t iAcdInter(0); iAcdInter < nAcdInter; iAcdInter++ ) {
       const AcdTkrIntersection* acdInter = acdRecon->getAcdTkrIntersection(iAcdInter);
+      if ( acdInter->getTrackIndex() != 0 ) continue;
+      if ( acdInter->getArcLengthToIntersection() != 0 ) continue;
       UShort_t acdGemId = getGemId( acdInter->getTileId().getId() );
       if ( acdInter->tileHit() ) {
 	m_AcdEfficMap->Fill( acdGemId );
