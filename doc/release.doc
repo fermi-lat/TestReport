@@ -127,3 +127,8 @@ v3r4p7	 Only accumlate AcdRecon stats for single track events.
 
 January 9, 2006: eac 
 v3r4p8	 Fix stupid typo in Track selection of AcdRecon stats. 
+
+January 18, 2006: eac 
+v3r4p9	 Added Logz option, used in AcdPha v. tileId plots.
+         fixed axis labels in acd plots
+         added cut at 500ms in timeInterval plot (some evts had interval > 1s)
