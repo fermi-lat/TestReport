@@ -68,7 +68,7 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_nTrgParityErrors(0), m_nPacketErrors(0), m_nTemErrors(0),
     m_nEvent(0),
     m_nTkrTrigger(0), m_nEventBadStrip(0), m_nEventMoreStrip(0), 
-    m_nEventSatTot(0), m_nEventZeroTot(0), m_nEvtInvalidTot(0),
+    m_nEventSatTot(0), m_nEventZeroTot(0), m_nEvtInvalidTot(0), m_nEvtOverlapTriggerTot(0),
     m_nEventBadTot(0), m_startTime(0),
     m_endTime(0), m_nDigi(0), m_nAcdOddParityError(0), m_nAcdHeaderParityError(0),
     m_AcdTileIdOnePMT(0), m_AcdTileIdOneVeto(0),
@@ -845,7 +845,11 @@ void TestReport::analyzeDigiTree()
     if((tot0>0 && lowCount==0)|| (tot1>0 && highCount==0)) badTot = true;
     if((tot0==0 && lowCount>0)|| (tot1==0 && highCount>0)) zeroTot = true;
     
-    if(tot0<0 || tot0>g_satTot || tot1<0 || tot1>g_satTot) ++m_nEvtInvalidTot; 
+    if (tot0<0 || tot0>g_overlapTot || tot1<0 || tot1>g_overlapTot) ++m_nEvtInvalidTot; 
+    if (tot0>g_satTot && tot0!=g_overlapTot) ++m_nEvtInvalidTot; 
+    if (tot1>g_satTot && tot1!=g_overlapTot) ++m_nEvtInvalidTot; 
+
+    if(tot0==g_satTot || tot1==g_satTot) ++m_nEvtOverlapTriggerTot; 
 
     if(tot0 == 0){
       m_totZero2D->Fill(plane+0.25, tower, 1./m_nEvent);
@@ -1099,7 +1103,8 @@ void TestReport::generateDigiReport()
   *(m_report) << "@subsection totInfo Time Over Threshold (TOT) information" << endl;
   *(m_report) << "@latexonly \\nopagebreak @endlatexonly" << endl;
   *(m_report) << "@li Fraction of events with saturated TOT value of " << g_satTot << " counts(1 count = 200ns): @b " << ToString(m_nEventSatTot/double(m_nEvent)) << endl;
-  *(m_report) << "@li Fraction of events with invalid TOT (outside the range [0, " << g_satTot << "]): @b " << ToString(m_nEvtInvalidTot/double(m_nEvent)) << endl;
+  *(m_report) << "@li Fraction of events with overlapped triggers i.e. TOT value of " << g_overlapTot << " counts(1 count = 200ns): @b " << ToString(m_nEvtOverlapTriggerTot/double(m_nEvent)) << endl;
+  *(m_report) << "@li Fraction of events with invalid TOT (outside the range [0, " << g_satTot << "] and != g_overlapTot): @b " << ToString(m_nEvtInvalidTot/double(m_nEvent)) << endl;
   *(m_report) << "@li Fraction of events with TOT==0 and nStrip!=0 for each Si plane: @b " << ToString(m_nEventZeroTot/double(m_nEvent)) << endl;
   *(m_report) << "@li Fraction of events with TOT!=0 and nStrip==0 for each Si plane: @b " << ToString(m_nEventBadTot/double(m_nEvent)) << endl;
 

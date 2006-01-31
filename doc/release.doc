@@ -139,5 +139,9 @@ v3r4p10	 Drop ACD pha in high range readout from the color plots at the end of t
 January 31, 2006: awb
 v3r4p11	Changed saturated TOT check from 255 to 250. 
 
+January 31, 2006: awb
+v3r4p12	Added check for overlapped triggers. 
+        Fixed check of non-physical TOT values.
+
 
  	 

@@ -353,8 +353,8 @@ class TestReport {
   DigiEvent* m_digiEvent;
 
   enum {g_nLayer = 18, g_nView = 2, g_nPlane = 36, g_nStrip = 1536, 
-	g_nFEC = 24, g_nTower = 16, g_satTot = 250, g_nCalLayer = 8, 
-        g_nEnd =2};
+	g_nFEC = 24, g_nTower = 16, g_satTot = 250, g_overlapTot = 255,
+        g_nCalLayer = 8, g_nEnd =2};
 
   /// trigger histogram
   TH1F* m_trigger;
@@ -456,8 +456,11 @@ class TestReport {
   /// number of events with 0 TOT but at least 1 strip
   int m_nEventZeroTot;
 
-  /// number of events with TOT values outside range [0, g_satTot]
+  /// number of events with TOT values outside range [0, g_overlapTot]
   int m_nEvtInvalidTot;
+
+  /// number of events with TOT values outside range [0, g_satTot] i.e. overlapped triggers
+  int m_nEvtOverlapTriggerTot;
 
   /// number of events with none zero TOT but no strip hit
   int m_nEventBadTot;
