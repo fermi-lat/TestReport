@@ -132,3 +132,6 @@ January 18, 2006: eac
 v3r4p9	 Added Logz option, used in AcdPha v. tileId plots.
          fixed axis labels in acd plots
          added cut at 500ms in timeInterval plot (some evts had interval > 1s)
+
+January 30, 2006: eac 
+v3r4p10	 Drop ACD pha in high range readout from the color plots at the end of the report

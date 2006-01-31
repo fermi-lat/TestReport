@@ -949,8 +949,8 @@ void TestReport::analyzeDigiTree()
     if ( singleVeto ) m_AcdTileIdOneVeto->Fill(AcdGemID);
     if ( vetoA || vetoB ) m_AcdVetoMap->Fill(AcdGemID);
 
-    m_AcdPhaMapA->Fill(AcdGemID, acdDigi->getPulseHeight(AcdDigi::A) );
-    m_AcdPhaMapB->Fill(AcdGemID, acdDigi->getPulseHeight(AcdDigi::B) );      
+    if (acdDigi->getRange(AcdDigi::A) == 0 ) m_AcdPhaMapA->Fill(AcdGemID, acdDigi->getPulseHeight(AcdDigi::A) );
+    if (acdDigi->getRange(AcdDigi::B) == 0 ) m_AcdPhaMapB->Fill(AcdGemID, acdDigi->getPulseHeight(AcdDigi::B) );      
     
     if (acdDigi->getOddParityError(AcdDigi::A)) ++tmpAcdOddParityError;
     if (acdDigi->getOddParityError(AcdDigi::B)) ++tmpAcdOddParityError;
