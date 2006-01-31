@@ -353,8 +353,8 @@ class TestReport {
   DigiEvent* m_digiEvent;
 
   enum {g_nLayer = 18, g_nView = 2, g_nPlane = 36, g_nStrip = 1536, 
-	g_nFEC = 24, g_nTower = 16, g_satTot = 255, g_nCalLayer = 8,
-	g_nEnd =2};
+	g_nFEC = 24, g_nTower = 16, g_satTot = 250, g_nCalLayer = 8, 
+        g_nEnd =2};
 
   /// trigger histogram
   TH1F* m_trigger;

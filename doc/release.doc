@@ -135,3 +135,9 @@ v3r4p9	 Added Logz option, used in AcdPha v. tileId plots.
 
 January 30, 2006: eac 
 v3r4p10	 Drop ACD pha in high range readout from the color plots at the end of the report
+
+January 31, 2006: awb
+v3r4p11	Changed saturated TOT check from 255 to 250. 
+
+
+ 	 
