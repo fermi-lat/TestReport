@@ -276,8 +276,9 @@ TestReport::TestReport(const char* dir, const char* prefix,
   att.m_canRebin = false;
   setHistParameters(m_alignCalTkr, att);
 
-  m_nAcdDigis = new TH1F("nAcdDigis","Number of ACD digis",10,0,10);
+  m_nAcdDigis = new TH1F("nAcdDigis","Number of ACD digis",100,-0.5,99.5);
   att.set("Number of ACD digis","Number of events");
+  att.m_canRebin = false;
   setHistParameters(m_nAcdDigis,att);
 
   m_AcdTileIdOnePMT = new TH1F("AcdTileIdOnePMT","ACD tile ID for single PMT digis",128,-0.5,127.5);
@@ -990,7 +991,7 @@ void TestReport::generateReport()
   } 
 
   (*m_report) << "In the digi file @em " << m_digiFile->GetName() << endl;
-  (*m_report) << "@li There are @b " << m_nEvent << " triggers. There should be " << m_nEvent+2 << " events recorded in the eLog database since LATTE adds two additional events in the process which are not triggered events."<< endl;
+  (*m_report) << "@li There are @b " << m_nEvent << " triggers. If this run was taken with LATTE, there should be " << m_nEvent+2 << " events recorded in the eLog database since LATTE adds two additional events in the process which are not triggered events."<< endl;
   (*m_report) << "@li There are @b " << m_nBadEvts << " bad events " << endl;
 
   (*m_report) << "@li There are @b " << m_nTrgParityErrors << " events with Trigger Parity errors " << endl;
@@ -2080,6 +2081,7 @@ void TestReport::produceAcdDigiPlots()
   file += "_nAcdDigis";
   PlotAttribute att(file.c_str(), "Number of ACD digis.", "nAcdDigis");
   att.m_statMode = 111111;
+  att.m_yLog = kTRUE;
   producePlot(m_nAcdDigis, att);
   insertPlot(att);
 
