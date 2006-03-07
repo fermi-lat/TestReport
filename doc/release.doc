@@ -143,5 +143,7 @@ January 31, 2006: awb
 v3r4p12	Added check for overlapped triggers. 
         Fixed check of non-physical TOT values.
 
-
+March   06, 2006: eac
+v3r4p13	Fixed binning in nAcdDigi histogram. 
+        Updated comments on number of events to distinguish LATTE and LICOS runs.
  	 
