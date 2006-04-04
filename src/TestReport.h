@@ -255,7 +255,9 @@ class TestReport {
 
   void produceTriggerPerTowerPlot();
 
-  void produceTimeIntervalPlot();
+  void produceTimeIntervalPlotSBC();
+  void produceTimeIntervalPlotGEM();
+
 
   void produceNHitPlane2DPlot();
 
@@ -358,6 +360,9 @@ class TestReport {
 
   /// trigger histogram
   TH1F* m_trigger;
+
+  // LATTE?
+  int m_isLATTE;
 
   /// number of events with different Glt trigger
   long m_nEvtGltTrigger[enums::number_of_trigger_bits];
@@ -493,6 +498,7 @@ class TestReport {
 
   /// histogram of time between adjacent event in mili second, taken from GEM
   TH1F* m_timeIntervalGem;
+  TH1F* m_timeIntervalGemZoom;
 
   /// percentage of events with TKR trigger but less than 6 digis in a tower
   TGraph* m_nDigi;

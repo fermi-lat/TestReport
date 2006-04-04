@@ -147,3 +147,7 @@ March   06, 2006: eac
 v3r4p13	Fixed binning in nAcdDigi histogram. 
         Updated comments on number of events to distinguish LATTE and LICOS runs.
  	 
+April 4, 2006: awb
+v3r4p14 Put in a 'isLATTE' flag. Only show SBC histograms for LATTE runs. 
+        Add in a zoom of the GEM delta event time (1 ms). 
+

@@ -65,7 +65,7 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_mcBranch(0), m_mcEvent(0), m_reconFile(0), m_reconTree(0), 
     m_reconBranch(0), m_reconEvent(0), m_digiFile(0), m_digiTree(0),
     m_digiBranch(0), m_digiEvent(0), m_trigger(0), m_nBadEvts(0), 
-    m_nTrgParityErrors(0), m_nPacketErrors(0), m_nTemErrors(0),
+    m_nTrgParityErrors(0), m_nPacketErrors(0), m_nTemErrors(0), m_isLATTE(0),
     m_nEvent(0),
     m_nTkrTrigger(0), m_nEventBadStrip(0), m_nEventMoreStrip(0), 
     m_nEventSatTot(0), m_nEventZeroTot(0), m_nEvtInvalidTot(0), m_nEvtOverlapTriggerTot(0),
@@ -262,14 +262,18 @@ TestReport::TestReport(const char* dir, const char* prefix,
   att.set("Time interval between adjacent events(ms)", "Number of events");
   setHistParameters(m_timeInterval, att);
 
-  m_timeIntervalCut = new TH1F("timeIntervalCut", "Time interval between adjacent event in millsecond with a cut of 1 millsecond", 100, 0., 1.);
+  m_timeIntervalCut = new TH1F("timeIntervalCut", "Time interval between adjacent event in millseconds with a cut of 1 millsecond", 100, 0., 1.);
   att.set("Time interval between adjacent events(ms)", "Number of events");
   att.m_canRebin = false;
   setHistParameters(m_timeIntervalCut, att);
 
-  m_timeIntervalGem = new TH1F("timeIntervalGem", "Time interval between adjacent event in mill second, the time is measured by GEM", 100, 0., 3.);
+  m_timeIntervalGem = new TH1F("timeIntervalGem", "Time interval between adjacent event in milliseconds, the time is measured by GEM", 100, 0., 3.);
   att.set("Time interval between adjacent events(ms)", "Number of events");
   setHistParameters(m_timeIntervalGem, att);
+
+  m_timeIntervalGemZoom = new TH1F("timeIntervalGemZoom", "Time interval between adjacent event in milliseconds with a cut of 1 millsecond. The time is measured by GEM", 100, 0., 1.);
+  att.set("Time interval between adjacent events(ms)", "Number of events");
+  setHistParameters(m_timeIntervalGemZoom, att);
 
   m_alignCalTkr = new TH1F("alignCalTkr", "Distance between the reconstructed CAL cluster XY coordinates and the XY coordinates extrapolated from TKR", 50, 0., 100.);
   att.set("Difference(mm)", "Number of events");
@@ -483,7 +487,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   }
 
   // For testing:
-  //int nEvent = 5000;
+  //int nEvent = 1000;
   //m_nEvent = nEvent;
 
   // For GEM discarded events:
@@ -566,10 +570,12 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	    double_t(lPpcT - prevLPpcT) / 16000.;
 	}
 
-	if ( interval < 500. ) {
+	//if ( interval < 500. ) {
 	  m_timeInterval->Fill(interval);
+	  //}
+        if ( interval < 1. ) {
+ 	  m_timeIntervalCut->Fill(interval);
 	}
-	m_timeIntervalCut->Fill(interval);
 	prevUPpcT = uPpcT;
 	prevLPpcT = lPpcT;
       }
@@ -722,6 +728,10 @@ void TestReport::analyzeDigiTree()
     if( (trigger >> i) & 1) ++m_nEvtGltTrigger[i];
   }
 
+  // LATTE run?
+  m_isLATTE = 0;
+  if (m_digiEvent->getEventSummaryData().oswLength() > 0) m_isLATTE = 1;
+
   if(m_digiEvent->getEventSummaryData().badEvent()) ++m_nBadEvts;
 
   if (m_digiEvent->getEventSummaryData().packetError())       ++m_nPacketErrors;
@@ -768,6 +778,10 @@ void TestReport::analyzeDigiTree()
   // 1 count = 50 ns
   UInt_t deltaT = m_digiEvent->getGem().getDeltaEventTime();
   m_timeIntervalGem->Fill(0.00005*deltaT);
+
+  if ((0.00005*deltaT) < 1.0) {
+    m_timeIntervalGemZoom->Fill(0.00005*deltaT);
+  }
 
   int tkrVector = m_digiEvent->getGem().getTkrVector();
 
@@ -991,7 +1005,13 @@ void TestReport::generateReport()
   } 
 
   (*m_report) << "In the digi file @em " << m_digiFile->GetName() << endl;
-  (*m_report) << "@li There are @b " << m_nEvent << " triggers. If this run was taken with LATTE, there should be " << m_nEvent+2 << " events recorded in the eLog database since LATTE adds two additional events in the process which are not triggered events."<< endl;
+
+  if (m_isLATTE == 1) {
+    (*m_report) << "@li There are @b " << m_nEvent << " triggers. This run was taken with LATTE so there will be " << m_nEvent+2 << " events recorded in the eLog database since LATTE adds two additional events in the process which are not triggered events." << endl;
+  } else {
+    (*m_report) << "@li There are @b " << m_nEvent << " triggers." << endl;
+  }
+
   (*m_report) << "@li There are @b " << m_nBadEvts << " bad events " << endl;
 
   (*m_report) << "@li There are @b " << m_nTrgParityErrors << " events with Trigger Parity errors " << endl;
@@ -1001,10 +1021,12 @@ void TestReport::generateReport()
   (*m_report) << "@li There are @b " << m_nAcdOddParityError    << " events with ACD Odd Parity errors " << endl;
   (*m_report) << "@li There are @b " << m_nAcdHeaderParityError << " events with ACD 'Header Parity errors'.  (Should always be zero)." << endl;
 
-  (*m_report) << "@li Time of the first trigger: <b>" << ctime((time_t*) (&m_startTime)) << " (GMT) </b>";
-  (*m_report) << "@li Time of the last trigger: <b>" << ctime((time_t*) (&m_endTime)) << " (GMT) </b>";
-  (*m_report) << "@li Duration: <b>" << m_endTime - m_startTime << " seconds" << "</b>" << endl;
-  (*m_report) << "@li Rate: <b>" << double(m_nEvent)/(m_endTime - m_startTime) << " hz" << "</b>" << endl;
+  if (m_isLATTE == 1) {
+    (*m_report) << "@li Time of the first trigger: <b>" << ctime((time_t*) (&m_startTime)) << " (GMT) </b>";
+    (*m_report) << "@li Time of the last trigger: <b>" << ctime((time_t*) (&m_endTime)) << " (GMT) </b>";
+    (*m_report) << "@li Duration: <b>" << m_endTime - m_startTime << " seconds" << "</b>" << endl;
+    (*m_report) << "@li Rate: <b>" << double(m_nEvent)/(m_endTime - m_startTime) << " hz" << "</b>" << endl;
+  }
 
   if(m_reconFile) {
     (*m_report) << "<p>The Recon file is: @em " << m_reconFile->GetName() << "</p>" << endl;
@@ -1047,7 +1069,11 @@ void TestReport::generateDigiReport()
 
   (*m_report) << "@section timeInfo Time Info" << endl;
 
-  produceTimeIntervalPlot();
+  if (m_isLATTE == 1) {
+    produceTimeIntervalPlotSBC();
+  }
+  produceTimeIntervalPlotGEM();
+
 
   (*m_report) << "@section tkrDigi TKR Digitization" << endl;
 
@@ -1983,7 +2009,7 @@ void TestReport::produceGemDiscardedPlot()
 }
 
 
-void TestReport::produceTimeIntervalPlot()
+void TestReport::produceTimeIntervalPlotSBC()
 {
   string file(m_prefix);
   file += "_timeInterval";
@@ -1996,13 +2022,30 @@ void TestReport::produceTimeIntervalPlot()
   att.set(file.c_str(), "Time interval between adjacent events in millseconds with a cut of 1 ms. Note that this interval is between the time when the events are built, NOT the GEM trigger time. The time is measured by the 16MHZ clock in the power PC.", "timeIntervalCut", true);
   producePlot(m_timeIntervalCut, att);
   insertPlot(att);
+}
 
+
+
+//
+void TestReport::produceTimeIntervalPlotGEM()
+{
+  string file(m_prefix);
   file = m_prefix;
   file += "_timeIntervalGem";
-  att.set(file.c_str(), "Time interval between adjacent events in millseconds. Note that this interval is measured in the GEM. The time is stored in a 16 bit counter, each count is equal to 50 ns, so the time will saturate at roughly 3.3 ms.", "timeIntervalGem", true);
+  PlotAttribute att(file.c_str(), "Time interval between adjacent events in millseconds. Note that this interval is measured in the GEM. The time is stored in a 16 bit counter, each count is equal to 50 ns, so the time will saturate at roughly 3.3 ms.", "timeIntervalGem", true);
   producePlot(m_timeIntervalGem, att);
   insertPlot(att);
+
+  file = m_prefix;
+  file += "_timeIntervalGemZoom";
+  att.set(file.c_str(), "Time interval between adjacent events in millseconds with a cut of 1 millisecond. Note that this interval is measured in the GEM. The time is stored in a 16 bit counter, each count is equal to 50 ns.", "timeIntervalGemZoom", true);
+  producePlot(m_timeIntervalGemZoom, att);
+  insertPlot(att);
 }
+
+
+
+
 
 string TestReport::boldFaceLatex(const string& s) 
 {
