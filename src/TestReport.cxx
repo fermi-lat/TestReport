@@ -554,7 +554,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       int deltaTimeUgly = 978307200 + 25200; 
 
       if(iEvent == 0) {
-        if (isLATTE == 1) {
+        if (m_isLATTE == 1) {
 	  m_startTime = m_digiEvent->getEbfTimeSec();
         } else {
           m_startTime = m_digiEvent->getTimeStamp() + deltaTimeUgly;
@@ -589,7 +589,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       }
 
       if(iEvent == m_nEvent-1) {
-        if (isLATTE == 1) { 
+        if (m_isLATTE == 1) { 
 	  m_endTime = m_digiEvent->getEbfTimeSec();
 	} else {
           m_endTime = m_digiEvent->getTimeStamp() + deltaTimeUgly;
