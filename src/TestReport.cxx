@@ -559,6 +559,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
         } else {
           m_startTime = m_digiEvent->getTimeStamp() + deltaTimeUgly;
 	}
+      }
       else {
 	// convert 16 MHZ clock to ms
 	
