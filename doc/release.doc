@@ -151,3 +151,7 @@ April 4, 2006: awb
 v3r4p14 Put in a 'isLATTE' flag. Only show SBC histograms for LATTE runs. 
         Add in a zoom of the GEM delta event time (1 ms). 
 
+
+April 16, 2006: awb
+v3r4p15	Added time stamps for LICOS runs.
+

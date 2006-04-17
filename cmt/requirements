@@ -1,9 +1,9 @@
 package TestReport
-version v3r4p12
+version v3r4p15
 
 author X. Chen <xchen@slac.stanford.edu>
 
-# tested using EngineeringModel package v5r0703p5
+# tested using EngineeringModel package v6r070305p9
 
 use GlastPolicy v*
 use commonRootData v*

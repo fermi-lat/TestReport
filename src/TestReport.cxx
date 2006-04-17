@@ -548,9 +548,17 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       //      << " good = " << m_digiEvent->getEventSummaryData().goodEvent()
       //   << endl;
 
+      //
+      // Time from Mission elapsed time to Unix time and then from PDT to GMT:
+      //
+      int deltaTimeUgly = 978307200 + 25200; 
+
       if(iEvent == 0) {
-	m_startTime = m_digiEvent->getEbfTimeSec();
-      }
+        if (isLATTE == 1) {
+	  m_startTime = m_digiEvent->getEbfTimeSec();
+        } else {
+          m_startTime = m_digiEvent->getTimeStamp() + deltaTimeUgly;
+	}
       else {
 	// convert 16 MHZ clock to ms
 	
@@ -581,7 +589,11 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       }
 
       if(iEvent == m_nEvent-1) {
-	m_endTime = m_digiEvent->getEbfTimeSec();
+        if (isLATTE == 1) { 
+	  m_endTime = m_digiEvent->getEbfTimeSec();
+	} else {
+          m_endTime = m_digiEvent->getTimeStamp() + deltaTimeUgly;
+	}
       }
     }
 
@@ -1021,12 +1033,10 @@ void TestReport::generateReport()
   (*m_report) << "@li There are @b " << m_nAcdOddParityError    << " events with ACD Odd Parity errors " << endl;
   (*m_report) << "@li There are @b " << m_nAcdHeaderParityError << " events with ACD 'Header Parity errors'.  (Should always be zero)." << endl;
 
-  if (m_isLATTE == 1) {
-    (*m_report) << "@li Time of the first trigger: <b>" << ctime((time_t*) (&m_startTime)) << " (GMT) </b>";
-    (*m_report) << "@li Time of the last trigger: <b>" << ctime((time_t*) (&m_endTime)) << " (GMT) </b>";
-    (*m_report) << "@li Duration: <b>" << m_endTime - m_startTime << " seconds" << "</b>" << endl;
-    (*m_report) << "@li Rate: <b>" << double(m_nEvent)/(m_endTime - m_startTime) << " hz" << "</b>" << endl;
-  }
+  (*m_report) << "@li Time of the first trigger: <b>" << ctime((time_t*) (&m_startTime)) << " (GMT) </b>";
+  (*m_report) << "@li Time of the last trigger: <b>" << ctime((time_t*) (&m_endTime)) << " (GMT) </b>";
+  (*m_report) << "@li Duration: <b>" << m_endTime - m_startTime << " seconds" << "</b>" << endl;
+  (*m_report) << "@li Rate: <b>" << double(m_nEvent)/(m_endTime - m_startTime) << " hz" << "</b>" << endl;
 
   if(m_reconFile) {
     (*m_report) << "<p>The Recon file is: @em " << m_reconFile->GetName() << "</p>" << endl;
