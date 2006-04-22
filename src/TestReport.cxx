@@ -70,7 +70,8 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_nTkrTrigger(0), m_nEventBadStrip(0), m_nEventMoreStrip(0), 
     m_nEventSatTot(0), m_nEventZeroTot(0), m_nEvtInvalidTot(0), m_nEvtOverlapTriggerTot(0),
     m_nEventBadTot(0), m_startTime(0),
-    m_endTime(0), m_nDigi(0), m_nAcdOddParityError(0), m_nAcdHeaderParityError(0),
+    m_endTime(0), m_startTimeDataGram(0), m_endTimeDataGram(0),
+    m_nDigi(0), m_nAcdOddParityError(0), m_nAcdHeaderParityError(0),
     m_AcdTileIdOnePMT(0), m_AcdTileIdOneVeto(0),
     m_AcdHitMap(0), m_AcdVetoMap(0),
     m_AcdPhaMapA(0), m_AcdPhaMapB(0),
@@ -557,7 +558,13 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
         if (m_isLATTE == 1) {
 	  m_startTime = m_digiEvent->getEbfTimeSec();
         } else {
-          m_startTime = m_digiEvent->getTimeStamp() + deltaTimeUgly;
+	  UInt_t myTimeStamp1 = m_digiEvent->getMetaEvent().time().current().timeSecs();
+	  UInt_t myTimeStamp2 = m_digiEvent->getMetaEvent().time().timeTicks();
+	  UInt_t myTimeStamp3 = m_digiEvent->getMetaEvent().time().current().timeHack().ticks();
+	  UInt_t myTimeStamp4 = m_digiEvent->getMetaEvent().time().previous().timeHack().ticks();
+
+          m_startTime         = myTimeStamp1 + (myTimeStamp2/(myTimeStamp3-myTimeStamp4)) + deltaTimeUgly;
+          m_startTimeDataGram = m_digiEvent->getTimeStamp() + deltaTimeUgly;
 	}
       }
       else {
@@ -593,7 +600,13 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
         if (m_isLATTE == 1) { 
 	  m_endTime = m_digiEvent->getEbfTimeSec();
 	} else {
-          m_endTime = m_digiEvent->getTimeStamp() + deltaTimeUgly;
+	  UInt_t myTimeStamp1 = m_digiEvent->getMetaEvent().time().current().timeSecs();
+	  UInt_t myTimeStamp2 = m_digiEvent->getMetaEvent().time().timeTicks();
+	  UInt_t myTimeStamp3 = m_digiEvent->getMetaEvent().time().current().timeHack().ticks();
+	  UInt_t myTimeStamp4 = m_digiEvent->getMetaEvent().time().previous().timeHack().ticks();
+
+          m_endTime         = myTimeStamp1 + (myTimeStamp2/(myTimeStamp3-myTimeStamp4)) + deltaTimeUgly;
+          m_endTimeDataGram = m_digiEvent->getTimeStamp() + deltaTimeUgly;
 	}
       }
     }
@@ -1025,19 +1038,22 @@ void TestReport::generateReport()
     (*m_report) << "@li There are @b " << m_nEvent << " triggers." << endl;
   }
 
-  (*m_report) << "@li There are @b " << m_nBadEvts << " bad events " << endl;
+  (*m_report) << "@li There are @b " << m_nBadEvts << " bad events (includes TKR FIFO full errors)" << endl;
 
   (*m_report) << "@li There are @b " << m_nTrgParityErrors << " events with Trigger Parity errors " << endl;
   (*m_report) << "@li There are @b " << m_nPacketErrors << " events with Packet errors " << endl;
-  (*m_report) << "@li There are @b " << m_nTemErrors << " events with TEM errors " << endl;
+  (*m_report) << "@li There are @b " << m_nTemErrors << " events with TEM errors (includes TKR FIFO full errors)" << endl;
 
   (*m_report) << "@li There are @b " << m_nAcdOddParityError    << " events with ACD Odd Parity errors " << endl;
-  (*m_report) << "@li There are @b " << m_nAcdHeaderParityError << " events with ACD 'Header Parity errors'.  (Should always be zero)." << endl;
+  (*m_report) << "@li There are @b " << m_nAcdHeaderParityError << " events with ACD 'Header Parity errors' (there should _never_ be any)." << endl;
+
+  //(*m_report) << "@li Time of the first datagram: <b>" << ctime((time_t*) (&m_startTimeDataGram)) << " (GMT) </b>";
+  //(*m_report) << "@li Time of the last datagram: <b>" << ctime((time_t*) (&m_endTimeDataGram)) << " (GMT) </b>";
 
   (*m_report) << "@li Time of the first trigger: <b>" << ctime((time_t*) (&m_startTime)) << " (GMT) </b>";
   (*m_report) << "@li Time of the last trigger: <b>" << ctime((time_t*) (&m_endTime)) << " (GMT) </b>";
   (*m_report) << "@li Duration: <b>" << m_endTime - m_startTime << " seconds" << "</b>" << endl;
-  (*m_report) << "@li Rate: <b>" << double(m_nEvent)/(m_endTime - m_startTime) << " hz" << "</b>" << endl;
+  (*m_report) << "@li Trigger rate: <b>" << double(m_nEvent)/(m_endTime - m_startTime) << " hz" << "</b>" << endl;
 
   if(m_reconFile) {
     (*m_report) << "<p>The Recon file is: @em " << m_reconFile->GetName() << "</p>" << endl;

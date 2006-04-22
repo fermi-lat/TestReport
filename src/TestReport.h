@@ -476,6 +476,14 @@ class TestReport {
   /// time of last trigger
   UInt_t m_endTime;
 
+
+  /// time of first datagram
+  UInt_t m_startTimeDataGram;
+
+  /// time of last datagram
+  UInt_t m_endTimeDataGram;
+
+
   // GEM discarded events:
   TH1F* m_gemDiscarded;
   TH1F* m_gemDiscardedTime;

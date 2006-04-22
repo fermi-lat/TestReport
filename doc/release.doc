@@ -153,5 +153,7 @@ v3r4p14 Put in a 'isLATTE' flag. Only show SBC histograms for LATTE runs.
 
 
 April 16, 2006: awb
-v3r4p15	Added time stamps for LICOS runs.
+v3r4p15	Added time stamps for LICOS/FSW runs.
 
+April 21, 2006: awb
+v3r4p16	Added real time stamps for LICOS/FSW runs. 
