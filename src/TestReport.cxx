@@ -251,6 +251,10 @@ TestReport::TestReport(const char* dir, const char* prefix,
   att.set("Layer", "Tower");
   setHistParameters(m_zeroCalEneLayer2D, att);
 
+  m_epu = new TH1F("epu","Crate Number (No crate - Epu0 - Epu1 - Epu2 - Siu0 - Siu1 - Aux) - ",22,-1,10);
+  att.set("Crate number (Epu0 - Epu1 - Epu2 - Siu0 - Siu1 - Aux)","Number of events");
+  setHistParameters(m_epu,att);
+
   m_gemDiscarded = new TH1F("gemDiscarded","Number of GEM discarded events between two successive read out events",40,0,20);
   att.set("Number of GEM discarded events","Number of events");
   setHistParameters(m_gemDiscarded,att);
@@ -487,7 +491,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
     m_nEvent = nDigi;
   }
 
-  // For testing:
+  // For testing: awb
   //int nEvent = 1000;
   //m_nEvent = nEvent;
 
@@ -513,6 +517,10 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       m_digiBranch->GetEntry(iEvent);
 
       analyzeDigiTree();
+
+      // EPU:
+      int crate = m_digiEvent->getMetaEvent().datagram().crate();
+      m_epu->Fill(crate);
 
 
       // GEM discarded events:
@@ -1100,6 +1108,12 @@ void TestReport::generateDigiReport()
     produceTimeIntervalPlotSBC();
   }
   produceTimeIntervalPlotGEM();
+
+
+  // FSW stuff:
+  (*m_report) << "@section epu Crate Number" << endl;
+  produceEpuPlot();
+
 
 
   (*m_report) << "@section tkrDigi TKR Digitization" << endl;
@@ -2019,6 +2033,15 @@ void TestReport::produceTriggerPerTowerPlot()
   insertPlot(att);
 }
 
+
+void TestReport::produceEpuPlot()
+{
+  string file(m_prefix);
+  file += "_epu";
+  PlotAttribute att(file.c_str(), "Crate number","epu",true);
+  producePlot(m_epu, att);
+  insertPlot(att);
+}
 
 void TestReport::produceGemDiscardedPlot()
 {

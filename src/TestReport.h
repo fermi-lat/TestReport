@@ -251,6 +251,8 @@ class TestReport {
 
   void produceReconEnePlots();
 
+  void produceEpuPlot();
+
   void produceGemDiscardedPlot();
 
   void produceTriggerPerTowerPlot();
@@ -483,6 +485,9 @@ class TestReport {
   /// time of last datagram
   UInt_t m_endTimeDataGram;
 
+
+  // epu number
+  TH1F* m_epu;
 
   // GEM discarded events:
   TH1F* m_gemDiscarded;

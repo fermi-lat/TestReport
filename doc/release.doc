@@ -156,4 +156,9 @@ April 16, 2006: awb
 v3r4p15	Added time stamps for LICOS/FSW runs.
 
 April 21, 2006: awb
-v3r4p16	Added real time stamps for LICOS/FSW runs. 
+v3r4p16	Added real time stamps for frst and last event in LICOS/FSW runs. 
+
+April 23, 2006: awb
+v3r4p17	Added histogram for crate number.
+ 
+
