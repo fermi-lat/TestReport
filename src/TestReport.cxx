@@ -532,6 +532,9 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       if (iEvent > 0) {
         // Gem discarded delta wrt the previous event:
         float delta = thisGemDiscarded - previousGemDiscarded;
+        if (delta < 0) {
+	  delta = delta  + 16776703;
+	} 
         m_gemDiscarded->Fill(delta);
 
         // Fill time histo for non-saturated events:
