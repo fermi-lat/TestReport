@@ -257,6 +257,8 @@ class TestReport {
 
   void produceTriggerPerTowerPlot();
 
+  void produceAcdTriggerPlots();
+
   void produceTimeIntervalPlotSBC();
   void produceTimeIntervalPlotGEM();
 
@@ -301,7 +303,7 @@ class TestReport {
 
   /// convert to the dense acd notation
   static UShort_t getGemId(UInt_t id);
-  
+    
   /// used in producing caption for a plot in a latex file. It will put the
   /// first sentence in the caption to be bold face.
   std::string boldFaceLatex(const std::string& s);
@@ -567,6 +569,7 @@ class TestReport {
   // Histograms for the ACD digis:
   TH1F* m_nAcdDigis;
 
+  // Acd Digi based histograms
   TH1F* m_AcdTileIdOnePMT;
   TH1F* m_AcdTileIdOneVeto;
 
@@ -576,6 +579,16 @@ class TestReport {
   TH2F* m_AcdPhaMapA;
   TH2F* m_AcdPhaMapB;
 
+  TH2F* m_AcdGarcGafeHitMap;
+  TH2F* m_AcdGarcGafeVetoMap;  
+
+  // Acd-related stuff in the GEM
+  TH1F* m_AcdGemVetoMap;
+  TH1F* m_AcdGemCnoMap;
+  TH1F* m_AcdGemRoiMap;
+
+  // Acd Recon based histograms
+  // 
   TH1F* m_AcdEfficMap;
   TH1F* m_AcdInEfficMap;
 
@@ -583,7 +596,12 @@ class TestReport {
   TH2F* m_AcdMissMapMinusX;
   TH2F* m_AcdMissMapMinusY;
   TH2F* m_AcdMissMapPlusX;
-  TH2F* m_AcdMissMapPlusY;  
+  TH2F* m_AcdMissMapPlusY;
+
+  // Path-length corrected MIP
+  TH2F* m_AcdMipMapA;
+  TH2F* m_AcdMipMapB;
+
 
 };
 #endif

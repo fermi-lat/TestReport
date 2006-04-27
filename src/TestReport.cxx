@@ -10,6 +10,7 @@
 #include "ToString.h"
 #include "TStyle.h"
 #include "TLine.h"
+#include "TMarker.h"
 #include "TFrame.h"
 #include "TLatex.h"
 #include "Geo.h"
@@ -320,6 +321,31 @@ TestReport::TestReport(const char* dir, const char* prefix,
   att.m_canRebin = false;
   setHistParameters(m_AcdPhaMapB,att);
 
+  m_AcdGarcGafeHitMap = new TH2F("AcdGarcGafeHitMap","GARC:GAFE for all hits",18,-0.5,17.5,12,-0.5,11.5);
+  att.set("GAFE","GARC");
+  att.m_canRebin = false;
+  setHistParameters(m_AcdGarcGafeHitMap,att);
+
+  m_AcdGarcGafeVetoMap = new TH2F("AcdGarcGafeVetoMap","GARC:GAFE for all vetos",18,-0.5,17.5,12,-0.5,11.5);
+  att.set("GAFE","GARC");
+  att.m_canRebin = false;
+  setHistParameters(m_AcdGarcGafeVetoMap,att);
+
+  m_AcdGemVetoMap = new TH1F("AcdGemVetoMap","Number of GEM vetos by Tile ID",128,-0.5,127.5); 
+  att.set("ACD GEM ID","Number of events");
+  att.m_canRebin = false;
+  setHistParameters(m_AcdGemVetoMap,att);
+
+  m_AcdGemRoiMap = new TH1F("AcdGemRoiMap","Number of GEM ROI by Tower",16,-0.5,15.5); 
+  att.set("Tower","Number of events");
+  att.m_canRebin = false;
+  setHistParameters(m_AcdGemRoiMap,att);
+
+  m_AcdGemCnoMap = new TH1F("AcdGemCnoMap","Number of GEM CNO by GARC",12,-0.5,11.5); 
+  att.set("GARC","Number of events");
+  att.m_canRebin = false;
+  setHistParameters(m_AcdGemCnoMap,att);
+
   m_AcdEfficMap = new TH1F("AcdEfficMap","ACD Effic by Tile ID",128,-0.5,127.5); 
   att.set("ACD GEM ID","Number of events");
   att.m_canRebin = false;
@@ -354,6 +380,16 @@ TestReport::TestReport(const char* dir, const char* prefix,
   att.set("X (mm)","Z (mm)");
   att.m_canRebin = false;
   setHistParameters(m_AcdMissMapPlusY,att);
+
+  m_AcdMipMapA = new TH2F("AcdMipMapA","ACD GEM ID vs MIP for A PMT",128,-0.5,127.5,80,0.,5.);
+  att.set("ACD GEM ID","MIPs");
+  att.m_canRebin = false;
+  setHistParameters(m_AcdMipMapA,att);
+
+  m_AcdMipMapB = new TH2F("AcdMipMapB","ACD GEM ID vs MIP for B PMT",128,-0.5,127.5,80,0.,5.);
+  att.set("ACD GEM ID","MIPs");
+  att.m_canRebin = false;
+  setHistParameters(m_AcdMipMapB,att);
   
 }
 
@@ -493,6 +529,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 
   // For testing: awb
   //int nEvent = 1000;
+
   //m_nEvent = nEvent;
 
   // For GEM discarded events:
@@ -716,8 +753,19 @@ void TestReport::analyzeReconTree()
     m_alignCalTkr->Fill(distance);
   }
 
+  // AcdRecon stuff
   AcdRecon* acdRecon = m_reconEvent->getAcdRecon();
+
   if ( acdRecon && nTk == 1) {
+
+    // map of the acd hits
+    std::map<int,const AcdHit*> acdHitMap;
+    UInt_t nAcdHit = acdRecon->nAcdHit();
+    for ( UInt_t iAcdHit(0); iAcdHit < nAcdHit; iAcdHit++ ) {
+      const AcdHit* acdHit = acdRecon->getAcdHit(iAcdHit);
+      acdHitMap[acdHit->getId().getId()] = acdHit;
+    }
+    
     UInt_t nAcdInter = acdRecon->nAcdIntersections();
     for ( UInt_t iAcdInter(0); iAcdInter < nAcdInter; iAcdInter++ ) {
       const AcdTkrIntersection* acdInter = acdRecon->getAcdTkrIntersection(iAcdInter);
@@ -726,6 +774,14 @@ void TestReport::analyzeReconTree()
       UShort_t acdGemId = getGemId( acdInter->getTileId().getId() );
       if ( acdInter->tileHit() ) {
 	m_AcdEfficMap->Fill( acdGemId );
+	const AcdHit* acdHit = acdHitMap[ acdInter->getTileId().getId() ];	
+	if ( acdHit != 0 ) {
+	  Double_t angleToPlane = acdInter->getCosTheta();
+	  Double_t mipsA = acdHit->getMips(AcdHit::A) * angleToPlane;
+	  Double_t mipsB = acdHit->getMips(AcdHit::B) * angleToPlane;
+	  m_AcdMipMapA->Fill(acdGemId,mipsA);
+	  m_AcdMipMapB->Fill(acdGemId,mipsB);
+	}
       } else {
 	m_AcdInEfficMap->Fill( acdGemId );
 	const TVector3& missPos = acdInter->getGlobalPosition();
@@ -1001,6 +1057,18 @@ void TestReport::analyzeDigiTree()
     Bool_t vetoB = acdDigi->getVeto(AcdDigi::B);
     Bool_t singleVeto = (vetoA && !vetoB) || (!vetoA && vetoB);
 
+    unsigned garcA(0); unsigned gafeA(0);
+    unsigned garcB(0); unsigned gafeB(0);
+
+    AcdId::convertToGarcGafe( acdDigi->getId().getId(), AcdDigi::A, garcA, gafeA );
+    AcdId::convertToGarcGafe( acdDigi->getId().getId(), AcdDigi::B, garcB, gafeB );
+
+    if ( hitPmtA && garcA < 12 ) m_AcdGarcGafeHitMap->Fill(gafeA,garcA);
+    if ( hitPmtB && garcB < 12 ) m_AcdGarcGafeHitMap->Fill(gafeB,garcB);
+
+    if ( vetoA && garcA < 12 ) m_AcdGarcGafeVetoMap->Fill(gafeA,garcA);
+    if ( vetoB && garcB < 12 ) m_AcdGarcGafeVetoMap->Fill(gafeB,garcB);
+
     if ( singlePmt ) m_AcdTileIdOnePMT->Fill(AcdGemID);
     if ( singleVeto ) m_AcdTileIdOneVeto->Fill(AcdGemID);
     if ( vetoA || vetoB ) m_AcdVetoMap->Fill(AcdGemID);
@@ -1014,6 +1082,31 @@ void TestReport::analyzeDigiTree()
     if (acdDigi->getHeaderParityError(AcdDigi::A)) ++tmpAcdHeaderParityError;
     if (acdDigi->getHeaderParityError(AcdDigi::B)) ++tmpAcdHeaderParityError;
   }
+
+  // ACD stuff in GEM
+  const Gem& gem = m_digiEvent->getGem();
+  const GemTileList& gemTL = gem.getTileList();
+  for ( UInt_t iGemIdx(0); iGemIdx < 16; iGemIdx++ ) {
+    // unfold the contribuions into a single vector
+    if ( gemTL.getXzm() & ( 1 << iGemIdx ) )     m_AcdGemVetoMap->Fill(iGemIdx);
+    if ( gemTL.getXzp() & ( 1 << iGemIdx ) )     m_AcdGemVetoMap->Fill(iGemIdx+16);
+    if ( gemTL.getYzm() & ( 1 << iGemIdx ) )     m_AcdGemVetoMap->Fill(iGemIdx+32);
+    if ( gemTL.getYzp() & ( 1 << iGemIdx ) )     m_AcdGemVetoMap->Fill(iGemIdx+48);
+    if ( gemTL.getXy() & ( 1 << iGemIdx ) )      m_AcdGemVetoMap->Fill(iGemIdx+64);
+    if ( gemTL.getXy() & ( 1 << (16+iGemIdx) ) ) m_AcdGemVetoMap->Fill(iGemIdx+80);
+    if ( gemTL.getRbn() & ( 1 << iGemIdx ) )     m_AcdGemVetoMap->Fill(iGemIdx+96);
+    if ( gemTL.getNa() & ( 1 << iGemIdx ) )      m_AcdGemVetoMap->Fill(iGemIdx+112);
+  }  
+
+  UShort_t roiVect = gem.getRoiVector();
+  for ( UInt_t iRoiIdx(0); iRoiIdx < 16; iRoiIdx++ ) {
+    if ( roiVect & ( 1 << iRoiIdx ) ) m_AcdGemRoiMap->Fill(iRoiIdx);
+  } 
+
+  UShort_t cnoVect = gem.getCnoVector();
+  for ( UInt_t iCnoIdx(0); iCnoIdx < 12; iCnoIdx++ ) {
+    if ( cnoVect & ( 1 << iCnoIdx ) ) m_AcdGemCnoMap->Fill(iCnoIdx);
+  } 
 
   if (tmpAcdOddParityError)    ++m_nAcdOddParityError;
   if (tmpAcdHeaderParityError) ++m_nAcdHeaderParityError;
@@ -1100,6 +1193,9 @@ void TestReport::generateDigiReport()
 
   // Trigger per tower:
   produceTriggerPerTowerPlot();
+
+  // Acd Trigger plots
+  produceAcdTriggerPlots();
 
   // GEM discarded events:
   (*m_report) << "@section gemDiscarded GEM Discarded Events" << endl;
@@ -1352,15 +1448,49 @@ void TestReport::producePlot(TObject* h, const PlotAttribute& att)
   TLatex texAcd5(69, maxY, "TOP");
   TLatex texAcd6(99, maxY, "Rb");  
 
-  if(h == m_AcdTileIdOnePMT ||
+  TList naList;
+  TMarker marker0(1.,0.,3); naList.Add(&marker0);
+  TMarker marker1(1.,6.,3); naList.Add(&marker1);  
+  TMarker marker2(2.,8.,3); naList.Add(&marker2);
+  TMarker marker3(3.,0.,3); naList.Add(&marker3);  
+  TMarker marker4(3.,6.,3); naList.Add(&marker4);
+  TMarker marker5(13.,3.,3); naList.Add(&marker5);  
+  TMarker marker6(13.,4.,3); naList.Add(&marker6);
+  TMarker marker7(13.,9.,3); naList.Add(&marker7);  
+  TMarker marker8(13.,10.,3); naList.Add(&marker8);
+  TMarker marker9(14.,1.,3); naList.Add(&marker9);
+
+  TMarker marker10(14.,7.,3); naList.Add(&marker10);
+  TMarker marker11(15.,9.,3); naList.Add(&marker11);  
+  TMarker marker12(16.,1.,3); naList.Add(&marker12);
+  TMarker marker13(16.,2.,3); naList.Add(&marker13);  
+  TMarker marker14(16.,3.,3); naList.Add(&marker14);
+  TMarker marker15(16.,4.,3); naList.Add(&marker15);  
+  TMarker marker16(16.,5.,3); naList.Add(&marker16);
+  TMarker marker17(16.,7.,3); naList.Add(&marker17);  
+  TMarker marker18(16.,8.,3); naList.Add(&marker18);
+  TMarker marker19(16.,9.,3); naList.Add(&marker19);
+  
+  TMarker marker20(16.,10.,3); naList.Add(&marker20);
+  TMarker marker21(16.,11.,3); naList.Add(&marker21);
+
+  if(h == m_AcdGemVetoMap ||
+     h == m_AcdTileIdOnePMT ||
      h == m_AcdTileIdOneVeto ||
      h == m_AcdHitMap ||
      h == m_AcdVetoMap ||
      h == m_AcdPhaMapA ||
      h == m_AcdPhaMapB ||
-     h == m_AcdInEfficMap ) {
+     h == m_AcdInEfficMap ||
+     h == m_AcdMipMapA || 
+     h == m_AcdMipMapB ) {
     lAcd1.Draw(); lAcd2.Draw(); lAcd3.Draw(); lAcd4.Draw(); lAcd5.Draw(); lAcd6.Draw(); lAcd7.Draw(); 
     texAcd1.Draw(); texAcd2.Draw(); texAcd3.Draw(); texAcd4.Draw(); texAcd5.Draw(); texAcd6.Draw();
+  }
+
+  if ( h == m_AcdGarcGafeHitMap ||
+       h == m_AcdGarcGafeVetoMap ) {
+    naList.Draw();
   }
 
   // FIXME -- should draw the tile edges on the miss maps
@@ -2036,6 +2166,31 @@ void TestReport::produceTriggerPerTowerPlot()
   insertPlot(att);
 }
 
+void TestReport::produceAcdTriggerPlots()
+{
+
+  string file(m_prefix);
+  file += "_acdGemVeto";
+  PlotAttribute att(file.c_str(), "Number of Acd Gem vetos by tile.  Expectect to see spikes at 15,31,47,63.  These are the large tiles at the bottom of the sides of the ACD.","AcdVetoPerTile");
+  producePlot(m_AcdGemVetoMap, att);
+  insertPlot(att);
+
+  file = m_prefix;
+  file += "_acdRoiVeto";
+  att.set(file.c_str(), "Number of Acd ROI by tower,  This bit is set if any of the tile in the ROI fired a veto.  This bit is independent of if the Tower bit is set.","AcdRoiPerTower");
+  m_AcdGemRoiMap->SetMinimum(0.);
+  producePlot(m_AcdGemRoiMap, att);
+  insertPlot(att);
+
+  file = m_prefix;
+  file += "_acdCnoVeto";
+  att.set(file.c_str(), "Number of Acd Cno by board.  This bit is the OR of all the CNO signals on a single board.","AcdCnoPerBoard");
+  m_AcdGemCnoMap->SetMinimum(0.);
+  producePlot(m_AcdGemCnoMap, att);
+  insertPlot(att);
+}
+
+
 
 void TestReport::produceEpuPlot()
 {
@@ -2175,7 +2330,7 @@ void TestReport::produceAcdDigiPlots()
   string file(m_prefix);
 
   file += "_nAcdDigis";
-  PlotAttribute att(file.c_str(), "Number of ACD digis.", "nAcdDigis");
+  PlotAttribute att(file.c_str(), "Number of ACD digis.  This is just the total number of tiles that have at least one PMT above the zero suppression threshold.", "nAcdDigis");
   att.m_statMode = 111111;
   att.m_yLog = kTRUE;
   producePlot(m_nAcdDigis, att);
@@ -2183,45 +2338,60 @@ void TestReport::produceAcdDigiPlots()
 
   file = m_prefix;
   file += "_AcdHitMap";
-  att.set(file.c_str(), "ACD Gem ID for all hits", "AcdHitMap" );
+  att.set(file.c_str(), "ACD Gem ID for all Digis.  Expectect to see spikes at 15,31,47,63.  These are the large tiles at the bottom of the sides of the ACD.", "AcdHitMap" );
   att.m_statMode = 0;
   producePlot(m_AcdHitMap, att);
   insertPlot(att);  
 
   file = m_prefix;
   file += "_AcdVetoMap";
-  att.set(file.c_str(), "Fraction of hits below Veto threshold.  By ACD Gem ID.", "AcdVetoMap" );
+  att.set(file.c_str(), "Fraction of hits above Veto threshold.  This is the fraction of Digis where at least one of the two PMT have the VETO bit set in the AEM.", "AcdVetoMap" );
   att.m_statMode = 0;
   producePlot(m_AcdVetoMap, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_AcdTileIdOnePMT";
-  att.set(file.c_str(), "Fraction of hits where only 1 PMT in a tile fired.  By ACD Gem ID", "AcdTileIdOnePMT");
+  att.set(file.c_str(), "Fraction of single hits.  This is the fraction of Digis where only one of the two PMT fired.", "AcdTileIdOnePMT");
   att.m_statMode = 0;
   producePlot(m_AcdTileIdOnePMT, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_AcdTileIdOneVeto";
-  att.set(file.c_str(), "Fraction of hits where only 1 PMT in a tile was above Veto threshold.  By ACD Gem ID", "AcdTileIdOneVeto");
+  att.set(file.c_str(), "Fraction of single vetos.  This is the fractions of Digis where only one of the two PMT was above Veto threshold,", "AcdTileIdOneVeto");
   att.m_statMode = 0;
   producePlot(m_AcdTileIdOneVeto, att);
   insertPlot(att);
   
   file = m_prefix;
   file += "_AcdPhaMapA";
-  att.set(file.c_str(), "ACD PHA map -- A PMTs.", "AcdPhaMapA" );
+  att.set(file.c_str(), "ACD PHA map -- A PMTs.  This shows the PHA values for each channel.", "AcdPhaMapA" );
   att.m_zLog = true;
   producePlot(m_AcdPhaMapA, att);
   insertPlot(att);
 
   file = m_prefix;  
   file += "_AcdPhaMapB";  
-  att.set(file.c_str(), "ACD PHA map -- B PMTs.", "AcdPhaMapB" );
+  att.set(file.c_str(), "ACD PHA map -- B PMTs.  This shows the PHA values for each channel", "AcdPhaMapB" );
   att.m_zLog = true;
   producePlot(m_AcdPhaMapB, att);
   insertPlot(att);
+
+  file = m_prefix;
+  file += "_AcdGarcGafeHitMap";
+  att.set(file.c_str(), "ACD Hit Map by GARC:GAFE.  This shows the digis in electronics space.  Not Attached (NA) channels are marked with *", "AcdGarcGafeHitMap" );
+  att.m_zLog = true;
+  producePlot(m_AcdGarcGafeHitMap, att);
+  insertPlot(att);
+
+  file = m_prefix;
+  file += "_AcdGarcGafeVetoMap";
+  att.set(file.c_str(), "ACD Veto Map by GARC:GAFE.  This shows the digis with the AEM veto bit set.  Not Attached (NA) channels are marked with *", "AcdGarcGafeVetoMap" );
+  att.m_zLog = true;
+  producePlot(m_AcdGarcGafeVetoMap, att);
+  insertPlot(att);
+
 }
 
 
@@ -2246,33 +2416,47 @@ void TestReport::produceAcdTkrReconPlots()
 
   file = m_prefix;
   file += "_AcdMissMapTop";
-  att.set(file.c_str(), "GLOBAL X-Y postions for track extrapolations NOT MATCHED hits: top of ACD", "AcdMissMapTop" );
+  att.set(file.c_str(), "GLOBAL X-Y postions for track extrapolations NOT MATCHED hits: top of ACD.  You should see the outline of the overlap regions, as this is where the association sometimes fails.  Depending on the sample you may also see a number of events in the central parts fo the tiles.", "AcdMissMapTop" );
   producePlot(m_AcdMissMapTop, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_AcdMissMapMinusX";
-  att.set(file.c_str(), "GLOBAL Y-Z postions for track extrapolations NOT MATCHED hits: -X side of ACD", "AcdMissMapMinusX" );
+  att.set(file.c_str(), "GLOBAL Y-Z postions for track extrapolations NOT MATCHED hits: -X side of ACD.  You should see the outline of the overlap regions, as this is where the association sometimes fails.  Depending on the sample you may also see a number of events in the central parts fo the tiles.", "AcdMissMapMinusX" );
   producePlot(m_AcdMissMapMinusX, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_AcdMissMapMinusY";
-  att.set(file.c_str(), "GLOBAL X-Z postions for track extrapolations NOT MATCHED hits: -Y side of ACD", "AcdMissMapMinusY" );
+  att.set(file.c_str(), "GLOBAL X-Z postions for track extrapolations NOT MATCHED hits: -Y side of ACD.  You should see the outline of the overlap regions, as this is where the association sometimes fails.  Depending on the sample you may also see a number of events in the central parts fo the tiles.", "AcdMissMapMinusY" );
   producePlot(m_AcdMissMapMinusY, att);
   insertPlot(att);
   
   file = m_prefix;
   file += "_AcdMissMapPlusX";
-  att.set(file.c_str(), "GLOBAL Y-Z postions for track extrapolations NOT MATCHED hits: +X side of ACD", "AcdMissMapPlusX" );
+  att.set(file.c_str(), "GLOBAL Y-Z postions for track extrapolations NOT MATCHED hits: +X side of ACD.  You should see the outline of the overlap regions, as this is where the association sometimes fails.  Depending on the sample you may also see a number of events in the central parts fo the tiles.", "AcdMissMapPlusX" );
   producePlot(m_AcdMissMapPlusX, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_AcdMissMapPlusY";
-  att.set(file.c_str(), "GLOBAL X-Z postions for track extrapolations NOT MATCHED hits: +Y side of ACD", "AcdMissMapPlusY" );
+  att.set(file.c_str(), "GLOBAL X-Z postions for track extrapolations NOT MATCHED hits: +Y side of ACD.  You should see the outline of the overlap regions, as this is where the association sometimes fails.  Depending on the sample you may also see a number of events in the central parts fo the tiles.", "AcdMissMapPlusY" );
   producePlot(m_AcdMissMapPlusY, att);
   insertPlot(att);
+
+  file = m_prefix;
+  file += "_AcdMipMapA";
+  att.set(file.c_str(), "ACD MIPs map -- A PMTs.  This shows the PHA values for each channel calibrated into MIP equivalent.", "AcdMipMapA" );
+  att.m_zLog = true;
+  //producePlot(m_AcdMipMapA, att);
+  //insertPlot(att);
+
+  file = m_prefix;  
+  file += "_AcdMipMapB";  
+  att.set(file.c_str(), "ACD MIPs map -- B PMTs.  This shows the PHA values for each channel calibrated into MIP equivalent.", "AcdMipMapB" );
+  att.m_zLog = true;
+  //producePlot(m_AcdMipMapB, att);
+  //insertPlot(att);
 
 }
 
