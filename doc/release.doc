@@ -167,3 +167,6 @@ v3r4p18 Fixed roll-over in GEM discarded events counter.
 
 April 26, 2006: eac 
 v3r5    Added ACD electronics space and ACD trigger quantities.  Also improved descriptions.
+
+May 2, 2006: awb
+v3r5p1	Protect against time hacks being the same in two events.

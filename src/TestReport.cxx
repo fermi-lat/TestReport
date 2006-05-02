@@ -610,8 +610,12 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	  UInt_t myTimeStamp2 = m_digiEvent->getMetaEvent().time().timeTicks();
 	  UInt_t myTimeStamp3 = m_digiEvent->getMetaEvent().time().current().timeHack().ticks();
 	  UInt_t myTimeStamp4 = m_digiEvent->getMetaEvent().time().previous().timeHack().ticks();
-
-          m_startTime         = myTimeStamp1 + (myTimeStamp2/(myTimeStamp3-myTimeStamp4)) + deltaTimeUgly;
+          
+          if (myTimeStamp3 != myTimeStamp4) {
+            m_startTime         = myTimeStamp1 + (myTimeStamp2/(myTimeStamp3-myTimeStamp4)) + deltaTimeUgly;
+	  } else {
+            m_startTime         = myTimeStamp1 + deltaTimeUgly;
+	  }
           m_startTimeDataGram = m_digiEvent->getTimeStamp() + deltaTimeUgly;
 	}
       }
