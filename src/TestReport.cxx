@@ -2200,7 +2200,7 @@ void TestReport::produceEpuPlot()
 {
   string file(m_prefix);
   file += "_epu";
-  PlotAttribute att(file.c_str(), "Crate number","epu",true);
+  PlotAttribute att(file.c_str(), "Crate number","epu");
   producePlot(m_epu, att);
   insertPlot(att);
 }
