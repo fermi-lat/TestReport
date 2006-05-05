@@ -561,17 +561,14 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 
 
       // GEM discarded events:
-      int thisGemDiscarded = m_digiEvent->getGem().getDiscarded();
+      ULong64_t thisGemDiscarded = m_digiEvent->getMetaEvent().scalers().discarded();
 
       int thisGemDeltaEventTime       = m_digiEvent->getGem().getDeltaEventTime();
       int thisGemWDeltaWindowOpenTime = m_digiEvent->getGem().getDeltaWindowOpenTime();
 
       if (iEvent > 0) {
         // Gem discarded delta wrt the previous event:
-        float delta = thisGemDiscarded - previousGemDiscarded;
-        if (delta < 0) {
-	  delta = delta  + 16776703;
-	} 
+        double delta = thisGemDiscarded - previousGemDiscarded;
         m_gemDiscarded->Fill(delta);
 
         // Fill time histo for non-saturated events:
@@ -2200,7 +2197,7 @@ void TestReport::produceEpuPlot()
 {
   string file(m_prefix);
   file += "_epu";
-  PlotAttribute att(file.c_str(), "Crate number","epu");
+  PlotAttribute att(file.c_str(), "Crate number","epu",true);
   producePlot(m_epu, att);
   insertPlot(att);
 }

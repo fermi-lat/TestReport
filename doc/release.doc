@@ -173,3 +173,7 @@ v3r5p1	Protect against time hacks being the same in two events.
 
 May 3, 2006: awb
 v3r5p2	Drop log scale for crate histogram to get autoscaling to work properly.
+
+May 5, 2006: awb
+v3r5p3	Reintroduce log scale for crate histogram. 
+ 	Get GEM discarded counter from context information. Drop rollover protection.  
