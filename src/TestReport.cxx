@@ -67,7 +67,7 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_reconBranch(0), m_reconEvent(0), m_digiFile(0), m_digiTree(0),
     m_digiBranch(0), m_digiEvent(0), m_trigger(0), m_nBadEvts(0), 
     m_nTrgParityErrors(0), m_nPacketErrors(0), m_nTemErrors(0), m_isLATTE(0),
-    m_nEvent(0),
+    m_nEvent(0), m_nbrPrescaled(0), m_nbrDeadZone(0), m_deltaSequenceNbrEvents(0),
     m_nTkrTrigger(0), m_nEventBadStrip(0), m_nEventMoreStrip(0), 
     m_nEventSatTot(0), m_nEventZeroTot(0), m_nEvtInvalidTot(0), m_nEvtOverlapTriggerTot(0),
     m_nEventBadTot(0), m_startTime(0),
@@ -529,8 +529,28 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 
   // For testing: awb
   //int nEvent = 1000;
-
   //m_nEvent = nEvent;
+
+  // Look at first and last event:
+  m_digiBranch->GetEntry(0);
+  ULong64_t gemSequenceFirst  = m_digiEvent->getMetaEvent().scalers().sequence();
+  ULong64_t gemPrescaledFirst = m_digiEvent->getMetaEvent().scalers().prescaled();
+  ULong64_t gemDeadZoneFirst  = m_digiEvent->getMetaEvent().scalers().deadzone();
+  ULong64_t liveTimeFirst     = m_digiEvent->getMetaEvent().scalers().livetime();
+  ULong64_t elapsedTimeFirst  = m_digiEvent->getMetaEvent().scalers().elapsed();
+
+  m_digiBranch->GetEntry(m_nEvent-1);
+  ULong64_t gemSequenceLast  = m_digiEvent->getMetaEvent().scalers().sequence();
+  ULong64_t gemPrescaledLast = m_digiEvent->getMetaEvent().scalers().prescaled();
+  ULong64_t gemDeadZoneLast  = m_digiEvent->getMetaEvent().scalers().deadzone();
+  ULong64_t liveTimeLast     = m_digiEvent->getMetaEvent().scalers().livetime();
+  ULong64_t elapsedTimeLast  = m_digiEvent->getMetaEvent().scalers().elapsed();
+
+  // Context information:
+  m_nbrPrescaled           = gemPrescaledLast - gemPrescaledFirst;
+  m_nbrDeadZone            = gemDeadZoneLast  - gemDeadZoneFirst;
+  m_deltaSequenceNbrEvents = m_nEvent - (gemSequenceLast-gemSequenceFirst + 1);
+
 
   // For GEM discarded events:
   int previousGemDiscarded = 0;
@@ -570,6 +590,10 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
         // Gem discarded delta wrt the previous event:
         double delta = thisGemDiscarded - previousGemDiscarded;
         m_gemDiscarded->Fill(delta);
+	if (delta < 0) {
+	  std::cout << "Warning! The GEM discarded counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
+	  std::cout << "         It went from " << previousGemDiscarded << " to " << thisGemDiscarded << " i.e. a change of " << delta << std::endl;
+        }
 
         // Fill time histo for non-saturated events:
         if (thisGemWDeltaWindowOpenTime<65500 && thisGemDeltaEventTime<65500) {
@@ -1159,6 +1183,12 @@ void TestReport::generateReport()
   (*m_report) << "@li Time of the last trigger: <b>" << ctime((time_t*) (&m_endTime)) << " (GMT) </b>";
   (*m_report) << "@li Duration: <b>" << m_endTime - m_startTime << " seconds" << "</b>" << endl;
   (*m_report) << "@li Trigger rate: <b>" << double(m_nEvent)/(m_endTime - m_startTime) << " hz" << "</b>" << endl;
+
+  (*m_report) << "@li There were @b " << m_nbrPrescaled << " prescaled events and @b " << m_nbrDeadZone  << " dead zone events." << endl;
+  if (m_deltaSequenceNbrEvents != 0) {
+    (*m_report) << "@li The number of events in the digi file does not agree with the GEM sequence counter! The difference is @b " << m_deltaSequenceNbrEvents << ". Is the onboard filter running?" << endl;
+  }
+
 
   if(m_reconFile) {
     (*m_report) << "<p>The Recon file is: @em " << m_reconFile->GetName() << "</p>" << endl;

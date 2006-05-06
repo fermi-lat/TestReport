@@ -487,6 +487,10 @@ class TestReport {
   /// time of last datagram
   UInt_t m_endTimeDataGram;
 
+  // Number of GEM related quantities:
+  ULong64_t m_nbrPrescaled;
+  ULong64_t m_nbrDeadZone;
+  ULong64_t m_deltaSequenceNbrEvents;
 
   // epu number
   TH1F* m_epu;

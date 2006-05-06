@@ -177,3 +177,7 @@ v3r5p2	Drop log scale for crate histogram to get autoscaling to work properly.
 May 5, 2006: awb
 v3r5p3	Reintroduce log scale for crate histogram. 
  	Get GEM discarded counter from context information. Drop rollover protection.  
+
+May 5, 2006: awb
+v3r5p4	Added number of prescaled and dead zone events.
+	Added check on the consistency between the GEM sequence counter and the number of events in the digi file.
