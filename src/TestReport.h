@@ -262,6 +262,7 @@ class TestReport {
   void produceTimeIntervalPlotSBC();
   void produceTimeIntervalPlotGEM();
 
+  void produceTriggerRatePlot(); 
 
   void produceNHitPlane2DPlot();
 
@@ -365,10 +366,25 @@ class TestReport {
   /// trigger histogram
   TH1F* m_trigger;
 
+  // Triggger rates:
+  TH1F* m_triggerRate;
+  TH1F* m_deadzoneRate;
+  TH1F* m_discardedRate;
+
   // LATTE?
   int m_isLATTE;
 
-  /// number of events with different Glt trigger
+  // Timetone counters and flags:
+  UInt_t m_nbrFlywheeling;
+
+  Int_t m_nbrIncomplete;
+  Int_t m_nbrMissingGps;
+  Int_t m_nbrMissingCpuPps;
+  Int_t m_nbrMissingLatPps;
+  Int_t m_nbrMissingTimeTone;
+
+
+  /// number of events with different Glt trigger:
   long m_nEvtGltTrigger[enums::number_of_trigger_bits];
 
   /// no of bad events indicated in event summary data
@@ -381,6 +397,9 @@ class TestReport {
 
   /// condition summary in GEM
   TH1F* m_condSummary;
+
+  // Livetime:
+  float m_liveTime;
 
   /// number of events with different GEM trigger
   long m_nEvtGemTrigger[enums::GEM_offset];
@@ -518,6 +537,9 @@ class TestReport {
   /// histogram of time between adjacent event in mili second, taken from GEM
   TH1F* m_timeIntervalGem;
   TH1F* m_timeIntervalGemZoom;
+
+  TH1F* m_deltaWindowOpenTime;
+  TH1F* m_deltaWindowOpenTimeZoom;
 
   /// percentage of events with TKR trigger but less than 6 digis in a tower
   TGraph* m_nDigi;

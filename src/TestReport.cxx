@@ -70,7 +70,9 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_nEvent(0), m_nbrPrescaled(0), m_nbrDeadZone(0), m_deltaSequenceNbrEvents(0),
     m_nTkrTrigger(0), m_nEventBadStrip(0), m_nEventMoreStrip(0), 
     m_nEventSatTot(0), m_nEventZeroTot(0), m_nEvtInvalidTot(0), m_nEvtOverlapTriggerTot(0),
-    m_nEventBadTot(0), m_startTime(0),
+    m_nEventBadTot(0), m_startTime(0), m_liveTime(0),
+    m_nbrFlywheeling(0), m_nbrIncomplete(0), m_nbrMissingGps(0), m_nbrMissingCpuPps(0), 
+    m_nbrMissingLatPps(0), m_nbrMissingTimeTone(0), 
     m_endTime(0), m_startTimeDataGram(0), m_endTimeDataGram(0),
     m_nDigi(0), m_nAcdOddParityError(0), m_nAcdHeaderParityError(0),
     m_AcdTileIdOnePMT(0), m_AcdTileIdOneVeto(0),
@@ -256,6 +258,18 @@ TestReport::TestReport(const char* dir, const char* prefix,
   att.set("Crate number (Epu0 - Epu1 - Epu2 - Siu0 - Siu1 - Aux)","Number of events");
   setHistParameters(m_epu,att);
 
+  m_triggerRate = new TH1F("triggerRate","Trigger rate for 30 equally spaced time intervals",30,0,30);
+  att.set("Trigger rate for 30 time intervals","Trigger rate [Hz]");
+  setHistParameters(m_triggerRate,att);
+
+  m_deadzoneRate = new TH1F("deadzoneRate","Deadzone rate for 30 equally spaced time intervals",30,0,30);
+  att.set("Deadzone rate for 30 time intervals","Deadzone rate [Hz]");
+  setHistParameters(m_deadzoneRate,att);
+
+  m_discardedRate = new TH1F("discardedRate","Discarded rate for 30 equally spaced time intervals",30,0,30);
+  att.set("Discarded rate for 30 time intervals","Discarded rate [Hz]");
+  setHistParameters(m_discardedRate,att);
+
   m_gemDiscarded = new TH1F("gemDiscarded","Number of GEM discarded events between two successive read out events",40,0,20);
   att.set("Number of GEM discarded events","Number of events");
   setHistParameters(m_gemDiscarded,att);
@@ -268,18 +282,26 @@ TestReport::TestReport(const char* dir, const char* prefix,
   att.set("Time interval between adjacent events(ms)", "Number of events");
   setHistParameters(m_timeInterval, att);
 
-  m_timeIntervalCut = new TH1F("timeIntervalCut", "Time interval between adjacent event in millseconds with a cut of 1 millsecond", 100, 0., 1.);
+  m_timeIntervalCut = new TH1F("timeIntervalCut", "Time interval between adjacent event in millseconds with a cut of 1 millisecond", 100, 0., 1.);
   att.set("Time interval between adjacent events(ms)", "Number of events");
   att.m_canRebin = false;
   setHistParameters(m_timeIntervalCut, att);
 
-  m_timeIntervalGem = new TH1F("timeIntervalGem", "Time interval between adjacent event in milliseconds, the time is measured by GEM", 100, 0., 3.);
+  m_timeIntervalGem = new TH1F("timeIntervalGem", "Time interval between adjacent events in milliseconds as measured by the GEM", 100, 0., 3.);
   att.set("Time interval between adjacent events(ms)", "Number of events");
   setHistParameters(m_timeIntervalGem, att);
 
-  m_timeIntervalGemZoom = new TH1F("timeIntervalGemZoom", "Time interval between adjacent event in milliseconds with a cut of 1 millsecond. The time is measured by GEM", 100, 0., 1.);
+  m_timeIntervalGemZoom = new TH1F("timeIntervalGemZoom", "Time interval between adjacent events in milliseconds as measured by the GEM with a cut of 1 millisecond", 100, 0., 1.);
   att.set("Time interval between adjacent events(ms)", "Number of events");
   setHistParameters(m_timeIntervalGemZoom, att);
+
+  m_deltaWindowOpenTime = new TH1F("deltaWindowOpenTime", "Delta window open time in milliseconds as measured by the GEM", 100, 0., 3.);
+  att.set("Delta window open time (ms)", "Number of events");
+  setHistParameters(m_deltaWindowOpenTime, att);
+
+  m_deltaWindowOpenTimeZoom = new TH1F("deltaWindowOpenTimeZoom", "Delta window open time in milliseconds as measured by the GEM with a cut of 1 millisecond", 100, 0., 1.);
+  att.set("Delta window open time (ms)", "Number of events");
+  setHistParameters(m_deltaWindowOpenTimeZoom, att);
 
   m_alignCalTkr = new TH1F("alignCalTkr", "Distance between the reconstructed CAL cluster XY coordinates and the XY coordinates extrapolated from TKR", 50, 0., 100.);
   att.set("Difference(mm)", "Number of events");
@@ -528,52 +550,189 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   }
 
   // For testing: awb
-  //int nEvent = 1000;
+  //int nEvent = 25000;
   //m_nEvent = nEvent;
 
+
+  //
+  // For the trigger/deadzone rate intervals:
+  //
+  ULong64_t elapsedTimeFirst;
+  ULong64_t elapsedTimeLast;
+
+  Long64_t deltaTimeInterval = 1;
+
+  Int_t nbrTimeIntervals = 30;
+  Int_t intervalCounter  = 1;
+
+  Int_t eventCounter = 0;
+
+  ULong64_t deadzoneCounter  = 0;
+  ULong64_t discardedCounter = 0;
+
+  ULong64_t previousDeadZone  = 0;
+  ULong64_t previousDiscarded = 0;
+
+  //
+  // Time tone counters and flags:
+  //
+  m_nbrFlywheeling     = 0;
+  m_nbrIncomplete      = 0;
+  m_nbrMissingGps      = 0;
+  m_nbrMissingCpuPps   = 0;
+  m_nbrMissingLatPps   = 0;
+  m_nbrMissingTimeTone = 0;  
+
+  UInt_t firstFlywheeling;
+  UInt_t lastFlywheeling;
+ 
+
   // Look at first and last event:
-  m_digiBranch->GetEntry(0);
-  ULong64_t gemSequenceFirst  = m_digiEvent->getMetaEvent().scalers().sequence();
-  ULong64_t gemPrescaledFirst = m_digiEvent->getMetaEvent().scalers().prescaled();
-  ULong64_t gemDeadZoneFirst  = m_digiEvent->getMetaEvent().scalers().deadzone();
-  ULong64_t liveTimeFirst     = m_digiEvent->getMetaEvent().scalers().livetime();
-  ULong64_t elapsedTimeFirst  = m_digiEvent->getMetaEvent().scalers().elapsed();
+  if(m_digiFile) {
+    m_digiBranch->GetEntry(0);
+    ULong64_t gemSequenceFirst  = m_digiEvent->getMetaEvent().scalers().sequence();
+    ULong64_t gemPrescaledFirst = m_digiEvent->getMetaEvent().scalers().prescaled();
+    ULong64_t gemDeadZoneFirst  = m_digiEvent->getMetaEvent().scalers().deadzone();
+    ULong64_t liveTimeFirst     = m_digiEvent->getMetaEvent().scalers().livetime();
+    elapsedTimeFirst            = m_digiEvent->getMetaEvent().scalers().elapsed();
+    firstFlywheeling            = m_digiEvent->getMetaEvent().time().current().flywheeling();
+    m_digiEvent->Clear();
 
-  m_digiBranch->GetEntry(m_nEvent-1);
-  ULong64_t gemSequenceLast  = m_digiEvent->getMetaEvent().scalers().sequence();
-  ULong64_t gemPrescaledLast = m_digiEvent->getMetaEvent().scalers().prescaled();
-  ULong64_t gemDeadZoneLast  = m_digiEvent->getMetaEvent().scalers().deadzone();
-  ULong64_t liveTimeLast     = m_digiEvent->getMetaEvent().scalers().livetime();
-  ULong64_t elapsedTimeLast  = m_digiEvent->getMetaEvent().scalers().elapsed();
+    m_digiBranch->GetEntry(m_nEvent-1);
+    ULong64_t gemSequenceLast  = m_digiEvent->getMetaEvent().scalers().sequence();
+    ULong64_t gemPrescaledLast = m_digiEvent->getMetaEvent().scalers().prescaled();
+    ULong64_t gemDeadZoneLast  = m_digiEvent->getMetaEvent().scalers().deadzone();
+    ULong64_t liveTimeLast     = m_digiEvent->getMetaEvent().scalers().livetime();
+    elapsedTimeLast            = m_digiEvent->getMetaEvent().scalers().elapsed();
+    lastFlywheeling            = m_digiEvent->getMetaEvent().time().current().flywheeling();
+    m_digiEvent->Clear();
 
-  // Context information:
-  m_nbrPrescaled           = gemPrescaledLast - gemPrescaledFirst;
-  m_nbrDeadZone            = gemDeadZoneLast  - gemDeadZoneFirst;
-  m_deltaSequenceNbrEvents = m_nEvent - (gemSequenceLast-gemSequenceFirst + 1);
+    // Flywheeling:
+    m_nbrFlywheeling = lastFlywheeling - firstFlywheeling;
+
+
+
+    // Context information:
+    m_nbrPrescaled           = gemPrescaledLast - gemPrescaledFirst;
+    m_nbrDeadZone            = gemDeadZoneLast  - gemDeadZoneFirst;
+    m_deltaSequenceNbrEvents = m_nEvent - (gemSequenceLast-gemSequenceFirst + 1);
+
+    // Livetime: 
+    Double_t tmpElapsedTime = elapsedTimeLast - elapsedTimeFirst;
+    Double_t tmpLiveTime    = liveTimeLast    - liveTimeFirst;
+    if (tmpElapsedTime != 0.0) {
+      m_liveTime = tmpLiveTime/tmpElapsedTime;
+    } else {
+      m_liveTime = -1.0;
+    }
+
+    // For trigger rates in time intervals:
+    deltaTimeInterval = (elapsedTimeLast - elapsedTimeFirst)/nbrTimeIntervals;
+  }
+
 
 
   // For GEM discarded events:
   int previousGemDiscarded = 0;
 
+  // Loop over events:
   for(int iEvent = 0; iEvent != m_nEvent; ++iEvent) {
 
     if ( iEvent % 1000 == 0 ) {
-      cout << iEvent << endl;
+      std::cout << "Event number " << iEvent << std::endl;
     }
 
-    if(m_mcEvent) m_mcEvent->Clear();
-    if(m_digiEvent) m_digiEvent->Clear();
-    if(m_reconEvent) m_reconEvent->Clear();
+    // Cleanup:
+    if (m_mcEvent)    m_mcEvent->Clear();
+    if (m_digiEvent)  m_digiEvent->Clear();
+    if (m_reconEvent) m_reconEvent->Clear();
 
-    if(m_mcFile) {
+    // Analyze MC file:
+    if (m_mcFile) {
       m_mcBranch->GetEntry(iEvent);
       analyzeMcTree();
     }
 
-    if(m_digiFile) {
+    // Analyze digi file:
+    if (m_digiFile) {
       m_digiBranch->GetEntry(iEvent);
 
       analyzeDigiTree();
+
+      // Time tone counters and flags:
+      if (m_digiEvent->getMetaEvent().time().current().incomplete() != 0) {
+        m_nbrIncomplete++;
+      }
+      if (m_digiEvent->getMetaEvent().time().current().missingGps() != 0) {
+        m_nbrMissingGps++;
+      }
+      if (m_digiEvent->getMetaEvent().time().current().missingCpuPps() != 0) {
+        m_nbrMissingCpuPps++;
+      }
+      if (m_digiEvent->getMetaEvent().time().current().missingLatPps() != 0) {
+        m_nbrMissingLatPps++;
+      }
+      if (m_digiEvent->getMetaEvent().time().current().missingTimeTone() != 0) {
+        m_nbrMissingTimeTone++;
+      }
+
+
+
+      // Trigger/deadzone rates per time interval:
+      eventCounter++;
+
+      ULong64_t thisDeadZone  = m_digiEvent->getMetaEvent().scalers().deadzone();
+      ULong64_t thisDiscarded = m_digiEvent->getMetaEvent().scalers().discarded();
+
+      if (iEvent > 0) { 
+        Int_t deltaDeadZone = thisDeadZone - previousDeadZone; 
+        deadzoneCounter     = deadzoneCounter + deltaDeadZone;
+        previousDeadZone    = thisDeadZone;
+
+        Int_t deltaDiscarded = thisDiscarded - previousDiscarded; 
+        discardedCounter     = discardedCounter + deltaDiscarded;
+        previousDiscarded    = thisDiscarded;
+      }  
+
+      ULong64_t thisElapsedTime = m_digiEvent->getMetaEvent().scalers().elapsed();
+
+      Long64_t deltaTime = thisElapsedTime - elapsedTimeFirst; 
+      Long64_t cutTime   = intervalCounter*deltaTimeInterval;  
+
+      // Trigger rates:
+      if (deltaTime >= cutTime) {
+        float rate;
+        if (deltaTimeInterval != 0) {
+          rate = (float) eventCounter/ (float) (deltaTimeInterval * 50 * std::pow(10.0, -9));
+	} else {
+	  rate = -1.0;
+	}
+        m_triggerRate->Fill(intervalCounter-1,rate);
+
+	// Deadzone rates:
+        if (deltaTimeInterval != 0) {
+          rate = (float) deadzoneCounter/ (float) (deltaTimeInterval * 50 * std::pow(10.0, -9));
+        } else {
+          rate = -1.0;
+        }
+        m_deadzoneRate->Fill(intervalCounter-1,rate);
+
+	// Discarded rates:
+        if (deltaTimeInterval != 0) {
+          rate = (float) discardedCounter/ (float) (deltaTimeInterval * 50 * std::pow(10.0, -9));
+        } else {
+          rate = -1.0;
+        }
+        m_discardedRate->Fill(intervalCounter-1,rate);
+
+	// Reset counters:
+        intervalCounter++;
+
+        eventCounter     = 0;
+        deadzoneCounter  = 0;
+        discardedCounter = 0;
+      }
+
 
       // EPU:
       int crate = m_digiEvent->getMetaEvent().datagram().crate();
@@ -591,7 +750,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
         double delta = thisGemDiscarded - previousGemDiscarded;
         m_gemDiscarded->Fill(delta);
 	if (delta < 0) {
-	  std::cout << "Warning! The GEM discarded counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
+	  std::cout << "Warning! The extended GEM discarded counter DECREASED from event " << (iEvent-1) << " to event " << iEvent     << std::endl;
 	  std::cout << "         It went from " << previousGemDiscarded << " to " << thisGemDiscarded << " i.e. a change of " << delta << std::endl;
         }
 
@@ -608,20 +767,16 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       previousGemDiscarded = thisGemDiscarded;
 
 
+      // PPC time:
       UInt_t uPpcT = m_digiEvent->getEbfUpperPpcTimeBase();
       UInt_t lPpcT = m_digiEvent->getEbfLowerPpcTimeBase();
       static UInt_t prevUPpcT = uPpcT;
       static UInt_t prevLPpcT = lPpcT;
 
- 
-      //     cout << "uPpcT = " << uPpcT << " lPpcT = " << lPpcT
-      //      << " good = " << m_digiEvent->getEventSummaryData().goodEvent()
-      //   << endl;
-
       //
       // Time from Mission elapsed time to Unix time and then from PDT to GMT:
       //
-      int deltaTimeUgly = 978307200 + 25200; 
+      Int_t deltaTimeUgly = 978307200 + 25200; 
 
       if(iEvent == 0) {
         if (m_isLATTE == 1) {
@@ -632,22 +787,22 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	  UInt_t myTimeStamp3 = m_digiEvent->getMetaEvent().time().current().timeHack().ticks();
 	  UInt_t myTimeStamp4 = m_digiEvent->getMetaEvent().time().previous().timeHack().ticks();
           
+          // This is overkill:
           if (myTimeStamp3 != myTimeStamp4) {
-            m_startTime         = myTimeStamp1 + (myTimeStamp2/(myTimeStamp3-myTimeStamp4)) + deltaTimeUgly;
+            m_startTime = myTimeStamp1 + (myTimeStamp2/(myTimeStamp3-myTimeStamp4)) + deltaTimeUgly;
 	  } else {
-            m_startTime         = myTimeStamp1 + deltaTimeUgly;
+            m_startTime = myTimeStamp1 + deltaTimeUgly;
 	  }
           m_startTimeDataGram = m_digiEvent->getTimeStamp() + deltaTimeUgly;
 	}
       }
       else {
 	// convert 16 MHZ clock to ms
-	
 	assert(uPpcT >= prevUPpcT);
 
 	double interval;
 
-// note a long can only hold 32 bit
+        // note a long can only hold 32 bit
 	static const long temp = 256*256*256*255;
 
 	if(lPpcT < prevLPpcT) { // roll over
@@ -678,23 +833,33 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	  UInt_t myTimeStamp3 = m_digiEvent->getMetaEvent().time().current().timeHack().ticks();
 	  UInt_t myTimeStamp4 = m_digiEvent->getMetaEvent().time().previous().timeHack().ticks();
 
-          m_endTime         = myTimeStamp1 + (myTimeStamp2/(myTimeStamp3-myTimeStamp4)) + deltaTimeUgly;
+	  // This is still overkill:
+          if (myTimeStamp3 != myTimeStamp4) {
+            m_endTime = myTimeStamp1 + (myTimeStamp2/(myTimeStamp3-myTimeStamp4)) + deltaTimeUgly;
+          } else {
+            m_endTime = myTimeStamp1 + deltaTimeUgly;
+	  }
           m_endTimeDataGram = m_digiEvent->getTimeStamp() + deltaTimeUgly;
 	}
       }
     }
 
+    // Analyze Recon file:
     if(m_reconFile) {
       m_reconBranch->GetEntry(iEvent);
       analyzeReconTree();
     }
 
   }  
-  
+
+  // Closing time:  
   if(m_mcFile) m_mcFile->Close();
   if(m_reconFile) m_reconFile->Close();
   if(m_digiFile) m_digiFile->Close();
 }
+
+
+
 
 void TestReport::analyzeReconTree()
 {
@@ -893,6 +1058,7 @@ void TestReport::analyzeDigiTree()
   }
 
 
+  // GEM delta event time:
   // 1 count = 50 ns
   UInt_t deltaT = m_digiEvent->getGem().getDeltaEventTime();
   m_timeIntervalGem->Fill(0.00005*deltaT);
@@ -900,6 +1066,15 @@ void TestReport::analyzeDigiTree()
   if ((0.00005*deltaT) < 1.0) {
     m_timeIntervalGemZoom->Fill(0.00005*deltaT);
   }
+
+  // Delta window open time:
+  UInt_t deltaWindowOpenTime = m_digiEvent->getGem().getDeltaWindowOpenTime();
+  m_deltaWindowOpenTime->Fill(0.00005*deltaWindowOpenTime);
+
+  if ((0.00005*deltaWindowOpenTime) < 1.0) {
+    m_deltaWindowOpenTimeZoom->Fill(0.00005*deltaWindowOpenTime);
+  }
+
 
   int tkrVector = m_digiEvent->getGem().getTkrVector();
 
@@ -1184,10 +1359,18 @@ void TestReport::generateReport()
   (*m_report) << "@li Duration: <b>" << m_endTime - m_startTime << " seconds" << "</b>" << endl;
   (*m_report) << "@li Trigger rate: <b>" << double(m_nEvent)/(m_endTime - m_startTime) << " hz" << "</b>" << endl;
 
+  // Needs FSW 08-06-09:
+  //(*m_report) << "@li Livetime: <b> " << (m_liveTime * 100.0) << "% </b>" << endl;  
+
   (*m_report) << "@li There were @b " << m_nbrPrescaled << " prescaled events and @b " << m_nbrDeadZone  << " dead zone events." << endl;
+
   if (m_deltaSequenceNbrEvents != 0) {
-    (*m_report) << "@li The number of events in the digi file does not agree with the GEM sequence counter! The difference is @b " << m_deltaSequenceNbrEvents << ". Is the onboard filter running?" << endl;
+    (*m_report) << "@li The number of events in the digi file does not agree with the extended GEM sequence counter! The difference is @b " << m_deltaSequenceNbrEvents << ". Is the onboard filter running?" << endl;
+  } else {
+    (*m_report) << "@li There were no gaps in the extended GEM sequence counter." << endl;
   }
+
+  (*m_report) << "@li There were @b " << m_nbrMissingTimeTone << " missing Time tones, @b " << m_nbrFlywheeling << " flywheeling, @b " << m_nbrIncomplete << " incomplete time tones, @b " << m_nbrMissingGps << " missing GPS locks, @b " << m_nbrMissingCpuPps << " missing 1-PPS signals at CPU level and @b " << m_nbrMissingLatPps << " missing 1-PPS signals at LAT level." << endl; 
 
 
   if(m_reconFile) {
@@ -1221,6 +1404,10 @@ void TestReport::generateDigiReport()
   insertPlot(att);
   *(m_report) << "@latexonly \\nopagebreak @endlatexonly" << endl;
   printGltTriggerTable();
+
+  // Trigger rates:
+  produceTriggerRatePlot();
+
 
   // Trigger per tower:
   produceTriggerPerTowerPlot();
@@ -2176,6 +2363,26 @@ void TestReport::scale2DHist(TH2F* h, int* nEvents)
 }
 
 
+void TestReport::produceTriggerRatePlot()
+{
+  string file(m_prefix);
+  file += "_triggerRate";
+  PlotAttribute att(file.c_str(), "Trigger rates for 30 time intervals","triggerRate",true);
+  producePlot(m_triggerRate, att);
+  insertPlot(att);
+
+  file += "_deadzoneRate";
+  att.set(file.c_str(), "Deadzone rates for 30 time intervals","deadzoneRate",true);
+  producePlot(m_deadzoneRate, att);
+  insertPlot(att);
+
+  file += "_discardedRate";
+  att.set(file.c_str(), "Discarded rates for 30 time intervals","discardedRate",true);
+  producePlot(m_discardedRate, att);
+  insertPlot(att);
+}
+
+
 void TestReport::produceTriggerPerTowerPlot()
 {
   string file(m_prefix);
@@ -2271,14 +2478,26 @@ void TestReport::produceTimeIntervalPlotGEM()
   string file(m_prefix);
   file = m_prefix;
   file += "_timeIntervalGem";
-  PlotAttribute att(file.c_str(), "Time interval between adjacent events in millseconds. Note that this interval is measured in the GEM. The time is stored in a 16 bit counter, each count is equal to 50 ns, so the time will saturate at roughly 3.3 ms.", "timeIntervalGem", true);
+  PlotAttribute att(file.c_str(), "Time interval between adjacent events in milliseconds. Note that this interval is measured in the GEM. The time is stored in a 16 bit counter, each count is nominally 50 ns, so the time will saturate at roughly 3.3 ms.", "timeIntervalGem", true);
   producePlot(m_timeIntervalGem, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_timeIntervalGemZoom";
-  att.set(file.c_str(), "Time interval between adjacent events in millseconds with a cut of 1 millisecond. Note that this interval is measured in the GEM. The time is stored in a 16 bit counter, each count is equal to 50 ns.", "timeIntervalGemZoom", true);
+  att.set(file.c_str(), "Time interval between adjacent events in milliseconds with a cut of 1 millisecond. Note that this interval is measured in the GEM. The time is stored in a 16 bit counter, each count is nominally 50 ns.", "timeIntervalGemZoom", true);
   producePlot(m_timeIntervalGemZoom, att);
+  insertPlot(att);
+
+  file = m_prefix;
+  file += "_deltaWindowOpenTime";
+  att.set(file.c_str(), "Delta window open time in milliseconds. Note that this interval is measured in the GEM. The time is stored in a 16 bit counter, each count is nominally 50 ns.", "deltaWindowOpenTime", true);
+  producePlot(m_deltaWindowOpenTime, att);
+  insertPlot(att);
+
+  file = m_prefix;
+  file += "_deltaWindowOpenTimeZoom";
+  att.set(file.c_str(), "Delta window open time in milliseconds with a cut of 1 millisecond. Note that this interval is measured in the GEM. The time is stored in a 16 bit counter, each count is nominally 50 ns.", "deltaWindowOpenTimeZoom", true);
+  producePlot(m_deltaWindowOpenTimeZoom, att);
   insertPlot(att);
 }
 

@@ -181,3 +181,7 @@ v3r5p3	Reintroduce log scale for crate histogram.
 May 5, 2006: awb
 v3r5p4	Added number of prescaled and dead zone events.
 	Added check on the consistency between the GEM sequence counter and the number of events in the digi file.
+
+May 12, 2006: awb
+v3r5p5	Added more context/time tone information.
+	Added trigger/deadzone/discarded rates for 30 time intervals.
