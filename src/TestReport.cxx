@@ -70,7 +70,7 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_nEvent(0), m_nbrPrescaled(0), m_nbrDeadZone(0), m_deltaSequenceNbrEvents(0),
     m_nTkrTrigger(0), m_nEventBadStrip(0), m_nEventMoreStrip(0), 
     m_nEventSatTot(0), m_nEventZeroTot(0), m_nEvtInvalidTot(0), m_nEvtOverlapTriggerTot(0),
-    m_nEventBadTot(0), m_startTime(0), m_liveTime(0),
+    m_nEventBadTot(0), m_startTime(0), m_liveTime(0), m_extendedCountersFlag(0),
     m_nbrFlywheeling(0), m_nbrIncomplete(0), m_nbrMissingGps(0), m_nbrMissingCpuPps(0), 
     m_nbrMissingLatPps(0), m_nbrMissingTimeTone(0), 
     m_endTime(0), m_startTimeDataGram(0), m_endTimeDataGram(0),
@@ -573,6 +573,11 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   ULong64_t previousDeadZone  = 0;
   ULong64_t previousDiscarded = 0;
 
+  ULong64_t previousElapsed   = 0;
+  ULong64_t previousLiveTime  = 0;
+  ULong64_t previousSequence  = 0;
+  ULong64_t previousPrescaled = 0;
+
   //
   // Time tone counters and flags:
   //
@@ -585,6 +590,9 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 
   UInt_t firstFlywheeling;
   UInt_t lastFlywheeling;
+
+  // Extended counter flag:
+  m_extendedCountersFlag = 0;
  
 
   // Look at first and last event:
@@ -684,15 +692,61 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       ULong64_t thisDeadZone  = m_digiEvent->getMetaEvent().scalers().deadzone();
       ULong64_t thisDiscarded = m_digiEvent->getMetaEvent().scalers().discarded();
 
-      if (iEvent > 0) { 
-        Int_t deltaDeadZone = thisDeadZone - previousDeadZone; 
-        deadzoneCounter     = deadzoneCounter + deltaDeadZone;
-        previousDeadZone    = thisDeadZone;
+      ULong64_t thisElapsed   = m_digiEvent->getMetaEvent().scalers().elapsed();
+      ULong64_t thisLiveTime  = m_digiEvent->getMetaEvent().scalers().livetime();
+      ULong64_t thisPrescaled = m_digiEvent->getMetaEvent().scalers().prescaled();
+      ULong64_t thisSequence  = m_digiEvent->getMetaEvent().scalers().sequence();
 
-        Int_t deltaDiscarded = thisDiscarded - previousDiscarded; 
-        discardedCounter     = discardedCounter + deltaDiscarded;
-        previousDiscarded    = thisDiscarded;
+      //if (iEvent > 0) { 
+      if (iEvent > 4160) { 
+        Long64_t deltaDeadZone = thisDeadZone - previousDeadZone; 
+        deadzoneCounter         = deadzoneCounter + deltaDeadZone;        
+
+        if (deltaDeadZone < 0) { 
+          m_extendedCountersFlag++;
+	  std::cout << "Warning! The extended deadzone counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
+	  std::cout << "         It went from " << previousDeadZone << " to " << thisDeadZone << " i.e. a change of " << deltaDeadZone << std::endl;
+	}
+
+        Long64_t deltaDiscarded = thisDiscarded - previousDiscarded; 
+        discardedCounter         = discardedCounter + deltaDiscarded;
+        if (deltaDiscarded < 0) { 
+          m_extendedCountersFlag++;
+	  std::cout << "Warning! The extended discarded counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
+	  std::cout << "         It went from " << previousDiscarded << " to " << thisDiscarded << " i.e. a change of " << deltaDiscarded << std::endl;
+	}
+
+	Long64_t deltaElapsed = thisElapsed - previousElapsed;
+        if (deltaElapsed < 0) {
+          m_extendedCountersFlag++;
+	  std::cout << "Warning! The extended elapsed counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
+	  std::cout << "         It went from " << previousElapsed << " to " << thisElapsed << " i.e. a change of " << deltaElapsed << std::endl;
+	}
+
+	Long64_t deltaLiveTime = thisLiveTime - previousLiveTime;
+        if (deltaLiveTime < 0) {
+          m_extendedCountersFlag++;
+	  std::cout << "Warning! The extended livetime counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
+	  std::cout << "         It went from " << previousLiveTime << " to " << thisLiveTime << " i.e. a change of " << deltaLiveTime << std::endl;
+	}
+
+	Long64_t deltaPrescaled = thisPrescaled - previousPrescaled;
+        if (deltaPrescaled < 0) {
+          m_extendedCountersFlag++;
+	  std::cout << "Warning! The extended prescaled counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
+	  std::cout << "         It went from " << previousPrescaled << " to " << thisPrescaled << " i.e. a change of " << deltaPrescaled << std::endl;
+	}
+
+	Long64_t deltaSequence = thisSequence - previousSequence;
+        if (deltaSequence < 0) {
+          m_extendedCountersFlag++;
+	  std::cout << "Warning! The extended sequence counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
+	  std::cout << "         It went from " << previousSequence << " to " << thisSequence << " i.e. a change of " << deltaSequence << std::endl;
+	}
+
       }  
+      previousDeadZone  = thisDeadZone;
+      previousDiscarded = thisDiscarded;
 
       ULong64_t thisElapsedTime = m_digiEvent->getMetaEvent().scalers().elapsed();
 
@@ -711,7 +765,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 
 	// Deadzone rates:
         if (deltaTimeInterval != 0) {
-          rate = (float) deadzoneCounter/ (float) (deltaTimeInterval * 50 * std::pow(10.0, -9));
+          rate = (double) deadzoneCounter/ (double) (deltaTimeInterval * 50 * std::pow(10.0, -9));
         } else {
           rate = -1.0;
         }
@@ -749,10 +803,6 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
         // Gem discarded delta wrt the previous event:
         double delta = thisGemDiscarded - previousGemDiscarded;
         m_gemDiscarded->Fill(delta);
-	if (delta < 0) {
-	  std::cout << "Warning! The extended GEM discarded counter DECREASED from event " << (iEvent-1) << " to event " << iEvent     << std::endl;
-	  std::cout << "         It went from " << previousGemDiscarded << " to " << thisGemDiscarded << " i.e. a change of " << delta << std::endl;
-        }
 
         // Fill time histo for non-saturated events:
         if (thisGemWDeltaWindowOpenTime<65500 && thisGemDeltaEventTime<65500) {
@@ -1371,6 +1421,10 @@ void TestReport::generateReport()
   }
 
   (*m_report) << "@li There were @b " << m_nbrMissingTimeTone << " missing Time tones, @b " << m_nbrFlywheeling << " flywheeling, @b " << m_nbrIncomplete << " incomplete time tones, @b " << m_nbrMissingGps << " missing GPS locks, @b " << m_nbrMissingCpuPps << " missing 1-PPS signals at CPU level and @b " << m_nbrMissingLatPps << " missing 1-PPS signals at LAT level." << endl; 
+
+  if (m_extendedCountersFlag != 0) {
+    (*m_report) << "@li Problem! At least one of the extended counters decreased from one event to the next one  @b " << m_extendedCountersFlag << " times! Check the log file for more details." << endl;
+  } 
 
 
   if(m_reconFile) {

@@ -383,6 +383,8 @@ class TestReport {
   Int_t m_nbrMissingLatPps;
   Int_t m_nbrMissingTimeTone;
 
+  // Extended counters problem?
+  Int_t m_extendedCountersFlag;
 
   /// number of events with different Glt trigger:
   long m_nEvtGltTrigger[enums::number_of_trigger_bits];

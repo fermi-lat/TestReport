@@ -185,3 +185,7 @@ v3r5p4	Added number of prescaled and dead zone events.
 May 12, 2006: awb
 v3r5p5	Added more context/time tone information.
 	Added trigger/deadzone/discarded rates for 30 time intervals.
+
+May 12, 2006: awb
+v3r5p6	Added check on extended counters.
+
