@@ -299,9 +299,13 @@ TestReport::TestReport(const char* dir, const char* prefix,
   att.set("Delta window open time (ms)", "Number of events");
   setHistParameters(m_deltaWindowOpenTime, att);
 
-  m_deltaWindowOpenTimeZoom = new TH1F("deltaWindowOpenTimeZoom", "Delta window open time in milliseconds as measured by the GEM with a cut of 1 millisecond", 100, 0., 1.);
+  m_deltaWindowOpenTimeZoom = new TH1F("deltaWindowOpenTimeZoom", "Delta window open time in milliseconds as measured by the GEM with a cut of 0.1 millisecond", 100, 0., 0.1);
   att.set("Delta window open time (ms)", "Number of events");
   setHistParameters(m_deltaWindowOpenTimeZoom, att);
+
+  m_timeIntervalElapsed = new TH1F("timeIntervalElapsed", "Elapsed time between adjacent events in milliseconds", 100, 0., 5.);
+  att.set("Elapsed time between adjacent events (ms)", "Number of events");
+  setHistParameters(m_timeIntervalElapsed, att);
 
   m_alignCalTkr = new TH1F("alignCalTkr", "Distance between the reconstructed CAL cluster XY coordinates and the XY coordinates extrapolated from TKR", 50, 0., 100.);
   att.set("Difference(mm)", "Number of events");
@@ -550,7 +554,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   }
 
   // For testing: awb
-  //int nEvent = 25000;
+  //int nEvent = 10000;
   //m_nEvent = nEvent;
 
 
@@ -697,15 +701,14 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       ULong64_t thisPrescaled = m_digiEvent->getMetaEvent().scalers().prescaled();
       ULong64_t thisSequence  = m_digiEvent->getMetaEvent().scalers().sequence();
 
-      //if (iEvent > 0) { 
-      if (iEvent > 4160) { 
+      if (iEvent > 0) { 
         Long64_t deltaDeadZone = thisDeadZone - previousDeadZone; 
         deadzoneCounter         = deadzoneCounter + deltaDeadZone;        
 
         if (deltaDeadZone < 0) { 
           m_extendedCountersFlag++;
 	  std::cout << "Warning! The extended deadzone counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
-	  std::cout << "         It went from " << previousDeadZone << " to " << thisDeadZone << " i.e. a change of " << deltaDeadZone << std::endl;
+	  std::cout << "         It went from " << previousDeadZone << " to " << thisDeadZone << " i.e. a change of " << deltaDeadZone << " ticks!" << std::endl;
 	}
 
         Long64_t deltaDiscarded = thisDiscarded - previousDiscarded; 
@@ -713,40 +716,46 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
         if (deltaDiscarded < 0) { 
           m_extendedCountersFlag++;
 	  std::cout << "Warning! The extended discarded counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
-	  std::cout << "         It went from " << previousDiscarded << " to " << thisDiscarded << " i.e. a change of " << deltaDiscarded << std::endl;
+	  std::cout << "         It went from " << previousDiscarded << " to " << thisDiscarded << " i.e. a change of " << deltaDiscarded << " ticks!" << std::endl;
 	}
 
 	Long64_t deltaElapsed = thisElapsed - previousElapsed;
+        m_timeIntervalElapsed->Fill(0.00005*deltaElapsed);
         if (deltaElapsed < 0) {
           m_extendedCountersFlag++;
 	  std::cout << "Warning! The extended elapsed counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
-	  std::cout << "         It went from " << previousElapsed << " to " << thisElapsed << " i.e. a change of " << deltaElapsed << std::endl;
+	  std::cout << "         It went from " << previousElapsed << " to " << thisElapsed << " i.e. a change of " << deltaElapsed << " ticks!" << std::endl;
 	}
 
 	Long64_t deltaLiveTime = thisLiveTime - previousLiveTime;
         if (deltaLiveTime < 0) {
           m_extendedCountersFlag++;
 	  std::cout << "Warning! The extended livetime counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
-	  std::cout << "         It went from " << previousLiveTime << " to " << thisLiveTime << " i.e. a change of " << deltaLiveTime << std::endl;
+	  std::cout << "         It went from " << previousLiveTime << " to " << thisLiveTime << " i.e. a change of " << deltaLiveTime << " ticks!" << std::endl;
 	}
 
 	Long64_t deltaPrescaled = thisPrescaled - previousPrescaled;
         if (deltaPrescaled < 0) {
           m_extendedCountersFlag++;
 	  std::cout << "Warning! The extended prescaled counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
-	  std::cout << "         It went from " << previousPrescaled << " to " << thisPrescaled << " i.e. a change of " << deltaPrescaled << std::endl;
+	  std::cout << "         It went from " << previousPrescaled << " to " << thisPrescaled << " i.e. a change of " << deltaPrescaled << " ticks!" << std::endl;
 	}
 
 	Long64_t deltaSequence = thisSequence - previousSequence;
         if (deltaSequence < 0) {
           m_extendedCountersFlag++;
 	  std::cout << "Warning! The extended sequence counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
-	  std::cout << "         It went from " << previousSequence << " to " << thisSequence << " i.e. a change of " << deltaSequence << std::endl;
+	  std::cout << "         It went from " << previousSequence << " to " << thisSequence << " i.e. a change of " << deltaSequence << " ticks!" << std::endl;
 	}
 
       }  
       previousDeadZone  = thisDeadZone;
       previousDiscarded = thisDiscarded;
+      previousElapsed   = thisElapsed;
+      previousSequence  = thisSequence;
+      previousPrescaled = thisPrescaled;
+      previousLiveTime  = thisLiveTime;
+
 
       ULong64_t thisElapsedTime = m_digiEvent->getMetaEvent().scalers().elapsed();
 
@@ -1121,7 +1130,7 @@ void TestReport::analyzeDigiTree()
   UInt_t deltaWindowOpenTime = m_digiEvent->getGem().getDeltaWindowOpenTime();
   m_deltaWindowOpenTime->Fill(0.00005*deltaWindowOpenTime);
 
-  if ((0.00005*deltaWindowOpenTime) < 1.0) {
+  if ((0.00005*deltaWindowOpenTime) < 0.1) {
     m_deltaWindowOpenTimeZoom->Fill(0.00005*deltaWindowOpenTime);
   }
 
@@ -2543,6 +2552,13 @@ void TestReport::produceTimeIntervalPlotGEM()
   insertPlot(att);
 
   file = m_prefix;
+  file += "_timeIntervalElapsed";
+  att.set(file.c_str(), "Elapsed time between adjacent events in milliseconds. This is not corrected for any drift in the clock. It assumes a nominal system clock of 50 ns.", "timeIntervalElapsed", true);
+  producePlot(m_timeIntervalElapsed, att);
+  insertPlot(att);
+
+
+  file = m_prefix;
   file += "_deltaWindowOpenTime";
   att.set(file.c_str(), "Delta window open time in milliseconds. Note that this interval is measured in the GEM. The time is stored in a 16 bit counter, each count is nominally 50 ns.", "deltaWindowOpenTime", true);
   producePlot(m_deltaWindowOpenTime, att);
@@ -2550,7 +2566,7 @@ void TestReport::produceTimeIntervalPlotGEM()
 
   file = m_prefix;
   file += "_deltaWindowOpenTimeZoom";
-  att.set(file.c_str(), "Delta window open time in milliseconds with a cut of 1 millisecond. Note that this interval is measured in the GEM. The time is stored in a 16 bit counter, each count is nominally 50 ns.", "deltaWindowOpenTimeZoom", true);
+  att.set(file.c_str(), "Delta window open time in milliseconds with a cut of 0.1 millisecond. Note that this interval is measured in the GEM. The time is stored in a 16 bit counter, each count is nominally 50 ns.", "deltaWindowOpenTimeZoom", true);
   producePlot(m_deltaWindowOpenTimeZoom, att);
   insertPlot(att);
 }

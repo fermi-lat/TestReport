@@ -543,6 +543,8 @@ class TestReport {
   TH1F* m_deltaWindowOpenTime;
   TH1F* m_deltaWindowOpenTimeZoom;
 
+  TH1F* m_timeIntervalElapsed;
+
   /// percentage of events with TKR trigger but less than 6 digis in a tower
   TGraph* m_nDigi;
 

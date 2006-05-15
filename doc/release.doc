@@ -189,3 +189,5 @@ v3r5p5	Added more context/time tone information.
 May 12, 2006: awb
 v3r5p6	Added check on extended counters.
 
+May 15, 2006: awb
+v3r5p7	Added DeltaElapsed time histogram. Bug fix for check on extedned counters.  
