@@ -366,13 +366,61 @@ class TestReport {
   /// trigger histogram
   TH1F* m_trigger;
 
-  // Triggger rates:
-  TH1F* m_triggerRate;
-  TH1F* m_deadzoneRate;
-  TH1F* m_discardedRate;
+  /// no of bad events indicated in event summary data
+  unsigned m_nBadEvts;
+
+  /// Error bits: Currently OR'ed over all towers!
+  unsigned int m_nTrgParityErrors;
+  unsigned int m_nPacketErrors;
+  unsigned int m_nTemErrors;
 
   // LATTE?
   int m_isLATTE;
+
+  /// number of events in the digi root file
+  int m_nEvent;
+
+  // Number of GEM related quantities:
+  ULong64_t m_nbrPrescaled;
+  ULong64_t m_nbrDeadZone;
+  ULong64_t m_deltaSequenceNbrEvents;
+
+  /// number of events with 3 in a row trigger in GEM
+  int m_nTkrTrigger;
+
+  /// number of events with strip ID outside the range from 0 to 1535
+  int m_nEventBadStrip;
+
+  /// number of events with more than 63 strips per GTRC
+  int m_nEventMoreStrip;
+
+  /// number of events with saturated TOT (250 ADC )
+  int m_nEventSatTot;
+
+  /// number of events with 0 TOT but at least 1 strip
+  int m_nEventZeroTot;
+
+  /// number of events with TOT values outside range [0, g_overlapTot]
+  int m_nEvtInvalidTot;
+
+  /// number of events with TOT values outside range [0, g_satTot] i.e. overlapped triggers
+  int m_nEvtOverlapTriggerTot;
+
+  /// number of events with none zero TOT but no strip hit
+  int m_nEventBadTot;
+
+  /// time of first trigger
+  UInt_t m_startTime;
+
+  /// time of last trigger
+  UInt_t m_endTime;
+
+  // Livetime:
+  float m_liveTime;
+
+  // Extended counters problem?
+  Int_t m_extendedCountersFlag;
+
 
   // Timetone counters and flags:
   UInt_t m_nbrFlywheeling;
@@ -383,34 +431,52 @@ class TestReport {
   Int_t m_nbrMissingLatPps;
   Int_t m_nbrMissingTimeTone;
 
-  // Extended counters problem?
-  Int_t m_extendedCountersFlag;
+  /// percentage of events with TKR trigger but less than 6 digis in a tower
+  TGraph* m_nDigi;
+
+  // ACD parity errors:
+  unsigned int m_nAcdOddParityError;
+  unsigned int m_nAcdHeaderParityError;
+
+
+  // Acd Digi based histograms
+  TH1F* m_AcdTileIdOnePMT;
+  TH1F* m_AcdTileIdOneVeto;
+
+  TH1F* m_AcdHitMap;
+  TH1F* m_AcdVetoMap;
+  
+  TH2F* m_AcdPhaMapA;
+  TH2F* m_AcdPhaMapB;
+
+  // Acd Recon based histograms
+  TH1F* m_AcdEfficMap;
+  TH1F* m_AcdInEfficMap;
+
+  TH2F* m_AcdMissMapTop;
+  TH2F* m_AcdMissMapMinusX;
+  TH2F* m_AcdMissMapMinusY;
+  TH2F* m_AcdMissMapPlusX;
+  TH2F* m_AcdMissMapPlusY;
+
+
+
+  // Triggger rates:
+  TH1F* m_triggerRate;
+  TH1F* m_deadzoneRate;
+  TH1F* m_discardedRate;
+
 
   /// number of events with different Glt trigger:
   long m_nEvtGltTrigger[enums::number_of_trigger_bits];
 
-  /// no of bad events indicated in event summary data
-  unsigned m_nBadEvts;
-
-  /// Error bits: Currently OR'ed over all towers!
-  unsigned int m_nTrgParityErrors;
-  unsigned int m_nPacketErrors;
-  unsigned int m_nTemErrors;
-
   /// condition summary in GEM
   TH1F* m_condSummary;
 
-  // Livetime:
-  float m_liveTime;
 
   /// number of events with different GEM trigger
   long m_nEvtGemTrigger[enums::GEM_offset];
 
-  /// number of events in the digi root file
-  int m_nEvent;
-
-  /// number of events with 3 in a row trigger in GEM
-  int m_nTkrTrigger;
 
   /// number of events with different number of digis.
   /// For example: m_nEventDigi[0] is number of events with 0 digi
@@ -419,11 +485,6 @@ class TestReport {
   /// tower is used
   int m_nEventDigi[7];
 
-  /// number of events with strip ID outside the range from 0 to 1535
-  int m_nEventBadStrip;
-
-  /// number of events with more than 63 strips per GTRC
-  int m_nEventMoreStrip;
 
   /// number of strip hits for each tower
   TH1F* m_nHit[g_nTower];
@@ -480,38 +541,7 @@ class TestReport {
   /// TOT distributions
   TH1F* m_tot[g_nTower][g_nPlane][2];
 
-  /// number of events with saturated TOT (250 ADC )
-  int m_nEventSatTot;
 
-  /// number of events with 0 TOT but at least 1 strip
-  int m_nEventZeroTot;
-
-  /// number of events with TOT values outside range [0, g_overlapTot]
-  int m_nEvtInvalidTot;
-
-  /// number of events with TOT values outside range [0, g_satTot] i.e. overlapped triggers
-  int m_nEvtOverlapTriggerTot;
-
-  /// number of events with none zero TOT but no strip hit
-  int m_nEventBadTot;
-
-  /// time of first trigger
-  UInt_t m_startTime;
-
-  /// time of last trigger
-  UInt_t m_endTime;
-
-
-  /// time of first datagram
-  UInt_t m_startTimeDataGram;
-
-  /// time of last datagram
-  UInt_t m_endTimeDataGram;
-
-  // Number of GEM related quantities:
-  ULong64_t m_nbrPrescaled;
-  ULong64_t m_nbrDeadZone;
-  ULong64_t m_deltaSequenceNbrEvents;
 
   // epu number
   TH1F* m_epu;
@@ -545,12 +575,6 @@ class TestReport {
 
   TH1F* m_timeIntervalElapsed;
 
-  /// percentage of events with TKR trigger but less than 6 digis in a tower
-  TGraph* m_nDigi;
-
-  // ACD parity errors:
-  unsigned int m_nAcdOddParityError;
-  unsigned int m_nAcdHeaderParityError;
 
   /// no. of events in each tower with TKR trigger
   int m_nTkrEvent[g_nTower];
@@ -599,15 +623,6 @@ class TestReport {
   // Histograms for the ACD digis:
   TH1F* m_nAcdDigis;
 
-  // Acd Digi based histograms
-  TH1F* m_AcdTileIdOnePMT;
-  TH1F* m_AcdTileIdOneVeto;
-
-  TH1F* m_AcdHitMap;
-  TH1F* m_AcdVetoMap;
-  
-  TH2F* m_AcdPhaMapA;
-  TH2F* m_AcdPhaMapB;
 
   TH2F* m_AcdGarcGafeHitMap;
   TH2F* m_AcdGarcGafeVetoMap;  
@@ -616,17 +631,6 @@ class TestReport {
   TH1F* m_AcdGemVetoMap;
   TH1F* m_AcdGemCnoMap;
   TH1F* m_AcdGemRoiMap;
-
-  // Acd Recon based histograms
-  // 
-  TH1F* m_AcdEfficMap;
-  TH1F* m_AcdInEfficMap;
-
-  TH2F* m_AcdMissMapTop;
-  TH2F* m_AcdMissMapMinusX;
-  TH2F* m_AcdMissMapMinusY;
-  TH2F* m_AcdMissMapPlusX;
-  TH2F* m_AcdMissMapPlusY;
 
   // Path-length corrected MIP
   TH2F* m_AcdMipMapA;

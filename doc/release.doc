@@ -194,4 +194,10 @@ v3r5p7	Added DeltaElapsed time histogram. Bug fix for check on extended counters
 
 May 15, 2006: awb
 v3r5p8	Enable Eric's Acd MIP peak histograms.
+
+May 16, 2006: awb
+v3r5p9	Changed zoom histograms from 1 ms to 1500 system clock ticks.
+        Got rid of most of the compiler warnings.
+
+
   

@@ -28,7 +28,7 @@ Float_t TestReport::efficDivide(TH1& top, const TH1& bot, Bool_t inEffic) {
   Float_t iT(0.);
   Float_t iB(0.);
 
-  for ( UInt_t i(1); i <= nt; i++ ) {
+  for ( Int_t i(1); i <= nt; i++ ) {
     Float_t vT = top.GetBinContent(i);
     Float_t n = bot.GetBinContent(i);
     iT += vT;
@@ -70,10 +70,10 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_nEvent(0), m_nbrPrescaled(0), m_nbrDeadZone(0), m_deltaSequenceNbrEvents(0),
     m_nTkrTrigger(0), m_nEventBadStrip(0), m_nEventMoreStrip(0), 
     m_nEventSatTot(0), m_nEventZeroTot(0), m_nEvtInvalidTot(0), m_nEvtOverlapTriggerTot(0),
-    m_nEventBadTot(0), m_startTime(0), m_liveTime(0), m_extendedCountersFlag(0),
+    m_nEventBadTot(0), m_startTime(0), m_endTime(0),
+    m_liveTime(0), m_extendedCountersFlag(0),
     m_nbrFlywheeling(0), m_nbrIncomplete(0), m_nbrMissingGps(0), m_nbrMissingCpuPps(0), 
     m_nbrMissingLatPps(0), m_nbrMissingTimeTone(0), 
-    m_endTime(0), m_startTimeDataGram(0), m_endTimeDataGram(0),
     m_nDigi(0), m_nAcdOddParityError(0), m_nAcdHeaderParityError(0),
     m_AcdTileIdOnePMT(0), m_AcdTileIdOneVeto(0),
     m_AcdHitMap(0), m_AcdVetoMap(0),
@@ -279,28 +279,28 @@ TestReport::TestReport(const char* dir, const char* prefix,
   setHistParameters(m_gemDiscardedTime,att);
 
   m_timeInterval = new TH1F("timeInterval", "Time interval between adjacent event in mill second", 100, 0., 3.);
-  att.set("Time interval between adjacent events(ms)", "Number of events");
+  att.set("Time interval between adjacent events (ms)", "Number of events");
   setHistParameters(m_timeInterval, att);
 
   m_timeIntervalCut = new TH1F("timeIntervalCut", "Time interval between adjacent event in millseconds with a cut of 1 millisecond", 100, 0., 1.);
-  att.set("Time interval between adjacent events(ms)", "Number of events");
+  att.set("Time interval between adjacent events (ms)", "Number of events");
   att.m_canRebin = false;
   setHistParameters(m_timeIntervalCut, att);
 
   m_timeIntervalGem = new TH1F("timeIntervalGem", "Time interval between adjacent events in milliseconds as measured by the GEM", 100, 0., 3.);
-  att.set("Time interval between adjacent events(ms)", "Number of events");
+  att.set("Time interval between adjacent events (ms)", "Number of events");
   setHistParameters(m_timeIntervalGem, att);
 
-  m_timeIntervalGemZoom = new TH1F("timeIntervalGemZoom", "Time interval between adjacent events in milliseconds as measured by the GEM with a cut of 1 millisecond", 100, 0., 1.);
-  att.set("Time interval between adjacent events(ms)", "Number of events");
+  m_timeIntervalGemZoom = new TH1F("timeIntervalGemZoom", "Time interval between adjacent events in system clock ticks (nominally 50 ns) as measured by the GEM with a cut of 1500 ticks", 100, 0., 1500);
+  att.set("Time interval between adjacent events (nominally 50 ns ticks)", "Number of events");
   setHistParameters(m_timeIntervalGemZoom, att);
 
   m_deltaWindowOpenTime = new TH1F("deltaWindowOpenTime", "Delta window open time in milliseconds as measured by the GEM", 100, 0., 3.);
   att.set("Delta window open time (ms)", "Number of events");
   setHistParameters(m_deltaWindowOpenTime, att);
 
-  m_deltaWindowOpenTimeZoom = new TH1F("deltaWindowOpenTimeZoom", "Delta window open time in milliseconds as measured by the GEM with a cut of 0.1 millisecond", 100, 0., 0.1);
-  att.set("Delta window open time (ms)", "Number of events");
+  m_deltaWindowOpenTimeZoom = new TH1F("deltaWindowOpenTimeZoom", "Delta window open time in system clock ticks (nominally 50 ns) as measured by the GEM with a cut of 1500 ticks", 100, 0., 1500);
+  att.set("Delta window open time (nominally 50 ns ticks)", "Number of events");
   setHistParameters(m_deltaWindowOpenTimeZoom, att);
 
   m_timeIntervalElapsed = new TH1F("timeIntervalElapsed", "Elapsed time between adjacent events in milliseconds", 100, 0., 5.);
@@ -308,7 +308,7 @@ TestReport::TestReport(const char* dir, const char* prefix,
   setHistParameters(m_timeIntervalElapsed, att);
 
   m_alignCalTkr = new TH1F("alignCalTkr", "Distance between the reconstructed CAL cluster XY coordinates and the XY coordinates extrapolated from TKR", 50, 0., 100.);
-  att.set("Difference(mm)", "Number of events");
+  att.set("Difference (mm)", "Number of events");
   att.m_canRebin = false;
   setHistParameters(m_alignCalTkr, att);
 
@@ -561,8 +561,8 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   //
   // For the trigger/deadzone rate intervals:
   //
-  ULong64_t elapsedTimeFirst;
-  ULong64_t elapsedTimeLast;
+  ULong64_t elapsedTimeFirst = 0;
+  ULong64_t elapsedTimeLast  = 0;
 
   Long64_t deltaTimeInterval = 1;
 
@@ -852,7 +852,6 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	  } else {
             m_startTime = myTimeStamp1 + deltaTimeUgly;
 	  }
-          m_startTimeDataGram = m_digiEvent->getTimeStamp() + deltaTimeUgly;
 	}
       }
       else {
@@ -898,7 +897,6 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
           } else {
             m_endTime = myTimeStamp1 + deltaTimeUgly;
 	  }
-          m_endTimeDataGram = m_digiEvent->getTimeStamp() + deltaTimeUgly;
 	}
       }
     }
@@ -1122,16 +1120,16 @@ void TestReport::analyzeDigiTree()
   UInt_t deltaT = m_digiEvent->getGem().getDeltaEventTime();
   m_timeIntervalGem->Fill(0.00005*deltaT);
 
-  if ((0.00005*deltaT) < 1.0) {
-    m_timeIntervalGemZoom->Fill(0.00005*deltaT);
+  if (deltaT < 1500) {
+    m_timeIntervalGemZoom->Fill(deltaT);
   }
 
   // Delta window open time:
   UInt_t deltaWindowOpenTime = m_digiEvent->getGem().getDeltaWindowOpenTime();
   m_deltaWindowOpenTime->Fill(0.00005*deltaWindowOpenTime);
 
-  if ((0.00005*deltaWindowOpenTime) < 0.1) {
-    m_deltaWindowOpenTimeZoom->Fill(0.00005*deltaWindowOpenTime);
+  if (deltaWindowOpenTime < 1500) {
+    m_deltaWindowOpenTimeZoom->Fill(deltaWindowOpenTime);
   }
 
 
@@ -1409,9 +1407,6 @@ void TestReport::generateReport()
 
   (*m_report) << "@li There are @b " << m_nAcdOddParityError    << " events with ACD Odd Parity errors " << endl;
   (*m_report) << "@li There are @b " << m_nAcdHeaderParityError << " events with ACD 'Header Parity errors' (there should _never_ be any)." << endl;
-
-  //(*m_report) << "@li Time of the first datagram: <b>" << ctime((time_t*) (&m_startTimeDataGram)) << " (GMT) </b>";
-  //(*m_report) << "@li Time of the last datagram: <b>" << ctime((time_t*) (&m_endTimeDataGram)) << " (GMT) </b>";
 
   (*m_report) << "@li Time of the first trigger: <b>" << ctime((time_t*) (&m_startTime)) << " (GMT) </b>";
   (*m_report) << "@li Time of the last trigger: <b>" << ctime((time_t*) (&m_endTime)) << " (GMT) </b>";
