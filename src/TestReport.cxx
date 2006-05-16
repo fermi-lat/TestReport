@@ -1017,7 +1017,7 @@ void TestReport::analyzeReconTree()
     for ( UInt_t iAcdInter(0); iAcdInter < nAcdInter; iAcdInter++ ) {
       const AcdTkrIntersection* acdInter = acdRecon->getAcdTkrIntersection(iAcdInter);
       if ( acdInter->getTrackIndex() != 0 ) continue;
-      if ( acdInter->getArcLengthToIntersection() < 0 ) continue;
+      //if ( acdInter->getArcLengthToIntersection() < 0 ) continue;
       UShort_t acdGemId = getGemId( acdInter->getTileId().getId() );
       if ( acdInter->tileHit() ) {
 	m_AcdEfficMap->Fill( acdGemId );
@@ -2467,7 +2467,7 @@ void TestReport::produceAcdTriggerPlots()
 
   string file(m_prefix);
   file += "_acdGemVeto";
-  PlotAttribute att(file.c_str(), "Number of Acd Gem vetos by tile.  Expectect to see spikes at 15,31,47,63.  These are the large tiles at the bottom of the sides of the ACD.","AcdVetoPerTile");
+  PlotAttribute att(file.c_str(), "Number of Acd Gem vetos by tile.  Expect to see spikes at 15,31,47,63.  These are the large tiles at the bottom of the sides of the ACD.","AcdVetoPerTile");
   producePlot(m_AcdGemVetoMap, att);
   insertPlot(att);
 
@@ -2480,7 +2480,7 @@ void TestReport::produceAcdTriggerPlots()
 
   file = m_prefix;
   file += "_acdCnoVeto";
-  att.set(file.c_str(), "Number of Acd Cno by board.  This bit is the OR of all the CNO signals on a single board.","AcdCnoPerBoard");
+  att.set(file.c_str(), "Number of Acd Cno by board.  This bit is the OR of all the CNO signals on a single board. Factor 2 variations between boards are normal.","AcdCnoPerBoard");
   m_AcdGemCnoMap->SetMinimum(0.);
   producePlot(m_AcdGemCnoMap, att);
   insertPlot(att);
@@ -2761,14 +2761,14 @@ void TestReport::produceAcdTkrReconPlots()
 
   file = m_prefix;
   file += "_AcdMipMapA";
-  att.set(file.c_str(), "ACD MIPs map -- A PMTs.  This shows the PHA values for each channel calibrated into MIP equivalent.", "AcdMipMapA" );
+  att.set(file.c_str(), "ACD MIPs map -- A PMTs.  This shows the PHA values for each channel calibrated into MIP equivalent (path lenght corrected).", "AcdMipMapA" );
   att.m_zLog = true;
   producePlot(m_AcdMipMapA, att);
   insertPlot(att);
 
   file = m_prefix;  
   file += "_AcdMipMapB";  
-  att.set(file.c_str(), "ACD MIPs map -- B PMTs.  This shows the PHA values for each channel calibrated into MIP equivalent.", "AcdMipMapB" );
+  att.set(file.c_str(), "ACD MIPs map -- B PMTs.  This shows the PHA values for each channel calibrated into MIP equivalent (path lenght corrected).", "AcdMipMapB" );
   att.m_zLog = true;
   producePlot(m_AcdMipMapB, att);
   insertPlot(att);

@@ -199,5 +199,9 @@ May 16, 2006: awb
 v3r5p9	Changed zoom histograms from 1 ms to 1500 system clock ticks.
         Got rid of most of the compiler warnings.
 
+May 16, 2006: awb for eac
+v3r5p10	Use track intersections in both directions for ACD MIPs plots.
+        Added additional information to a few plots.
+
 
   
