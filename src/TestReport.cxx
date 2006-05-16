@@ -2768,15 +2768,15 @@ void TestReport::produceAcdTkrReconPlots()
   file += "_AcdMipMapA";
   att.set(file.c_str(), "ACD MIPs map -- A PMTs.  This shows the PHA values for each channel calibrated into MIP equivalent.", "AcdMipMapA" );
   att.m_zLog = true;
-  //producePlot(m_AcdMipMapA, att);
-  //insertPlot(att);
+  producePlot(m_AcdMipMapA, att);
+  insertPlot(att);
 
   file = m_prefix;  
   file += "_AcdMipMapB";  
   att.set(file.c_str(), "ACD MIPs map -- B PMTs.  This shows the PHA values for each channel calibrated into MIP equivalent.", "AcdMipMapB" );
   att.m_zLog = true;
-  //producePlot(m_AcdMipMapB, att);
-  //insertPlot(att);
+  producePlot(m_AcdMipMapB, att);
+  insertPlot(att);
 
 }
 

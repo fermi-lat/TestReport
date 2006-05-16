@@ -190,4 +190,8 @@ May 12, 2006: awb
 v3r5p6	Added check on extended counters.
 
 May 15, 2006: awb
-v3r5p7	Added DeltaElapsed time histogram. Bug fix for check on extedned counters.  
+v3r5p7	Added DeltaElapsed time histogram. Bug fix for check on extended counters.  
+
+May 15, 2006: awb
+v3r5p8	Enable Eric's Acd MIP peak histograms.
+  
