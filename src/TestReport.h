@@ -369,11 +369,6 @@ class TestReport {
   /// no of bad events indicated in event summary data
   unsigned m_nBadEvts;
 
-  /// Error bits: Currently OR'ed over all towers!
-  unsigned int m_nTrgParityErrors;
-  unsigned int m_nPacketErrors;
-  unsigned int m_nTemErrors;
-
   // LATTE?
   int m_isLATTE;
 
@@ -437,6 +432,28 @@ class TestReport {
   // ACD parity errors:
   unsigned int m_nAcdOddParityError;
   unsigned int m_nAcdHeaderParityError;
+
+
+  // Error flags:
+  Int_t m_eventBadEventSequence;
+  Int_t m_eventBadTkrRecon;
+  Int_t m_eventPacketError;
+  Int_t m_eventTemError;
+  Int_t m_eventTrgParityError;
+  Int_t m_eventBadLdfStatus;
+  Int_t m_eventGtrcPhase;
+  Int_t m_eventGtfePhase;
+  Int_t m_eventGtccFifo;
+  Int_t m_eventGtccHdrParity;
+  Int_t m_eventGtccWcParity;
+  Int_t m_eventGtrcSummary;
+  Int_t m_eventGtccDataParity;
+  Int_t m_eventGtccTimeout;
+  Int_t m_eventGcccError;
+  Int_t m_eventGtccError;
+  Int_t m_eventPhaseError;
+  Int_t m_eventTimeoutError;
+
 
 
   // Acd Digi based histograms

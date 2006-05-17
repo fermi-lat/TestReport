@@ -60,28 +60,84 @@ Float_t TestReport::efficDivide(TH1& top, const TH1& bot, Bool_t inEffic) {
 TestReport::TestReport(const char* dir, const char* prefix, 
 		       const char* version, const char* emVersion,
 		       const char*tkrCalibSerNo, const char* calCalibSerNo)
-  : m_dir(dir), m_prefix(prefix), m_version(version), m_emVersion(emVersion),
-    m_tkrCalibSerNo(tkrCalibSerNo), m_calCalibSerNo(calCalibSerNo), 
-    m_outputFile(0), m_mcFile(0), m_mcTree(0),
-    m_mcBranch(0), m_mcEvent(0), m_reconFile(0), m_reconTree(0), 
-    m_reconBranch(0), m_reconEvent(0), m_digiFile(0), m_digiTree(0),
-    m_digiBranch(0), m_digiEvent(0), m_trigger(0), m_nBadEvts(0), 
-    m_nTrgParityErrors(0), m_nPacketErrors(0), m_nTemErrors(0), m_isLATTE(0),
-    m_nEvent(0), m_nbrPrescaled(0), m_nbrDeadZone(0), m_deltaSequenceNbrEvents(0),
-    m_nTkrTrigger(0), m_nEventBadStrip(0), m_nEventMoreStrip(0), 
-    m_nEventSatTot(0), m_nEventZeroTot(0), m_nEvtInvalidTot(0), m_nEvtOverlapTriggerTot(0),
-    m_nEventBadTot(0), m_startTime(0), m_endTime(0),
-    m_liveTime(0), m_extendedCountersFlag(0),
-    m_nbrFlywheeling(0), m_nbrIncomplete(0), m_nbrMissingGps(0), m_nbrMissingCpuPps(0), 
-    m_nbrMissingLatPps(0), m_nbrMissingTimeTone(0), 
-    m_nDigi(0), m_nAcdOddParityError(0), m_nAcdHeaderParityError(0),
-    m_AcdTileIdOnePMT(0), m_AcdTileIdOneVeto(0),
-    m_AcdHitMap(0), m_AcdVetoMap(0),
-    m_AcdPhaMapA(0), m_AcdPhaMapB(0),
-    m_AcdEfficMap(0),m_AcdInEfficMap(0),
+  : m_dir(dir), 
+    m_prefix(prefix), 
+    m_version(version), 
+    m_emVersion(emVersion),
+    m_tkrCalibSerNo(tkrCalibSerNo), 
+    m_calCalibSerNo(calCalibSerNo), 
+    m_outputFile(0), 
+    m_mcFile(0), 
+    m_mcTree(0),
+    m_mcBranch(0), 
+    m_mcEvent(0), 
+    m_reconFile(0), 
+    m_reconTree(0), 
+    m_reconBranch(0), 
+    m_reconEvent(0), 
+    m_digiFile(0), 
+    m_digiTree(0),
+    m_digiBranch(0), 
+    m_digiEvent(0), 
+    m_trigger(0), 
+    m_nBadEvts(0), 
+    m_isLATTE(0),
+    m_nEvent(0), 
+    m_nbrPrescaled(0), 
+    m_nbrDeadZone(0), 
+    m_deltaSequenceNbrEvents(0),
+    m_nTkrTrigger(0), 
+    m_nEventBadStrip(0), 
+    m_nEventMoreStrip(0), 
+    m_nEventSatTot(0), 
+    m_nEventZeroTot(0), 
+    m_nEvtInvalidTot(0), 
+    m_nEvtOverlapTriggerTot(0),
+    m_nEventBadTot(0), 
+    m_startTime(0), 
+    m_endTime(0),
+    m_liveTime(0), 
+    m_extendedCountersFlag(0),
+    m_nbrFlywheeling(0), 
+    m_nbrIncomplete(0), 
+    m_nbrMissingGps(0), 
+    m_nbrMissingCpuPps(0), 
+    m_nbrMissingLatPps(0), 
+    m_nbrMissingTimeTone(0), 
+    m_nDigi(0), 
+    m_nAcdOddParityError(0), 
+    m_nAcdHeaderParityError(0),
+    m_eventBadEventSequence(0),
+    m_eventBadTkrRecon(0),
+    m_eventPacketError(0),
+    m_eventTemError(0),
+    m_eventTrgParityError(0),
+    m_eventBadLdfStatus(0),
+    m_eventGtrcPhase(0),
+    m_eventGtfePhase (0),
+    m_eventGtccFifo(0),
+    m_eventGtccHdrParity(0),
+    m_eventGtccWcParity(0),
+    m_eventGtrcSummary(0),
+    m_eventGtccDataParity(0),
+    m_eventGtccTimeout(0),
+    m_eventGcccError(0),
+    m_eventGtccError(0),
+    m_eventPhaseError(0),
+    m_eventTimeoutError(0),
+    m_AcdTileIdOnePMT(0), 
+    m_AcdTileIdOneVeto(0),
+    m_AcdHitMap(0), 
+    m_AcdVetoMap(0),
+    m_AcdPhaMapA(0), 
+    m_AcdPhaMapB(0),
+    m_AcdEfficMap(0),
+    m_AcdInEfficMap(0),
     m_AcdMissMapTop(0), 
-    m_AcdMissMapMinusX(0), m_AcdMissMapMinusY(0),
-    m_AcdMissMapPlusX(0), m_AcdMissMapPlusY(0)
+    m_AcdMissMapMinusX(0), 
+    m_AcdMissMapMinusY(0),
+    m_AcdMissMapPlusX(0), 
+    m_AcdMissMapPlusY(0)
 { 
   // initialize ROOT
   if(gROOT == 0) {
@@ -554,7 +610,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   }
 
   // For testing: awb
-  //int nEvent = 10000;
+  //int nEvent = 1000;
   //m_nEvent = nEvent;
 
 
@@ -1074,9 +1130,28 @@ void TestReport::analyzeDigiTree()
 
   if(m_digiEvent->getEventSummaryData().badEvent()) ++m_nBadEvts;
 
-  if (m_digiEvent->getEventSummaryData().packetError())       ++m_nPacketErrors;
-  if (m_digiEvent->getEventSummaryData().trgParityError())    ++m_nTrgParityErrors;
-  if (m_digiEvent->getEventSummaryData().errorEventSummary()) ++m_nTemErrors;
+  // Error flags:
+  if (m_digiEvent->getEventSummaryData().badEventSequence())  ++m_eventBadEventSequence;
+  if (m_digiEvent->getEventSummaryData().badTkrRecon())       ++m_eventBadTkrRecon;
+  if (m_digiEvent->getEventSummaryData().packetError())       ++m_eventPacketError;
+  if (m_digiEvent->getEventSummaryData().temError())          ++m_eventTemError;
+  if (m_digiEvent->getEventSummaryData().trgParityError())    ++m_eventTrgParityError;
+  if (m_digiEvent->getEventSummaryData().badLdfStatus())      ++m_eventBadLdfStatus;
+  if (m_digiEvent->getEventSummaryData().gtrcPhase())         ++m_eventGtrcPhase;
+  if (m_digiEvent->getEventSummaryData().gtfePhase())         ++m_eventGtfePhase;
+  if (m_digiEvent->getEventSummaryData().gtccFifo())          ++m_eventGtccFifo;
+  if (m_digiEvent->getEventSummaryData().gtccHdrParity())     ++m_eventGtccHdrParity;
+  if (m_digiEvent->getEventSummaryData().gtccWcParity())      ++m_eventGtccWcParity;
+  if (m_digiEvent->getEventSummaryData().gtrcSummary())       ++m_eventGtrcSummary;
+  if (m_digiEvent->getEventSummaryData().gtccDataParity())    ++m_eventGtccDataParity;
+  if (m_digiEvent->getEventSummaryData().gtccTimeout())       ++m_eventGtccTimeout;
+  if (m_digiEvent->getEventSummaryData().gcccError())         ++m_eventGcccError;
+  if (m_digiEvent->getEventSummaryData().gtccError())         ++m_eventGtccError;
+  if (m_digiEvent->getEventSummaryData().phaseError())        ++m_eventPhaseError;
+  if (m_digiEvent->getEventSummaryData().timeoutError())      ++m_eventTimeoutError;
+
+
+
 
   int cond = m_digiEvent->getGem().getConditionSummary();
   m_condSummary->Fill(cond);
@@ -1399,19 +1474,14 @@ void TestReport::generateReport()
     (*m_report) << "@li There are @b " << m_nEvent << " triggers." << endl;
   }
 
-  (*m_report) << "@li There are @b " << m_nBadEvts << " bad events (includes TKR FIFO full errors)" << endl;
-
-  (*m_report) << "@li There are @b " << m_nTrgParityErrors << " events with Trigger Parity errors " << endl;
-  (*m_report) << "@li There are @b " << m_nPacketErrors << " events with Packet errors " << endl;
-  (*m_report) << "@li There are @b " << m_nTemErrors << " events with TEM errors (includes TKR FIFO full errors)" << endl;
-
-  (*m_report) << "@li There are @b " << m_nAcdOddParityError    << " events with ACD Odd Parity errors " << endl;
-  (*m_report) << "@li There are @b " << m_nAcdHeaderParityError << " events with ACD 'Header Parity errors' (there should _never_ be any)." << endl;
+  (*m_report) << "   " << endl;
 
   (*m_report) << "@li Time of the first trigger: <b>" << ctime((time_t*) (&m_startTime)) << " (GMT) </b>";
   (*m_report) << "@li Time of the last trigger: <b>" << ctime((time_t*) (&m_endTime)) << " (GMT) </b>";
   (*m_report) << "@li Duration: <b>" << m_endTime - m_startTime << " seconds" << "</b>" << endl;
   (*m_report) << "@li Trigger rate: <b>" << double(m_nEvent)/(m_endTime - m_startTime) << " hz" << "</b>" << endl;
+
+  (*m_report) << "   " << endl;
 
   // Needs FSW 08-06-09:
   //(*m_report) << "@li Livetime: <b> " << (m_liveTime * 100.0) << "% </b>" << endl;  
@@ -1430,6 +1500,39 @@ void TestReport::generateReport()
     (*m_report) << "@li Problem! At least one of the extended counters decreased from one event to the next one  @b " << m_extendedCountersFlag << " times! Check the log file for more details." << endl;
   } 
 
+  (*m_report) << "   " << endl;
+
+  (*m_report) << "@li There are @b " << m_nBadEvts              << " bad events as defined by Offline (catch all flag)." << endl;
+
+  (*m_report) << "@li There are @b " << m_eventTrgParityError   << " events with Trigger Parity errors. " << endl;
+  (*m_report) << "@li There are @b " << m_eventPacketError      << " events with Packet errors. " << endl;
+
+  (*m_report) << "@li There are @b " << m_eventPhaseError       << " events with Phasing errors." << endl;
+  (*m_report) << "@li There are @b " << m_eventTimeoutError     << " events with Timeout errors." << endl;
+
+  (*m_report) << "@li There are @b " << m_nAcdOddParityError    << " events with ACD Odd Parity errors. " << endl;
+  (*m_report) << "@li There are @b " << m_nAcdHeaderParityError << " events with ACD 'Header Parity errors' (there should _never_ be any)." << endl;
+
+  (*m_report) << "@li There are @b " << m_eventBadLdfStatus     << " events with a bad LDF status flag. " << endl;
+
+  (*m_report) << "@li There are @b " << m_eventBadEventSequence << " events with event sequence issues (not increasing monotonically)." << endl;
+
+  (*m_report) << "@li There are @b " << m_eventTemError         << " events with TEM errors (includes TKR FIFO full errors)." << endl;
+
+  (*m_report) << "@li There are @b " << m_eventGtccError        << " events with GTCC errors." << endl;
+  (*m_report) << "@li There are @b " << m_eventGtccFifo         << " events with GTCC FIFO errors." << endl;
+  (*m_report) << "@li There are @b " << m_eventGtccHdrParity    << " events with GTCC Header Parity errors." << endl;
+  (*m_report) << "@li There are @b " << m_eventGtccWcParity     << " events with GTCC Word Count Parity errors." << endl;
+  (*m_report) << "@li There are @b " << m_eventGtccDataParity   << " events with GTCC Data Parity errors." << endl; 
+  (*m_report) << "@li There are @b " << m_eventGtccTimeout      << " events with GTCC Timeout errors." << endl;
+
+  (*m_report) << "@li There are @b " << m_eventGtrcSummary      << " events with GTRC Summary errors." << endl;
+  (*m_report) << "@li There are @b " << m_eventGtrcPhase        << " events with GTRC Phase errors." << endl;
+
+  (*m_report) << "@li There are @b " << m_eventGtfePhase        << " events with GTFE Phase errors." << endl;
+  (*m_report) << "@li There are @b " << m_eventGcccError        << " events with GCCC errors." << endl;
+    
+  (*m_report) << "@li There are @b " << m_eventBadTkrRecon      << " events passing the Offline Bad TKR Recon criteria." << endl;
 
   if(m_reconFile) {
     (*m_report) << "<p>The Recon file is: @em " << m_reconFile->GetName() << "</p>" << endl;
