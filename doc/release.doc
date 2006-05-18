@@ -206,4 +206,5 @@ v3r5p10	Use track intersections in both directions for ACD MIPs plots.
 May 17, 2006: awb
 v3r6	Added new error flags.
   
-  
+May 17, 2006: awb
+v3r6p1	Added trigger arrival times.  

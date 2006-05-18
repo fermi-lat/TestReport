@@ -257,6 +257,8 @@ class TestReport {
 
   void produceTriggerPerTowerPlot();
 
+  void produceCondArrivalTimesPlots();
+
   void produceAcdTriggerPlots();
 
   void produceTimeIntervalPlotSBC();
@@ -591,6 +593,12 @@ class TestReport {
   TH1F* m_deltaWindowOpenTimeZoom;
 
   TH1F* m_timeIntervalElapsed;
+
+  TH1F* m_condArrivalTimeTKR;
+  TH1F* m_condArrivalTimeROI;
+  TH1F* m_condArrivalTimeCalLo;
+  TH1F* m_condArrivalTimeCalHi;
+  TH1F* m_condArrivalTimeCNO;
 
 
   /// no. of events in each tower with TKR trigger

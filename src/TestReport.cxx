@@ -363,6 +363,27 @@ TestReport::TestReport(const char* dir, const char* prefix,
   att.set("Elapsed time between adjacent events (ms)", "Number of events");
   setHistParameters(m_timeIntervalElapsed, att);
 
+  m_condArrivalTimeTKR = new TH1F("condArrivalTimeTKR", "Conditions arrival time for TKR", 32, 0, 32);
+  att.set("Conditions arrival time for TKR (nominally 50 ns ticks)", "Number of events");
+  setHistParameters(m_condArrivalTimeTKR, att);
+
+  m_condArrivalTimeROI = new TH1F("condArrivalTimeROI", "Conditions arrival time for ROI", 32, 0, 32);
+  att.set("Conditions arrival time for ROI (nominally 50 ns ticks)", "Number of events");
+  setHistParameters(m_condArrivalTimeROI, att);
+
+  m_condArrivalTimeCalLo = new TH1F("condArrivalTimeCalLo", "Conditions arrival time for CAL LO", 32, 0, 32);
+  att.set("Conditions arrival time for CAL LO (nominally 50 ns ticks)", "Number of events");
+  setHistParameters(m_condArrivalTimeCalLo, att);
+
+  m_condArrivalTimeCalHi = new TH1F("condArrivalTimeCalHi", "Conditions arrival time for CalHi", 32, 0, 32);
+  att.set("Conditions arrival time for CAL HI (nominally 50 ns ticks)", "Number of events");
+  setHistParameters(m_condArrivalTimeCalHi, att);
+
+  m_condArrivalTimeCNO = new TH1F("condArrivalTimeCNO", "Conditions arrival time for CNO", 32, 0, 32);
+  att.set("Conditions arrival time for CNO (nominally 50 ns ticks)", "Number of events");
+  setHistParameters(m_condArrivalTimeCNO, att);
+
+
   m_alignCalTkr = new TH1F("alignCalTkr", "Distance between the reconstructed CAL cluster XY coordinates and the XY coordinates extrapolated from TKR", 50, 0., 100.);
   att.set("Difference (mm)", "Number of events");
   att.m_canRebin = false;
@@ -610,7 +631,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   }
 
   // For testing: awb
-  //int nEvent = 1000;
+  //int nEvent = 5000;
   //m_nEvent = nEvent;
 
 
@@ -744,8 +765,6 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
         m_nbrMissingTimeTone++;
       }
 
-
-
       // Trigger/deadzone rates per time interval:
       eventCounter++;
 
@@ -763,7 +782,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 
         if (deltaDeadZone < 0) { 
           m_extendedCountersFlag++;
-	  std::cout << "Warning! The extended deadzone counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
+	  std::cout << "Warning! The extended DeadZone counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
 	  std::cout << "         It went from " << previousDeadZone << " to " << thisDeadZone << " i.e. a change of " << deltaDeadZone << " ticks!" << std::endl;
 	}
 
@@ -771,7 +790,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
         discardedCounter         = discardedCounter + deltaDiscarded;
         if (deltaDiscarded < 0) { 
           m_extendedCountersFlag++;
-	  std::cout << "Warning! The extended discarded counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
+	  std::cout << "Warning! The extended Discarded counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
 	  std::cout << "         It went from " << previousDiscarded << " to " << thisDiscarded << " i.e. a change of " << deltaDiscarded << " ticks!" << std::endl;
 	}
 
@@ -779,31 +798,30 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
         m_timeIntervalElapsed->Fill(0.00005*deltaElapsed);
         if (deltaElapsed < 0) {
           m_extendedCountersFlag++;
-	  std::cout << "Warning! The extended elapsed counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
+	  std::cout << "Warning! The extended Elapsed counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
 	  std::cout << "         It went from " << previousElapsed << " to " << thisElapsed << " i.e. a change of " << deltaElapsed << " ticks!" << std::endl;
 	}
 
 	Long64_t deltaLiveTime = thisLiveTime - previousLiveTime;
         if (deltaLiveTime < 0) {
           m_extendedCountersFlag++;
-	  std::cout << "Warning! The extended livetime counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
+	  std::cout << "Warning! The extended Livetime counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
 	  std::cout << "         It went from " << previousLiveTime << " to " << thisLiveTime << " i.e. a change of " << deltaLiveTime << " ticks!" << std::endl;
 	}
 
 	Long64_t deltaPrescaled = thisPrescaled - previousPrescaled;
         if (deltaPrescaled < 0) {
           m_extendedCountersFlag++;
-	  std::cout << "Warning! The extended prescaled counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
+	  std::cout << "Warning! The extended Prescaled counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
 	  std::cout << "         It went from " << previousPrescaled << " to " << thisPrescaled << " i.e. a change of " << deltaPrescaled << " ticks!" << std::endl;
 	}
 
 	Long64_t deltaSequence = thisSequence - previousSequence;
         if (deltaSequence < 0) {
           m_extendedCountersFlag++;
-	  std::cout << "Warning! The extended sequence counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
+	  std::cout << "Warning! The extended Sequence counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
 	  std::cout << "         It went from " << previousSequence << " to " << thisSequence << " i.e. a change of " << deltaSequence << " ticks!" << std::endl;
 	}
-
       }  
       previousDeadZone  = thisDeadZone;
       previousDiscarded = thisDiscarded;
@@ -1158,6 +1176,25 @@ void TestReport::analyzeDigiTree()
   for(int i = 0; i != enums::GEM_offset; ++i) {
     if( (cond >> i) & 1) {
       ++m_nEvtGemTrigger[i];
+    }
+  }
+
+  // Conditions arrival time: Take out periodic triggers!
+  if (!(m_digiEvent->getGem().getConditionSummary() & 32)) {
+    if (m_digiEvent->getGem().getConditionSummary() & 2) {
+      m_condArrivalTimeTKR->Fill(m_digiEvent->getGem().getCondArrTime().tkr());
+    }
+    if (m_digiEvent->getGem().getConditionSummary() & 1) {
+      m_condArrivalTimeROI->Fill(m_digiEvent->getGem().getCondArrTime().roi());
+    }
+    if (m_digiEvent->getGem().getConditionSummary() & 4) {
+      m_condArrivalTimeCalLo->Fill(m_digiEvent->getGem().getCondArrTime().calLE());
+    }
+    if (m_digiEvent->getGem().getConditionSummary() & 8) {
+      m_condArrivalTimeCalHi->Fill(m_digiEvent->getGem().getCondArrTime().calHE());
+    }
+    if (m_digiEvent->getGem().getConditionSummary() & 16) {
+      m_condArrivalTimeCNO->Fill(m_digiEvent->getGem().getCondArrTime().cno());
     }
   }
 
@@ -1575,6 +1612,9 @@ void TestReport::generateDigiReport()
 
   // Acd Trigger plots
   produceAcdTriggerPlots();
+
+  // Arrival times:
+  produceCondArrivalTimesPlots();
 
   // GEM discarded events:
   (*m_report) << "@section gemDiscarded GEM Discarded Events" << endl;
@@ -2564,6 +2604,42 @@ void TestReport::produceTriggerPerTowerPlot()
   producePlot(m_calHiPerTower, att);
   insertPlot(att);
 }
+
+
+void TestReport::produceCondArrivalTimesPlots()
+{
+
+  string file(m_prefix);
+  file += "_condArrivalTimesTKR";
+  PlotAttribute att(file.c_str(), "Condition arrival times for TKR triggers. Periodic triggers have been taken out. ","condArrivalTimesTKR",true);
+  producePlot(m_condArrivalTimeTKR, att);
+  insertPlot(att);
+
+  file = m_prefix;
+  file += "_condArrivalTimesROI";
+  att.set(file.c_str(), "Condition arrival times for ROI triggers. Periodic triggers have been taken out. ","condArrivalTimesROI",true);
+  producePlot(m_condArrivalTimeROI, att);
+  insertPlot(att);
+
+  file = m_prefix;
+  file += "_condArrivalTimesCalLo";
+  att.set(file.c_str(), "Condition arrival times for CAL LO triggers. Periodic triggers have been taken out. ","condArrivalTimesCalLo",true);
+  producePlot(m_condArrivalTimeCalLo, att);
+  insertPlot(att);
+
+  file = m_prefix;
+  file += "_condArrivalTimesCalHi";
+  att.set(file.c_str(), "Condition arrival times for CAL HI triggers. Periodic triggers have been taken out. ","condArrivalTimesCalHi",true);
+  producePlot(m_condArrivalTimeCalHi, att);
+  insertPlot(att);
+
+  file = m_prefix;
+  file += "_condArrivalTimesCNO";
+  att.set(file.c_str(), "Condition arrival times for CNO triggers. Periodic triggers have been taken out. ","condArrivalTimesCNO",true);
+  producePlot(m_condArrivalTimeCNO, att);
+  insertPlot(att);
+}
+
 
 void TestReport::produceAcdTriggerPlots()
 {
