@@ -380,7 +380,7 @@ class TestReport {
   // Number of GEM related quantities:
   ULong64_t m_nbrPrescaled;
   ULong64_t m_nbrDeadZone;
-  ULong64_t m_deltaSequenceNbrEvents;
+  Long64_t m_deltaSequenceNbrEvents;
 
   /// number of events with 3 in a row trigger in GEM
   int m_nTkrTrigger;
