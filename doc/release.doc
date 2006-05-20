@@ -209,6 +209,11 @@ v3r6	Added new error flags.
 May 17, 2006: awb
 v3r6p1	Added trigger arrival times.  
 
-May 20, 2006: awb
+May 20, 2006: awb Screwed!
 v3r6p2	Bug fix: m_deltaSequenceNbrEvents should not be unsigned!
-        Added delta GEM deadzone histogram. 
+
+May 20, 2006: awb Screwed!
+v3r6p3 	Added delta GEM deadzone histogram. 
+
+May 20, 2006: awb
+v3r64  	Should be OK. 
