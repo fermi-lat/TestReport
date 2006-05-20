@@ -569,6 +569,9 @@ class TestReport {
   TH1F* m_gemDiscarded;
   TH1F* m_gemDiscardedTime;
 
+  // GEM deadzone events:
+  TH1F* m_gemDeadzone;
+
   // Number of triggers per tower:
   TH1F* m_tkrPerTower;
   TH1F* m_calLoPerTower;

@@ -334,6 +334,10 @@ TestReport::TestReport(const char* dir, const char* prefix,
   att.set("Time of last discarded event (nominally 50 ns ticks)","Number of events");
   setHistParameters(m_gemDiscardedTime,att);
 
+  m_gemDeadzone = new TH1F("gemDeadzone","Number of GEM deadzone events between two successive read out events",40,0,20);
+  att.set("Number of GEM deadzone events","Number of events");
+  setHistParameters(m_gemDeadzone,att);
+
   m_timeInterval = new TH1F("timeInterval", "Time interval between adjacent event in mill second", 100, 0., 3.);
   att.set("Time interval between adjacent events (ms)", "Number of events");
   setHistParameters(m_timeInterval, att);
@@ -721,8 +725,10 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 
 
 
-  // For GEM discarded events:
-  int previousGemDiscarded = 0;
+  // For GEM discarded and deadzone events:
+  ULong64_t previousGemDiscarded = 0;
+  ULong64_t previousGemDeadzone  = 0;
+
 
   // Loop over events:
   for(int iEvent = 0; iEvent != m_nEvent; ++iEvent) {
@@ -876,16 +882,22 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       m_epu->Fill(crate);
 
 
-      // GEM discarded events:
+      // GEM discarded and deadzone events:
       ULong64_t thisGemDiscarded = m_digiEvent->getMetaEvent().scalers().discarded();
+      ULong64_t thisGemDeadzone  = m_digiEvent->getMetaEvent().scalers().deadzone();
 
       int thisGemDeltaEventTime       = m_digiEvent->getGem().getDeltaEventTime();
       int thisGemWDeltaWindowOpenTime = m_digiEvent->getGem().getDeltaWindowOpenTime();
 
       if (iEvent > 0) {
         // Gem discarded delta wrt the previous event:
-        double delta = thisGemDiscarded - previousGemDiscarded;
+        Long64_t delta = thisGemDiscarded - previousGemDiscarded;
         m_gemDiscarded->Fill(delta);
+
+        // Gem deadzone delta wrt the previous event:
+        Long64_t deltaDeadzone = thisGemDeadzone - previousGemDeadzone;
+        m_gemDeadzone->Fill(deltaDeadzone);
+
 
         // Fill time histo for non-saturated events:
         if (thisGemWDeltaWindowOpenTime<65500 && thisGemDeltaEventTime<65500) {
@@ -898,6 +910,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
         }
       }
       previousGemDiscarded = thisGemDiscarded;
+      previousGemDeadzone  = thisGemDeadzone;
 
 
       // PPC time:
@@ -1617,7 +1630,7 @@ void TestReport::generateDigiReport()
   produceCondArrivalTimesPlots();
 
   // GEM discarded events:
-  (*m_report) << "@section gemDiscarded GEM Discarded Events" << endl;
+  (*m_report) << "@section gemDiscarded GEM Discarded and DeadZone Events" << endl;
   produceGemDiscardedPlot();
 
   (*m_report) << "@section timeInfo Time Info" << endl;
@@ -2680,7 +2693,7 @@ void TestReport::produceGemDiscardedPlot()
 {
   string file(m_prefix);
   file += "_gemDiscarded";
-  PlotAttribute att(file.c_str(), "Number of GEM discarded events between two successive read out events","gemDiscarded",true);
+  PlotAttribute att(file.c_str(), "Number of GEM discarded events between two successive read out events.","gemDiscarded",true);
   producePlot(m_gemDiscarded, att);
   insertPlot(att);
 
@@ -2688,6 +2701,12 @@ void TestReport::produceGemDiscardedPlot()
   file += "_gemDiscardedTime";
   att.set(file.c_str(), "Time between the previous read out event and the last discarded event in system clock ticks (nominally 50 ns). Only non-saturated values of the GEM time counters have been used.","gemDiscardedTime",true);
   producePlot(m_gemDiscardedTime, att);
+  insertPlot(att);
+
+  file = m_prefix;
+  file += "_gemDeadzone";
+  att.set(file.c_str(), "Number of GEM deadzone events between two successive read out events.","gemDeadzone",true);
+  producePlot(m_gemDeadzone, att);
   insertPlot(att);
 }
 
