@@ -216,4 +216,7 @@ May 20, 2006: awb Screwed!
 v3r6p3 	Added delta GEM deadzone histogram. 
 
 May 20, 2006: awb
-v3r64  	Should be OK. 
+v3r6p4	Should be OK. 
+
+May 23, 2006: awb
+v3r6p5	Corrected a few histogram explanations.
