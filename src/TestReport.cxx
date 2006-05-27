@@ -617,7 +617,11 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
     m_digiBranch->SetAddress(&m_digiEvent);
   }
 
-  int nMc, nRecon, nDigi;
+  m_nEvent   = -1;
+  int nMc    = -1;
+  int nRecon = -1;
+  int nDigi  = -1;
+
   if(m_mcFile) {
     nMc = (int) m_mcTree->GetEntries();
     std::cout << "No of events in " << mcFileName << " : " << nMc << endl;
@@ -633,6 +637,20 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
     std::cout << "No of events in " << digiFileName << " : " << nDigi << endl;
     m_nEvent = nDigi;
   }
+
+  // Want same number of event sin files:
+  if (nMc != -1) {
+    assert (nMc == m_nEvent);
+  }
+  if (nRecon != -1) {
+    assert (nRecon == m_nEvent);
+  }
+  if (nDigi != -1) {
+    assert (nDigi == m_nEvent);
+  }
+
+      
+ 
 
   // For testing: awb
   //int nEvent = 5000;
