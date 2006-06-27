@@ -14,6 +14,8 @@
 #include "TFrame.h"
 #include "TLatex.h"
 #include "Geo.h"
+#include <list>
+#include <iterator>
 
 using std::cout;
 using std::endl;
@@ -91,6 +93,7 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_firstDataGram(0),
     m_thisDataGram(0),
     m_previousDataGram(0),
+    m_previousPreviousDataGram(0),
     m_endRunDataGram(0),
     m_fullDataGram(0),
     m_beginRunDataGram(0),
@@ -666,8 +669,11 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
  
 
   // For testing: awb
-  //int nEvent = 5000;
+  //int nEvent = 10000;
   //m_nEvent = nEvent;
+
+  // List of datagrams:
+  std::list<int> listDataGrams;
 
   //
   // For the trigger/deadzone rate intervals:
@@ -712,9 +718,8 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   // Ground ID changes?
   m_counterGroundID = 0;
 
-  // awb
   // Datagrams:
-  //m_counterDataDiagrams = 0;
+  m_counterDataDiagrams = 0;
  
 
   // Look at first and last event:
@@ -813,9 +818,51 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 
       analyzeDigiTree();
 
-      // awb:
       // Datagrams:
-      //m_thisDataGram = m_digiEvent->getMetaEvent().datagram().datagrams();
+      m_thisDataGram = m_digiEvent->getMetaEvent().datagram().datagrams();
+      
+      if (iEvent == 0) {
+        listDataGrams.push_back(m_thisDataGram);
+        m_previousDataGram         = m_thisDataGram;
+        m_previousPreviousDataGram = m_thisDataGram;
+      }
+      if (iEvent > 0) {
+        // This is not perfect, but I'll remove the presumably small number of duplicates at the end:
+        if (m_thisDataGram != m_previousDataGram && m_thisDataGram!= m_previousPreviousDataGram) {
+          listDataGrams.push_back(m_thisDataGram);
+	}
+      }
+      if (iEvent == m_nEvent-1) {
+	// Get rid of duplicates:
+        listDataGrams.sort();
+        listDataGrams.unique();
+
+	// Keep total number of datagrams in the run: 
+        m_nbrDataGrams = listDataGrams.size();
+
+	std::list<int>::iterator p;
+        for (p = listDataGrams.begin(); p != listDataGrams.end(); p++) {       
+          if (p != listDataGrams.begin()) {
+            int diff = *p - *(--p);
+            p++;
+            if (diff > 1) {
+              m_counterDataDiagrams++;
+	    }
+	  }
+	}
+	//std::cout << "AWB: Datagrams are " << std::endl;
+	//std::copy(listDataGrams.begin(),listDataGrams.end(),std::ostream_iterator<int>(std::cout,"\n"));
+      }
+
+     
+      // Keep datagram sequence numbers for two previous events. Not perfect, but good enough!
+      unsigned int tmpDataGram = m_previousDataGram;
+      if (iEvent > 0) {
+        m_previousDataGram         = m_thisDataGram;
+        m_previousPreviousDataGram = tmpDataGram;
+      }
+        
+
       //if (iEvent > 0) { 
       //  int deltaDataGram = m_thisDataGram - m_previousDataGram;
       //  if (deltaDataGram > 1) {
@@ -1638,9 +1685,10 @@ void TestReport::generateReport()
     (*m_report) << "@li Problem! At least one of the extended counters decreased from one event to the next one  @b " << m_extendedCountersFlag << " times! Check the log file for more details." << endl;
   } 
 
-  if (m_beginRunDataGram != 1 || m_firstDataGram != 0 || (m_endRunDataGram == 0 && m_fullDataGram==1) || (m_endRunDataGram ==0 && m_fullDataGram==0)) {
-    (*m_report) << "   " << endl;
-  }
+  (*m_report) << "   " << endl;
+  (*m_report) << "@li There were @b " << m_nbrDataGrams << " datagrams in this run. " << endl;
+  (*m_report) << "@li There were in average @b " << ((float) m_nEvent / (float) m_nbrDataGrams) << " events per datagram." << endl;
+
   if (m_beginRunDataGram != 1) {
     (*m_report) << "@li Problem! The first datagram was not the first datagram after the start of the run!" << endl;
   }
@@ -1648,10 +1696,9 @@ void TestReport::generateReport()
     (*m_report) << "@li Problem! The first datagram did not have sequence number 0! It was @b " << m_firstDataGram << "." << endl;
   }
 
-  //awb
-  //if (m_counterDataDiagrams != 0) {
-  //  (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagrams << " datagrams in this run!" << endl;
-  //}
+  if (m_counterDataDiagrams != 0) {
+    (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagrams << " datagrams in this run!" << endl;
+  }
 
   if (m_endRunDataGram == 0 && m_fullDataGram==1) {
     (*m_report) << "@li Problem! The last datagram was not closed because of end of run, but because it was full! Are we missing events?" << endl;

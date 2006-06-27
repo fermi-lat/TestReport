@@ -380,14 +380,14 @@ class TestReport {
   unsigned int m_previousGroundID;
   int m_counterGroundID;
 
-  // awb
   // Datagrams:
   int m_counterDataDiagrams;
   int m_nbrDataGrams;
   unsigned int m_firstDataGram;
   unsigned int m_thisDataGram;
   unsigned int m_previousDataGram;
-
+  unsigned int m_previousPreviousDataGram;
+  
   // Datagram closing reason:
   int m_endRunDataGram;
   int m_fullDataGram;
