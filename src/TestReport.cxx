@@ -82,6 +82,18 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_trigger(0), 
     m_nBadEvts(0), 
     m_isLATTE(0),
+    m_firstGroundID(0),
+    m_lastGroundID(0),
+    m_previousGroundID(0),
+    m_counterGroundID(0),
+    m_counterDataDiagrams(0),
+    m_nbrDataGrams(0),
+    m_firstDataGram(0),
+    m_thisDataGram(0),
+    m_previousDataGram(0),
+    m_endRunDataGram(0),
+    m_fullDataGram(0),
+    m_beginRunDataGram(0),
     m_nEvent(0), 
     m_nbrPrescaled(0), 
     m_nbrDeadZone(0), 
@@ -617,6 +629,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
     m_digiBranch->SetAddress(&m_digiEvent);
   }
 
+  // Make sure we have the same number of event sin the input files:
   m_nEvent   = -1;
   int nMc    = -1;
   int nRecon = -1;
@@ -655,7 +668,6 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   // For testing: awb
   //int nEvent = 5000;
   //m_nEvent = nEvent;
-
 
   //
   // For the trigger/deadzone rate intervals:
@@ -696,6 +708,13 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 
   // Extended counter flag:
   m_extendedCountersFlag = 0;
+
+  // Ground ID changes?
+  m_counterGroundID = 0;
+
+  // awb
+  // Datagrams:
+  //m_counterDataDiagrams = 0;
  
 
   // Look at first and last event:
@@ -707,6 +726,13 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
     ULong64_t liveTimeFirst     = m_digiEvent->getMetaEvent().scalers().livetime();
     elapsedTimeFirst            = m_digiEvent->getMetaEvent().scalers().elapsed();
     firstFlywheeling            = m_digiEvent->getMetaEvent().time().current().flywheeling();
+    m_firstGroundID             = m_digiEvent->getMetaEvent().run().id();
+    m_firstDataGram             = m_digiEvent->getMetaEvent().datagram().datagrams();
+    m_beginRunDataGram = 0;
+    int firstDataGramOpen = m_digiEvent->getMetaEvent().datagram().openAction();
+    if (firstDataGramOpen == enums::Lsf::Open::Start) {
+      m_beginRunDataGram = 1;
+    }
     m_digiEvent->Clear();
 
     m_digiBranch->GetEntry(m_nEvent-1);
@@ -716,6 +742,21 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
     ULong64_t liveTimeLast     = m_digiEvent->getMetaEvent().scalers().livetime();
     elapsedTimeLast            = m_digiEvent->getMetaEvent().scalers().elapsed();
     lastFlywheeling            = m_digiEvent->getMetaEvent().time().current().flywheeling();
+    m_lastGroundID             = m_digiEvent->getMetaEvent().run().id();
+    m_endRunDataGram = 0;
+    m_fullDataGram   = 0;
+    int lastReasonDataGram    = m_digiEvent->getMetaEvent().datagram().closeReason();
+    int lastActionDataGram    = m_digiEvent->getMetaEvent().datagram().closeAction();
+    if (lastActionDataGram == enums::Lsf::Close::Stop) {
+      m_endRunDataGram = 1;
+    }
+    if (lastReasonDataGram == enums::Lsf::Close::Full) {
+      m_fullDataGram = 1;
+    }
+    if (m_endRunDataGram==0 && m_fullDataGram==0) {
+      std::cout << "Warning! The last datagram was not closed because we reached end of run or because it was full! The datagram closing reason was " << lastReasonDataGram 
+                << " and the datagram closing action was " << lastActionDataGram << std::endl;
+    }
     m_digiEvent->Clear();
 
     // Flywheeling:
@@ -771,6 +812,30 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       m_digiBranch->GetEntry(iEvent);
 
       analyzeDigiTree();
+
+      // awb:
+      // Datagrams:
+      //m_thisDataGram = m_digiEvent->getMetaEvent().datagram().datagrams();
+      //if (iEvent > 0) { 
+      //  int deltaDataGram = m_thisDataGram - m_previousDataGram;
+      //  if (deltaDataGram > 1) {
+      //    m_counterDataDiagrams++;  
+      //    std::cout << "Warning! We dropped a datagram here!. Current datagram is " << m_thisDataGram << " while the previous datagram was " << m_previousDataGram << ". This happened in event " 
+      //              << iEvent << std::endl;
+      //  }
+      //}
+      //m_previousDataGram = m_thisDataGram;
+
+
+      // Ground ID:
+      unsigned int thisGroundID = m_digiEvent->getMetaEvent().run().id();  
+      if (iEvent > 0) {
+        if (thisGroundID != m_previousGroundID) {
+          m_counterGroundID++;
+	  std::cout << "Warning! The Ground ID changed from " << m_previousGroundID << " to " << thisGroundID << " when going from event " << (iEvent-1) << " to " << iEvent << std::endl;
+	}
+      }
+      m_previousGroundID = thisGroundID;
 
       // Time tone counters and flags:
       if (m_digiEvent->getMetaEvent().time().current().incomplete() != 0) {
@@ -1541,14 +1606,19 @@ void TestReport::generateReport()
   } else {
     (*m_report) << "@li There are @b " << m_nEvent << " triggers." << endl;
   }
-
   (*m_report) << "   " << endl;
 
   (*m_report) << "@li Time of the first trigger: <b>" << ctime((time_t*) (&m_startTime)) << " (GMT) </b>";
   (*m_report) << "@li Time of the last trigger: <b>" << ctime((time_t*) (&m_endTime)) << " (GMT) </b>";
   (*m_report) << "@li Duration: <b>" << m_endTime - m_startTime << " seconds" << "</b>" << endl;
   (*m_report) << "@li Trigger rate: <b>" << double(m_nEvent)/(m_endTime - m_startTime) << " hz" << "</b>" << endl;
+  (*m_report) << "   " << endl;
 
+  if (m_counterGroundID == 0) {
+    (*m_report) << "@li The Ground ID is <b>" << m_firstGroundID << "</b>" << endl;
+  } else {
+    (*m_report) << "@li Warning! The ground ID changed @b " << m_counterGroundID << " times during the run! The first event had ground ID @b " << m_firstGroundID << " while the last event had ground ID @b " << m_lastGroundID << ". See the log file for more details. " << endl;
+  }
   (*m_report) << "   " << endl;
 
   // Needs FSW 08-06-09:
@@ -1567,6 +1637,29 @@ void TestReport::generateReport()
   if (m_extendedCountersFlag != 0) {
     (*m_report) << "@li Problem! At least one of the extended counters decreased from one event to the next one  @b " << m_extendedCountersFlag << " times! Check the log file for more details." << endl;
   } 
+
+  if (m_beginRunDataGram != 1 || m_firstDataGram != 0 || (m_endRunDataGram == 0 && m_fullDataGram==1) || (m_endRunDataGram ==0 && m_fullDataGram==0)) {
+    (*m_report) << "   " << endl;
+  }
+  if (m_beginRunDataGram != 1) {
+    (*m_report) << "@li Problem! The first datagram was not the first datagram after the start of the run!" << endl;
+  }
+  if (m_firstDataGram != 0) {
+    (*m_report) << "@li Problem! The first datagram did not have sequence number 0! It was @b " << m_firstDataGram << "." << endl;
+  }
+
+  //awb
+  //if (m_counterDataDiagrams != 0) {
+  //  (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagrams << " datagrams in this run!" << endl;
+  //}
+
+  if (m_endRunDataGram == 0 && m_fullDataGram==1) {
+    (*m_report) << "@li Problem! The last datagram was not closed because of end of run, but because it was full! Are we missing events?" << endl;
+  }
+  if (m_endRunDataGram ==0 && m_fullDataGram==0) {
+    (*m_report) << "@li Problem! The last datagram was not closed neither because of end of run neither because it was full. See logfile for more details!" << endl;
+  }
+
 
   (*m_report) << "   " << endl;
 

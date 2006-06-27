@@ -1,8 +1,8 @@
-/nfs/farm/g/glast/u34/Integration/rootData/077003267/v6r070329p16/grRoot/svacTuple-v3r6p2_077003267_digi_DIGI.root
-/nfs/farm/g/glast/u34/Integration/rootData/077003267/v6r070329p16/calib-v1r0/grRoot/svacTuple-v3r6p2_077003267_recon_RECON.root
-/nfs/farm/g/glast/u33/borgland/commit/svac/TestReport/v3r6p5//src/test
-077003434
-v3r6p5
-v6r070329p16
+/nfs/farm/g/glast/u34/Integration/rootData/077006055/v6r070329p17/digi/digitization-licos-v3r6p3_077006055_digi_DIGI.root
+/nfs/farm/g/glast/u34/Integration/rootData/077006055/v6r070329p17/recon/recon-v3r6p3_077006055_recon_RECON.root
+/nfs/farm/g/glast/u33/borgland/CodeDev/svac/TestReport/v3r6p6/src/test
+077003267
+v3r6p6
+v6r070329p17
 -9999
 -9999

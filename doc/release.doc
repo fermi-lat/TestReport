@@ -223,3 +223,7 @@ v3r6p5	Corrected a few histogram explanations.
 
 May 26, 2006: awb
 v3r6p6	Verify that number of events in input files are the same.
+
+June 26, 2006: awb
+v3r6p7	Sanity checks on datagrams at the beginning and end of the run.
+        Added Ground ID to the top of the report. 
