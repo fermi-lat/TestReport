@@ -381,17 +381,60 @@ class TestReport {
   int m_counterGroundID;
 
   // Datagrams:
-  int m_counterDataDiagrams;
-  int m_nbrDataGrams;
-  unsigned int m_firstDataGram;
-  unsigned int m_thisDataGram;
-  unsigned int m_previousDataGram;
-  unsigned int m_previousPreviousDataGram;
-  
-  // Datagram closing reason:
-  int m_endRunDataGram;
-  int m_fullDataGram;
-  int m_beginRunDataGram;
+  int m_counterDataDiagramsEpu0;
+  int m_nbrDataGramsEpu0;
+  int m_nbrEventsDataGramsEpu0;
+  unsigned int m_firstDataGramEpu0;
+  unsigned int m_thisDataGramEpu0;
+  unsigned int m_previousDataGramEpu0;
+  unsigned int m_previousPreviousDataGramEpu0;
+  int m_endRunDataGramEpu0;
+  int m_fullDataGramEpu0;
+  int m_beginRunDataGramEpu0;
+
+  int m_counterDataDiagramsEpu1;
+  int m_nbrDataGramsEpu1;
+  int m_nbrEventsDataGramsEpu1;
+  unsigned int m_firstDataGramEpu1;
+  unsigned int m_thisDataGramEpu1;
+  unsigned int m_previousDataGramEpu1;
+  unsigned int m_previousPreviousDataGramEpu1;
+  int m_endRunDataGramEpu1;
+  int m_fullDataGramEpu1;
+  int m_beginRunDataGramEpu1;
+
+  int m_counterDataDiagramsEpu2;
+  int m_nbrDataGramsEpu2;
+  int m_nbrEventsDataGramsEpu2;
+  unsigned int m_firstDataGramEpu2;
+  unsigned int m_thisDataGramEpu2;
+  unsigned int m_previousDataGramEpu2;
+  unsigned int m_previousPreviousDataGramEpu2;
+  int m_endRunDataGramEpu2;
+  int m_fullDataGramEpu2;
+  int m_beginRunDataGramEpu2;
+
+  int m_counterDataDiagramsSiu0;
+  int m_nbrDataGramsSiu0;
+  int m_nbrEventsDataGramsSiu0;
+  unsigned int m_firstDataGramSiu0;
+  unsigned int m_thisDataGramSiu0;
+  unsigned int m_previousDataGramSiu0;
+  unsigned int m_previousPreviousDataGramSiu0;
+  int m_endRunDataGramSiu0;
+  int m_fullDataGramSiu0;
+  int m_beginRunDataGramSiu0;
+
+  int m_counterDataDiagramsSiu1;
+  int m_nbrDataGramsSiu1;
+  int m_nbrEventsDataGramsSiu1;
+  unsigned int m_firstDataGramSiu1;
+  unsigned int m_thisDataGramSiu1;
+  unsigned int m_previousDataGramSiu1;
+  unsigned int m_previousPreviousDataGramSiu1;
+  int m_endRunDataGramSiu1;
+  int m_fullDataGramSiu1;
+  int m_beginRunDataGramSiu1;
 
   /// number of events in the digi root file
   int m_nEvent;

@@ -88,15 +88,56 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_lastGroundID(0),
     m_previousGroundID(0),
     m_counterGroundID(0),
-    m_counterDataDiagrams(0),
-    m_nbrDataGrams(0),
-    m_firstDataGram(0),
-    m_thisDataGram(0),
-    m_previousDataGram(0),
-    m_previousPreviousDataGram(0),
-    m_endRunDataGram(0),
-    m_fullDataGram(0),
-    m_beginRunDataGram(0),
+    m_counterDataDiagramsEpu0(0),
+    m_nbrDataGramsEpu0(0),
+    m_nbrEventsDataGramsEpu0(0),
+    m_firstDataGramEpu0(0),
+    m_thisDataGramEpu0(0),
+    m_previousDataGramEpu0(0),
+    m_previousPreviousDataGramEpu0(0),
+    m_endRunDataGramEpu0(0),
+    m_fullDataGramEpu0(0),
+    m_beginRunDataGramEpu0(0),
+    m_counterDataDiagramsEpu1(0),
+    m_nbrDataGramsEpu1(0),
+    m_nbrEventsDataGramsEpu1(0),
+    m_firstDataGramEpu1(0),
+    m_thisDataGramEpu1(0),
+    m_previousDataGramEpu1(0),
+    m_previousPreviousDataGramEpu1(0),
+    m_endRunDataGramEpu1(0),
+    m_fullDataGramEpu1(0),
+    m_beginRunDataGramEpu1(0),
+    m_counterDataDiagramsEpu2(0),
+    m_nbrDataGramsEpu2(0),
+    m_nbrEventsDataGramsEpu2(0),
+    m_firstDataGramEpu2(0),
+    m_thisDataGramEpu2(0),
+    m_previousDataGramEpu2(0),
+    m_previousPreviousDataGramEpu2(0),
+    m_endRunDataGramEpu2(0),
+    m_fullDataGramEpu2(0),
+    m_beginRunDataGramEpu2(0),
+    m_counterDataDiagramsSiu0(0),
+    m_nbrDataGramsSiu0(0),
+    m_nbrEventsDataGramsSiu0(0),
+    m_firstDataGramSiu0(0),
+    m_thisDataGramSiu0(0),
+    m_previousDataGramSiu0(0),
+    m_previousPreviousDataGramSiu0(0),
+    m_endRunDataGramSiu0(0),
+    m_fullDataGramSiu0(0),
+    m_beginRunDataGramSiu0(0),
+    m_counterDataDiagramsSiu1(0),
+    m_nbrDataGramsSiu1(0),
+    m_nbrEventsDataGramsSiu1(0),
+    m_firstDataGramSiu1(0),
+    m_thisDataGramSiu1(0),
+    m_previousDataGramSiu1(0),
+    m_previousPreviousDataGramSiu1(0),
+    m_endRunDataGramSiu1(0),
+    m_fullDataGramSiu1(0),
+    m_beginRunDataGramSiu1(0),
     m_nEvent(0), 
     m_nbrPrescaled(0), 
     m_nbrDeadZone(0), 
@@ -669,11 +710,15 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
  
 
   // For testing: awb
-  //int nEvent = 10000;
+  //int nEvent = 20000;
   //m_nEvent = nEvent;
 
   // List of datagrams:
-  std::list<int> listDataGrams;
+  std::list<int> listDataGramsEpu0;
+  std::list<int> listDataGramsEpu1;
+  std::list<int> listDataGramsEpu2;
+  std::list<int> listDataGramsSiu0;
+  std::list<int> listDataGramsSiu1;
 
   //
   // For the trigger/deadzone rate intervals:
@@ -718,9 +763,6 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   // Ground ID changes?
   m_counterGroundID = 0;
 
-  // Datagrams:
-  m_counterDataDiagrams = 0;
- 
 
   // Look at first and last event:
   if(m_digiFile) {
@@ -732,13 +774,8 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
     elapsedTimeFirst            = m_digiEvent->getMetaEvent().scalers().elapsed();
     firstFlywheeling            = m_digiEvent->getMetaEvent().time().current().flywheeling();
     m_firstGroundID             = m_digiEvent->getMetaEvent().run().id();
-    m_firstDataGram             = m_digiEvent->getMetaEvent().datagram().datagrams();
-    m_beginRunDataGram = 0;
-    int firstDataGramOpen = m_digiEvent->getMetaEvent().datagram().openAction();
-    if (firstDataGramOpen == enums::Lsf::Open::Start) {
-      m_beginRunDataGram = 1;
-    }
     m_digiEvent->Clear();
+
 
     m_digiBranch->GetEntry(m_nEvent-1);
     ULong64_t gemSequenceLast  = m_digiEvent->getMetaEvent().scalers().sequence();
@@ -748,20 +785,6 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
     elapsedTimeLast            = m_digiEvent->getMetaEvent().scalers().elapsed();
     lastFlywheeling            = m_digiEvent->getMetaEvent().time().current().flywheeling();
     m_lastGroundID             = m_digiEvent->getMetaEvent().run().id();
-    m_endRunDataGram = 0;
-    m_fullDataGram   = 0;
-    int lastReasonDataGram    = m_digiEvent->getMetaEvent().datagram().closeReason();
-    int lastActionDataGram    = m_digiEvent->getMetaEvent().datagram().closeAction();
-    if (lastActionDataGram == enums::Lsf::Close::Stop) {
-      m_endRunDataGram = 1;
-    }
-    if (lastReasonDataGram == enums::Lsf::Close::Full) {
-      m_fullDataGram = 1;
-    }
-    if (m_endRunDataGram==0 && m_fullDataGram==0) {
-      std::cout << "Warning! The last datagram was not closed because we reached end of run or because it was full! The datagram closing reason was " << lastReasonDataGram 
-                << " and the datagram closing action was " << lastActionDataGram << std::endl;
-    }
     m_digiEvent->Clear();
 
     // Flywheeling:
@@ -794,6 +817,37 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   ULong64_t previousGemDeadzone  = 0;
 
 
+  // Datagrams:
+  m_previousDataGramEpu0         = 0;
+  m_previousPreviousDataGramEpu0 = 0;
+  m_previousDataGramEpu1         = 0;
+  m_previousPreviousDataGramEpu1 = 0;
+  m_previousDataGramEpu2         = 0;
+  m_previousPreviousDataGramEpu2 = 0;
+  m_previousDataGramSiu0         = 0;
+  m_previousPreviousDataGramSiu1 = 0;
+  m_previousDataGramSiu1         = 0;
+  m_previousPreviousDataGramSiu1 = 0;
+
+  int firstDatagramEventEpu0 = -1;
+  int firstDatagramEventEpu1 = -1;
+  int firstDatagramEventEpu2 = -1;
+  int firstDatagramEventSiu0 = -1;
+  int firstDatagramEventSiu1 = -1;
+
+  int lastDatagramEventEpu0 = -1;
+  int lastDatagramEventEpu1 = -1;
+  int lastDatagramEventEpu2 = -1;
+  int lastDatagramEventSiu0 = -1;
+  int lastDatagramEventSiu1 = -1;
+
+  m_nbrEventsDataGramsEpu0 = 0;
+  m_nbrEventsDataGramsEpu1 = 0;
+  m_nbrEventsDataGramsEpu2 = 0;
+  m_nbrEventsDataGramsSiu0 = 0;
+  m_nbrEventsDataGramsSiu1 = 0;
+
+
   // Loop over events:
   for(int iEvent = 0; iEvent != m_nEvent; ++iEvent) {
 
@@ -818,49 +872,315 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 
       analyzeDigiTree();
 
+
+
       // Datagrams:
-      m_thisDataGram = m_digiEvent->getMetaEvent().datagram().datagrams();
+      // Here I make a list of the datagrams and keep the opening reason for the first datagram - all per EPU/SIU:
+
+      // EPU0:
+      if (m_digiEvent->getMetaEvent().datagram().crate() == enums::Lsf::Epu0) {
+        m_thisDataGramEpu0 = m_digiEvent->getMetaEvent().datagram().datagrams();
+
+        m_nbrEventsDataGramsEpu0++;
+        lastDatagramEventEpu0 = iEvent;
       
-      if (iEvent == 0) {
-        listDataGrams.push_back(m_thisDataGram);
-        m_previousDataGram         = m_thisDataGram;
-        m_previousPreviousDataGram = m_thisDataGram;
-      }
-      if (iEvent > 0) {
-        // This is not perfect, but I'll remove the presumably small number of duplicates at the end:
-        if (m_thisDataGram != m_previousDataGram && m_thisDataGram!= m_previousPreviousDataGram) {
-          listDataGrams.push_back(m_thisDataGram);
+	// First event in first datagram for EPU0?
+        if (firstDatagramEventEpu0 == -1) {
+          listDataGramsEpu0.push_back(m_thisDataGramEpu0);
+
+	  m_firstDataGramEpu0    = m_thisDataGramEpu0;
+	  m_beginRunDataGramEpu0 = 0;
+	  int firstDataGramOpen = m_digiEvent->getMetaEvent().datagram().openAction();
+	  if (firstDataGramOpen == enums::Lsf::Open::Start) {
+	    m_beginRunDataGramEpu0 = 1;
+          }
+          firstDatagramEventEpu0 = 1;
 	}
-      }
-      if (iEvent == m_nEvent-1) {
-	// Get rid of duplicates:
-        listDataGrams.sort();
-        listDataGrams.unique();
 
-	// Keep total number of datagrams in the run: 
-        m_nbrDataGrams = listDataGrams.size();
-
-	std::list<int>::iterator p;
-        for (p = listDataGrams.begin(); p != listDataGrams.end(); p++) {       
-          if (p != listDataGrams.begin()) {
-            int diff = *p - *(--p);
-            p++;
-            if (diff > 1) {
-              m_counterDataDiagrams++;
-	    }
+        if (firstDatagramEventEpu0 != -1) {
+          // This is not perfect, but I'll remove the presumably small number of duplicates at the end:
+          if (m_thisDataGramEpu0 != m_previousDataGramEpu0 && m_thisDataGramEpu0 != m_previousPreviousDataGramEpu0) {
+            listDataGramsEpu0.push_back(m_thisDataGramEpu0);
 	  }
-	}
-	//std::cout << "AWB: Datagrams are " << std::endl;
-	//std::copy(listDataGrams.begin(),listDataGrams.end(),std::ostream_iterator<int>(std::cout,"\n"));
+        }
+        // Keep datagram sequence numbers for two previous events. Not perfect, but good enough!
+        unsigned int tmpDataGramEpu0   = m_previousDataGramEpu0;
+        m_previousDataGramEpu0         = m_thisDataGramEpu0;
+        m_previousPreviousDataGramEpu0 = tmpDataGramEpu0;
       }
 
-     
-      // Keep datagram sequence numbers for two previous events. Not perfect, but good enough!
-      unsigned int tmpDataGram = m_previousDataGram;
-      if (iEvent > 0) {
-        m_previousDataGram         = m_thisDataGram;
-        m_previousPreviousDataGram = tmpDataGram;
+
+      // EPU1:
+      if (m_digiEvent->getMetaEvent().datagram().crate() == enums::Lsf::Epu1) {
+        m_thisDataGramEpu1 = m_digiEvent->getMetaEvent().datagram().datagrams();
+
+        m_nbrEventsDataGramsEpu1++;
+        lastDatagramEventEpu1 = iEvent;
+      
+	// First event in first datagram for EPU1?
+        if (firstDatagramEventEpu1 == -1) {
+          listDataGramsEpu1.push_back(m_thisDataGramEpu1);
+
+	  m_firstDataGramEpu1    = m_thisDataGramEpu1;
+	  m_beginRunDataGramEpu1 = 0;
+	  int firstDataGramOpen = m_digiEvent->getMetaEvent().datagram().openAction();
+	  if (firstDataGramOpen == enums::Lsf::Open::Start) {
+	    m_beginRunDataGramEpu1 = 1;
+          }
+          firstDatagramEventEpu1 = 1;
+	}
+
+        if (firstDatagramEventEpu1 != -1) {
+          // This is not perfect, but I'll remove the presumably small number of duplicates at the end:
+          if (m_thisDataGramEpu1 != m_previousDataGramEpu1 && m_thisDataGramEpu1 != m_previousPreviousDataGramEpu1) {
+            listDataGramsEpu1.push_back(m_thisDataGramEpu1);
+	  }
+        }
+        // Keep datagram sequence numbers for two previous events. Not perfect, but good enough!
+        unsigned int tmpDataGramEpu1   = m_previousDataGramEpu1;
+        m_previousDataGramEpu1         = m_thisDataGramEpu1;
+        m_previousPreviousDataGramEpu1 = tmpDataGramEpu1;
       }
+
+
+      // EPU2:
+      if (m_digiEvent->getMetaEvent().datagram().crate() == enums::Lsf::Epu2) {
+        m_thisDataGramEpu2 = m_digiEvent->getMetaEvent().datagram().datagrams();
+
+        m_nbrEventsDataGramsEpu2++;
+        lastDatagramEventEpu2 = iEvent;
+      
+	// First event in first datagram for EPU0?
+        if (firstDatagramEventEpu2 == -1) {
+          listDataGramsEpu2.push_back(m_thisDataGramEpu2);
+
+	  m_firstDataGramEpu2    = m_thisDataGramEpu2;
+	  m_beginRunDataGramEpu2 = 0;
+	  int firstDataGramOpen = m_digiEvent->getMetaEvent().datagram().openAction();
+	  if (firstDataGramOpen == enums::Lsf::Open::Start) {
+	    m_beginRunDataGramEpu2 = 1;
+          }
+          firstDatagramEventEpu2 = 1;
+	}
+
+        if (firstDatagramEventEpu2 != -1) {
+          // This is not perfect, but I'll remove the presumably small number of duplicates at the end:
+          if (m_thisDataGramEpu2 != m_previousDataGramEpu2 && m_thisDataGramEpu2 != m_previousPreviousDataGramEpu2) {
+            listDataGramsEpu2.push_back(m_thisDataGramEpu2);
+	  }
+        }
+        // Keep datagram sequence numbers for two previous events. Not perfect, but good enough!
+        unsigned int tmpDataGramEpu2   = m_previousDataGramEpu2;
+        m_previousDataGramEpu2         = m_thisDataGramEpu2;
+        m_previousPreviousDataGramEpu2 = tmpDataGramEpu2;
+      }
+
+
+      // SIU0:
+      if (m_digiEvent->getMetaEvent().datagram().crate() == enums::Lsf::Siu0) {
+        m_thisDataGramSiu0 = m_digiEvent->getMetaEvent().datagram().datagrams();
+
+        m_nbrEventsDataGramsSiu0++;
+        lastDatagramEventSiu0 = iEvent;
+      
+	// First event in first datagram for EPU0?
+        if (firstDatagramEventSiu0 == -1) {
+          listDataGramsSiu0.push_back(m_thisDataGramSiu0);
+
+	  m_firstDataGramSiu0    = m_thisDataGramSiu0;
+	  m_beginRunDataGramSiu0 = 0;
+	  int firstDataGramOpen = m_digiEvent->getMetaEvent().datagram().openAction();
+	  if (firstDataGramOpen == enums::Lsf::Open::Start) {
+	    m_beginRunDataGramSiu0 = 1;
+          }
+          firstDatagramEventSiu0 = 1;
+	}
+
+        if (firstDatagramEventSiu0 != -1) {
+          // This is not perfect, but I'll remove the presumably small number of duplicates at the end:
+          if (m_thisDataGramSiu0 != m_previousDataGramSiu0 && m_thisDataGramSiu0 != m_previousPreviousDataGramSiu0) {
+            listDataGramsSiu0.push_back(m_thisDataGramSiu0);
+	  }
+        }
+        // Keep datagram sequence numbers for two previous events. Not perfect, but good enough!
+        unsigned int tmpDataGramSiu0   = m_previousDataGramSiu0;
+        m_previousDataGramSiu0         = m_thisDataGramSiu0;
+        m_previousPreviousDataGramSiu0 = tmpDataGramSiu0;
+      }
+
+
+      // SIU1:
+      if (m_digiEvent->getMetaEvent().datagram().crate() == enums::Lsf::Siu1) {
+        m_thisDataGramSiu1 = m_digiEvent->getMetaEvent().datagram().datagrams();
+
+        m_nbrEventsDataGramsSiu1++;
+        lastDatagramEventSiu1 = iEvent;
+      
+	// First event in first datagram for EPU0?
+        if (firstDatagramEventSiu1 == -1) {
+          listDataGramsSiu1.push_back(m_thisDataGramSiu1);
+
+	  m_firstDataGramSiu1    = m_thisDataGramSiu1;
+	  m_beginRunDataGramSiu1 = 0;
+	  int firstDataGramOpen = m_digiEvent->getMetaEvent().datagram().openAction();
+	  if (firstDataGramOpen == enums::Lsf::Open::Start) {
+	    m_beginRunDataGramSiu1 = 1;
+          }
+          firstDatagramEventSiu1 = 1;
+	}
+
+        if (firstDatagramEventSiu1 != -1) {
+          // This is not perfect, but I'll remove the presumably small number of duplicates at the end:
+          if (m_thisDataGramSiu1 != m_previousDataGramSiu1 && m_thisDataGramSiu1 != m_previousPreviousDataGramSiu1) {
+            listDataGramsSiu1.push_back(m_thisDataGramSiu1);
+	  }
+        }
+        // Keep datagram sequence numbers for two previous events. Not perfect, but good enough!
+        unsigned int tmpDataGramSiu1   = m_previousDataGramSiu1;
+        m_previousDataGramSiu1         = m_thisDataGramSiu1;
+        m_previousPreviousDataGramSiu1 = tmpDataGramSiu1;
+      }
+
+
+
+      // For the last event, we know we have all the datagrams for all the EPU/SIUs:
+      if (iEvent == m_nEvent-1) {
+
+        // We only have two EPUs or one SIU in each run:
+
+	// EPU0:
+        if (firstDatagramEventEpu0 == 1) {
+
+          // Get rid of duplicates:
+          listDataGramsEpu0.sort();
+          listDataGramsEpu0.unique();
+
+    	  // Keep total number of datagrams in the run: 
+          m_nbrDataGramsEpu0 = listDataGramsEpu0.size();
+
+	  std::list<int>::iterator p;
+          for (p = listDataGramsEpu0.begin(); p != listDataGramsEpu0.end(); p++) {       
+            if (p != listDataGramsEpu0.begin()) {
+              int diff = *p - *(--p);
+              p++;
+              if (diff > 1) {
+                m_counterDataDiagramsEpu0 = m_counterDataDiagramsEpu0 + diff - 1;
+	        std::cout << "Warning! We dropped " << (diff - 1) << " datagram(s) before datagram " << (*p) << " for EPU0!" << std::endl;
+	      }
+	    }
+ 	  } 
+	  //std::cout << "AWB: Datagrams for EPU0 are " << std::endl;
+	  //std::copy(listDataGramsEpu0.begin(),listDataGramsEpu0.end(),std::ostream_iterator<int>(std::cout,"\n"));
+        }
+
+	// EPU1:
+        if (firstDatagramEventEpu1 == 1) {
+
+          // Get rid of duplicates:
+          listDataGramsEpu1.sort();
+          listDataGramsEpu1.unique();
+
+    	  // Keep total number of datagrams in the run: 
+          m_nbrDataGramsEpu1 = listDataGramsEpu1.size();
+
+	  std::list<int>::iterator p;
+          for (p = listDataGramsEpu1.begin(); p != listDataGramsEpu1.end(); p++) {       
+            if (p != listDataGramsEpu1.begin()) {
+              int diff = *p - *(--p);
+              p++;
+              if (diff > 1) {
+                m_counterDataDiagramsEpu1 = m_counterDataDiagramsEpu1 + diff - 1;
+	        std::cout << "Warning! We dropped " << (diff - 1) << " datagram(s) before datagram " << (*p) << " for EPU1!" << std::endl;
+	      }
+	    }
+ 	  } 
+	  //std::cout << "AWB: Datagrams for EPU1 are " << std::endl;
+	  //std::copy(listDataGramsEpu1.begin(),listDataGramsEpu1.end(),std::ostream_iterator<int>(std::cout,"\n"));
+        }
+
+	// EPU2:
+        if (firstDatagramEventEpu2 == 1) {
+
+          // Get rid of duplicates:
+          listDataGramsEpu2.sort();
+          listDataGramsEpu2.unique();
+
+    	  // Keep total number of datagrams in the run: 
+          m_nbrDataGramsEpu2 = listDataGramsEpu2.size();
+
+	  std::list<int>::iterator p;
+          for (p = listDataGramsEpu2.begin(); p != listDataGramsEpu2.end(); p++) {       
+            if (p != listDataGramsEpu2.begin()) {
+              int diff = *p - *(--p);
+              p++;
+              if (diff > 1) {
+                m_counterDataDiagramsEpu2 = m_counterDataDiagramsEpu2 + diff - 1;
+	        std::cout << "Warning! We dropped " << (diff - 1) << " datagram(s) before datagram " << (*p) << " for EPU2!" << std::endl;
+	      }
+	    }
+ 	  } 
+	  //std::cout << "AWB: Datagrams for EPU2 are " << std::endl;
+	  //std::copy(listDataGramsEpu2.begin(),listDataGramsEpu2.end(),std::ostream_iterator<int>(std::cout,"\n"));
+        }
+
+	// SIU0:
+        if (firstDatagramEventSiu0 == 1) {
+
+          // Get rid of duplicates:
+          listDataGramsSiu0.sort();
+          listDataGramsSiu0.unique();
+
+    	  // Keep total number of datagrams in the run: 
+          m_nbrDataGramsSiu0 = listDataGramsSiu0.size();
+
+	  std::list<int>::iterator p;
+          for (p = listDataGramsSiu0.begin(); p != listDataGramsSiu0.end(); p++) {       
+            if (p != listDataGramsSiu0.begin()) {
+              int diff = *p - *(--p);
+              p++;
+              if (diff > 1) {
+                m_counterDataDiagramsSiu0 = m_counterDataDiagramsSiu0 + diff - 1;
+	        std::cout << "Warning! We dropped " << (diff - 1) << " datagram(s) before datagram " << (*p) << " for SIU0!" << std::endl;
+	      }
+	    }
+ 	  } 
+	  //std::cout << "AWB: Datagrams for SIU0 are " << std::endl;
+	  //std::copy(listDataGramsSiu0.begin(),listDataGramsSiu0.end(),std::ostream_iterator<int>(std::cout,"\n"));
+        }
+
+	// SIU1:
+        if (firstDatagramEventSiu1 == 1) {
+
+          // Get rid of duplicates:
+          listDataGramsSiu1.sort();
+          listDataGramsSiu1.unique();
+
+    	  // Keep total number of datagrams in the run: 
+          m_nbrDataGramsSiu1 = listDataGramsSiu0.size();
+
+	  std::list<int>::iterator p;
+          for (p = listDataGramsSiu1.begin(); p != listDataGramsSiu1.end(); p++) {       
+            if (p != listDataGramsSiu1.begin()) {
+              int diff = *p - *(--p);
+              p++;
+              if (diff > 1) {
+                m_counterDataDiagramsSiu1 = m_counterDataDiagramsSiu1 + diff - 1;
+	        std::cout << "Warning! We dropped " << (diff - 1) << " datagram(s) before datagram " << (*p) << " for SIU1!" << std::endl;
+	      }
+	    }
+ 	  } 
+	  //std::cout << "AWB: Datagrams for SIU1 are " << std::endl;
+	  //std::copy(listDataGramsSiu1.begin(),listDataGramsSiu1.end(),std::ostream_iterator<int>(std::cout,"\n"));
+        }
+      }
+    
+     
+
+
+
+
+
+
         
 
       //if (iEvent > 0) { 
@@ -1124,7 +1444,126 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       analyzeReconTree();
     }
 
-  }  
+  }
+
+  // Last event for the last datagram per EPU/SIU:
+  // EPU0:
+  if (lastDatagramEventEpu0 != -1) {
+    m_digiBranch->GetEntry(lastDatagramEventEpu0);
+    if (m_digiEvent->getMetaEvent().datagram().crate() != enums::Lsf::Epu0) {
+      std::cout << "Anders! You fucked up! This should have been been from EPU0, but it's not! It is " << m_digiEvent->getMetaEvent().datagram().crate() << std::endl;
+    } else {
+      m_endRunDataGramEpu0 = 0;
+      m_fullDataGramEpu0   = 0;
+      int lastReasonDataGram = m_digiEvent->getMetaEvent().datagram().closeReason();
+      int lastActionDataGram  = m_digiEvent->getMetaEvent().datagram().closeAction();
+      if (lastActionDataGram == enums::Lsf::Close::Stop) {
+        m_endRunDataGramEpu0 = 1;
+      }
+      if (lastReasonDataGram == enums::Lsf::Close::Full) {
+        m_fullDataGramEpu0 = 1;
+      }
+      if (m_endRunDataGramEpu0==0 && m_fullDataGramEpu0==0) {
+        std::cout << "Warning! The last datagram for EPU0 was not closed because we reached end of run or because it was full! The datagram closing reason was " << lastReasonDataGram
+	  	  << " and the datagram closing action was " << lastActionDataGram << std::endl;
+      }
+    }
+    m_digiEvent->Clear();
+  }
+
+  if (lastDatagramEventEpu1 != -1) {
+    m_digiBranch->GetEntry(lastDatagramEventEpu1);
+    if (m_digiEvent->getMetaEvent().datagram().crate() != enums::Lsf::Epu1) {
+      std::cout << "Anders! You fucked up! This should have been been from EPU1, but it's not! It is " << m_digiEvent->getMetaEvent().datagram().crate() << std::endl;
+    } else {
+      m_endRunDataGramEpu1 = 0;
+      m_fullDataGramEpu1   = 0;
+      int lastReasonDataGram = m_digiEvent->getMetaEvent().datagram().closeReason();
+      int lastActionDataGram  = m_digiEvent->getMetaEvent().datagram().closeAction();
+      if (lastActionDataGram == enums::Lsf::Close::Stop) {
+        m_endRunDataGramEpu1 = 1;
+      }
+      if (lastReasonDataGram == enums::Lsf::Close::Full) {
+        m_fullDataGramEpu1 = 1;
+      }
+      if (m_endRunDataGramEpu1==0 && m_fullDataGramEpu1==0) {
+        std::cout << "Warning! The last datagram for EPU1 was not closed because we reached end of run or because it was full! The datagram closing reason was " << lastReasonDataGram
+	  	  << " and the datagram closing action was " << lastActionDataGram << std::endl;
+      }
+    }
+   m_digiEvent->Clear();
+  }
+
+  if (lastDatagramEventEpu2 != -1) {
+    m_digiBranch->GetEntry(lastDatagramEventEpu2);
+    if (m_digiEvent->getMetaEvent().datagram().crate() != enums::Lsf::Epu2) {
+      std::cout << "Anders! You fucked up! This should have been been from EPU2, but it's not! It is " << m_digiEvent->getMetaEvent().datagram().crate() << std::endl;
+    } else {
+      m_endRunDataGramEpu2 = 0;
+      m_fullDataGramEpu2   = 0;
+      int lastReasonDataGram = m_digiEvent->getMetaEvent().datagram().closeReason();
+      int lastActionDataGram  = m_digiEvent->getMetaEvent().datagram().closeAction();
+      if (lastActionDataGram == enums::Lsf::Close::Stop) {
+        m_endRunDataGramEpu2 = 1;
+      }
+      if (lastReasonDataGram == enums::Lsf::Close::Full) {
+        m_fullDataGramEpu2 = 1;
+      }
+      if (m_endRunDataGramEpu2==0 && m_fullDataGramEpu2==0) {
+        std::cout << "Warning! The last datagram for EPU2 was not closed because we reached end of run or because it was full! The datagram closing reason was " << lastReasonDataGram
+	  	  << " and the datagram closing action was " << lastActionDataGram << std::endl;
+      }
+    }
+    m_digiEvent->Clear();
+  }
+
+
+  if (lastDatagramEventSiu0 != -1) {
+    m_digiBranch->GetEntry(lastDatagramEventSiu0);
+    if (m_digiEvent->getMetaEvent().datagram().crate() != enums::Lsf::Siu0) {
+      std::cout << "Anders! You fucked up! This should have been been from SIU0, but it's not! It is " << m_digiEvent->getMetaEvent().datagram().crate() << std::endl;
+    } else {
+      m_endRunDataGramSiu0 = 0;
+      m_fullDataGramSiu0   = 0;
+      int lastReasonDataGram = m_digiEvent->getMetaEvent().datagram().closeReason();
+      int lastActionDataGram  = m_digiEvent->getMetaEvent().datagram().closeAction();
+      if (lastActionDataGram == enums::Lsf::Close::Stop) {
+        m_endRunDataGramSiu0 = 1;
+      }
+      if (lastReasonDataGram == enums::Lsf::Close::Full) {
+        m_fullDataGramSiu0 = 1;
+      }
+      if (m_endRunDataGramSiu0==0 && m_fullDataGramSiu0==0) {
+        std::cout << "Warning! The last datagram for EPU0 was not closed because we reached end of run or because it was full! The datagram closing reason was " << lastReasonDataGram
+	  	  << " and the datagram closing action was " << lastActionDataGram << std::endl;
+      }
+    }
+    m_digiEvent->Clear();
+  }
+
+  if (lastDatagramEventSiu1 != -1) {
+    m_digiBranch->GetEntry(lastDatagramEventSiu1);
+    if (m_digiEvent->getMetaEvent().datagram().crate() != enums::Lsf::Siu1) {
+      std::cout << "Anders! You fucked up! This should have been been from Siu1, but it's not! It is " << m_digiEvent->getMetaEvent().datagram().crate() << std::endl;
+    } else {
+      m_endRunDataGramSiu1 = 0;
+      m_fullDataGramSiu1   = 0;
+      int lastReasonDataGram = m_digiEvent->getMetaEvent().datagram().closeReason();
+      int lastActionDataGram  = m_digiEvent->getMetaEvent().datagram().closeAction();
+      if (lastActionDataGram == enums::Lsf::Close::Stop) {
+        m_endRunDataGramSiu1 = 1;
+      }
+      if (lastReasonDataGram == enums::Lsf::Close::Full) {
+        m_fullDataGramSiu1 = 1;
+      }
+      if (m_endRunDataGramSiu1==0 && m_fullDataGramSiu1==0) {
+        std::cout << "Warning! The last datagram for SIU1 was not closed because we reached end of run or because it was full! The datagram closing reason was " << lastReasonDataGram
+		  << " and the datagram closing action was " << lastActionDataGram << std::endl;
+      }
+    }
+    m_digiEvent->Clear();
+  }
+
 
   // Closing time:  
   if(m_mcFile) m_mcFile->Close();
@@ -1674,7 +2113,7 @@ void TestReport::generateReport()
   (*m_report) << "@li There were @b " << m_nbrPrescaled << " prescaled events and @b " << m_nbrDeadZone  << " dead zone events." << endl;
 
   if (m_deltaSequenceNbrEvents != 0) {
-    (*m_report) << "@li The number of events in the digi file does not agree with the extended GEM sequence counter! The difference is @b " << m_deltaSequenceNbrEvents << ". Is the onboard filter running?" << endl;
+    (*m_report) << "@li The number of events in the digi file does not agree with the extended GEM sequence counter! The difference is @b " << m_deltaSequenceNbrEvents << " events. Is the onboard filter running?" << endl;
   } else {
     (*m_report) << "@li There were no gaps in the extended GEM sequence counter." << endl;
   }
@@ -1686,26 +2125,128 @@ void TestReport::generateReport()
   } 
 
   (*m_report) << "   " << endl;
-  (*m_report) << "@li There were @b " << m_nbrDataGrams << " datagrams in this run. " << endl;
-  (*m_report) << "@li There were in average @b " << ((float) m_nEvent / (float) m_nbrDataGrams) << " events per datagram." << endl;
 
-  if (m_beginRunDataGram != 1) {
-    (*m_report) << "@li Problem! The first datagram was not the first datagram after the start of the run!" << endl;
+ 
+  if (m_nbrDataGramsEpu0 > 0) {
+    (*m_report) << "@li There were @b " << m_nbrDataGramsEpu0 << " datagrams from EPU0 in this run with in average @b " << ((float) m_nbrEventsDataGramsEpu0 / (float) m_nbrDataGramsEpu0) << " events per datagram." << endl;
   }
-  if (m_firstDataGram != 0) {
-    (*m_report) << "@li Problem! The first datagram did not have sequence number 0! It was @b " << m_firstDataGram << "." << endl;
+  if (m_nbrDataGramsEpu1 > 0) {
+    (*m_report) << "@li There were @b " << m_nbrDataGramsEpu1 << " datagrams from EPU1 in this run with in average @b " << ((float) m_nbrEventsDataGramsEpu1 / (float) m_nbrDataGramsEpu1) << " events per datagram." << endl;
+  }
+  if (m_nbrDataGramsEpu2 > 0) {
+    (*m_report) << "@li There were @b " << m_nbrDataGramsEpu2 << " datagrams from EPU2 in this run with in average @b " << ((float) m_nbrEventsDataGramsEpu2 / (float) m_nbrDataGramsEpu2) << " events per datagram." << endl;
+  }
+  if (m_nbrDataGramsSiu0 > 0) {
+    (*m_report) << "@li There were @b " << m_nbrDataGramsSiu0 << " datagrams from SIU0 in this run with in average @b " << ((float) m_nbrEventsDataGramsSiu0 / (float) m_nbrDataGramsSiu0) << " events per datagram." << endl;
+  }
+  if (m_nbrDataGramsSiu1 > 0) {
+    (*m_report) << "@li There were @b " << m_nbrDataGramsSiu1 << " datagrams from SIU1 in this run with in average @b " << ((float) m_nbrEventsDataGramsSiu1 / (float) m_nbrDataGramsSiu1) << " events per datagram." << endl;
   }
 
-  if (m_counterDataDiagrams != 0) {
-    (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagrams << " datagrams in this run!" << endl;
+
+  // EPU0:
+  if (m_nbrEventsDataGramsEpu0 > 0) {
+    if (m_counterDataDiagramsEpu0 != 0) {
+      (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagramsEpu0 << " datagrams from EPU0 in this run!" << endl;
+    }
+
+    if (m_beginRunDataGramEpu0 != 1) {
+      (*m_report) << "@li Problem! The first datagram in EPU0 was not the first datagram after the start of the run!" << endl;
+    }
+    if (m_firstDataGramEpu0 != 0) {
+      (*m_report) << "@li Problem! The first datagram in EPU0 did not have sequence number 0! It was @b " << m_firstDataGramEpu0 << "." << endl;
+    }
+    if (m_endRunDataGramEpu0 == 0 && m_fullDataGramEpu0==1) {
+      (*m_report) << "@li Problem! The last datagram from EPU0 was not closed because of end of run, but because it was full! Are we missing events?" << endl;
+    }
+    if (m_endRunDataGramEpu0 ==0 && m_fullDataGramEpu0==0) {
+      (*m_report) << "@li Problem! The last datagram from EPU0 was not closed neither because of end of run neither because it was full. See logfile for more details!" << endl;
+    }
   }
 
-  if (m_endRunDataGram == 0 && m_fullDataGram==1) {
-    (*m_report) << "@li Problem! The last datagram was not closed because of end of run, but because it was full! Are we missing events?" << endl;
+  // EPU1:
+  if (m_nbrEventsDataGramsEpu1 > 0) {
+    if (m_counterDataDiagramsEpu1 != 0) {
+      (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagramsEpu1 << " datagrams from EPU1 in this run!" << endl;
+    }
+
+    if (m_beginRunDataGramEpu1 != 1) {
+      (*m_report) << "@li Problem! The first datagram in EPU11 was not the first datagram after the start of the run!" << endl;
+    }
+    if (m_firstDataGramEpu1 != 0) {
+      (*m_report) << "@li Problem! The first datagram in EPU1 did not have sequence number 0! It was @b " << m_firstDataGramEpu1 << "." << endl;
+    }
+    if (m_endRunDataGramEpu1== 0 && m_fullDataGramEpu1==1) {
+      (*m_report) << "@li Problem! The last datagram from EPU1 was not closed because of end of run, but because it was full! Are we missing events?" << endl;
+    }
+    if (m_endRunDataGramEpu1==0 && m_fullDataGramEpu1==0) {
+      (*m_report) << "@li Problem! The last datagram from EPU1 was not closed neither because of end of run neither because it was full. See logfile for more details!" << endl;
+    }
   }
-  if (m_endRunDataGram ==0 && m_fullDataGram==0) {
-    (*m_report) << "@li Problem! The last datagram was not closed neither because of end of run neither because it was full. See logfile for more details!" << endl;
+
+  // EPU2:
+  if (m_nbrEventsDataGramsEpu2 > 0) {
+    if (m_counterDataDiagramsEpu2 != 0) {
+      (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagramsEpu2 << " datagrams from EPU2 in this run!" << endl;
+    }
+
+    if (m_beginRunDataGramEpu2 != 1) {
+      (*m_report) << "@li Problem! The first datagram in EPU2 was not the first datagram after the start of the run!" << endl;
+    }
+    if (m_firstDataGramEpu2 != 0) {
+      (*m_report) << "@li Problem! The first datagram in EPU2 did not have sequence number 0! It was @b " << m_firstDataGramEpu2 << "." << endl;
+    }
+    if (m_endRunDataGramEpu2== 0 && m_fullDataGramEpu2==1) {
+      (*m_report) << "@li Problem! The last datagram from EPU2 was not closed because of end of run, but because it was full! Are we missing events?" << endl;
+    }
+    if (m_endRunDataGramEpu2==0 && m_fullDataGramEpu2==0) {
+      (*m_report) << "@li Problem! The last datagram from EPU2 was not closed neither because of end of run neither because it was full. See logfile for more details!" << endl;
+    }
   }
+
+  // SIU0
+  if (m_nbrEventsDataGramsSiu0 > 0) {
+    if (m_counterDataDiagramsSiu0 != 0) {
+      (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagramsSiu0 << " datagrams from SIU0 in this run!" << endl;
+    }
+
+    if (m_beginRunDataGramSiu0 != 1) {
+      (*m_report) << "@li Problem! The first datagram in SIU0 was not the first datagram after the start of the run!" << endl;
+    }
+    if (m_firstDataGramSiu0 != 0) {
+      (*m_report) << "@li Problem! The first datagram in SIU0 did not have sequence number 0! It was @b " << m_firstDataGramSiu0 << "." << endl;
+    }
+    if (m_endRunDataGramSiu0== 0 && m_fullDataGramSiu0==1) {
+      (*m_report) << "@li Problem! The last datagram from SIU0 was not closed because of end of run, but because it was full! Are we missing events?" << endl;
+    }
+    if (m_endRunDataGramSiu0 ==0 && m_fullDataGramSiu0==0) {
+      (*m_report) << "@li Problem! The last datagram from SIU0 was not closed neither because of end of run neither because it was full. See logfile for more details!" << endl;
+    }
+  }
+
+  // SIU1
+  if (m_nbrEventsDataGramsSiu1 > 0) {
+    if (m_counterDataDiagramsSiu1 != 0) {
+      (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagramsSiu1 << " datagrams from SIU1 in this run!" << endl;
+    }
+
+    if (m_beginRunDataGramSiu1 != 1) {
+      (*m_report) << "@li Problem! The first datagram in EPU1 was not the first datagram after the start of the run!" << endl;
+    }
+    if (m_firstDataGramSiu1 != 0) {
+      (*m_report) << "@li Problem! The first datagram in SIU1 did not have sequence number 0! It was @b " << m_firstDataGramSiu1 << "." << endl;
+    }
+    if (m_endRunDataGramSiu1== 0 && m_fullDataGramSiu1==1) {
+      (*m_report) << "@li Problem! The last datagram from SIU1 was not closed because of end of run, but because it was full! Are we missing events?" << endl;
+    }
+    if (m_endRunDataGramSiu1 ==0 && m_fullDataGramSiu1==0) {
+      (*m_report) << "@li Problem! The last datagram from SIU1 was not closed neither because of end of run neither because it was full. See logfile for more details!" << endl;
+    }
+  }
+
+
+
+
 
 
   (*m_report) << "   " << endl;
