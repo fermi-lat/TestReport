@@ -233,3 +233,6 @@ v3r6p8  Checking for dropped datagrams.
 
 June 29, 2006: awb
 v3r6p9 	Doh! Better do it the right way .....
+
+July 3, 2006: awb
+v3r6p10	Fixed end of count datagram check for the SIUs.

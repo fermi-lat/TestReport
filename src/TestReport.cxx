@@ -96,7 +96,7 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_previousDataGramEpu0(0),
     m_previousPreviousDataGramEpu0(0),
     m_endRunDataGramEpu0(0),
-    m_fullDataGramEpu0(0),
+     m_fullDataGramEpu0(0),
     m_beginRunDataGramEpu0(0),
     m_counterDataDiagramsEpu1(0),
     m_nbrDataGramsEpu1(0),
@@ -106,7 +106,7 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_previousDataGramEpu1(0),
     m_previousPreviousDataGramEpu1(0),
     m_endRunDataGramEpu1(0),
-    m_fullDataGramEpu1(0),
+     m_fullDataGramEpu1(0),
     m_beginRunDataGramEpu1(0),
     m_counterDataDiagramsEpu2(0),
     m_nbrDataGramsEpu2(0),
@@ -125,7 +125,7 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_thisDataGramSiu0(0),
     m_previousDataGramSiu0(0),
     m_previousPreviousDataGramSiu0(0),
-    m_endRunDataGramSiu0(0),
+    m_endCountDataGramSiu0(0), 
     m_fullDataGramSiu0(0),
     m_beginRunDataGramSiu0(0),
     m_counterDataDiagramsSiu1(0),
@@ -135,7 +135,7 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_thisDataGramSiu1(0),
     m_previousDataGramSiu1(0),
     m_previousPreviousDataGramSiu1(0),
-    m_endRunDataGramSiu1(0),
+    m_endCountDataGramSiu1(0),
     m_fullDataGramSiu1(0),
     m_beginRunDataGramSiu1(0),
     m_nEvent(0), 
@@ -1523,19 +1523,19 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
     if (m_digiEvent->getMetaEvent().datagram().crate() != enums::Lsf::Siu0) {
       std::cout << "Anders! You fucked up! This should have been been from SIU0, but it's not! It is " << m_digiEvent->getMetaEvent().datagram().crate() << std::endl;
     } else {
-      m_endRunDataGramSiu0 = 0;
-      m_fullDataGramSiu0   = 0;
+      m_endCountDataGramSiu0 = 0;
+      m_fullDataGramSiu0     = 0;
       int lastReasonDataGram = m_digiEvent->getMetaEvent().datagram().closeReason();
       int lastActionDataGram  = m_digiEvent->getMetaEvent().datagram().closeAction();
-      if (lastActionDataGram == enums::Lsf::Close::Stop) {
-        m_endRunDataGramSiu0 = 1;
+      if (lastReasonDataGram == enums::Lsf::Close::CountedOut) {
+        m_endCountDataGramSiu0 = 1;
       }
       if (lastReasonDataGram == enums::Lsf::Close::Full) {
         m_fullDataGramSiu0 = 1;
       }
-      if (m_endRunDataGramSiu0==0 && m_fullDataGramSiu0==0) {
-        std::cout << "Warning! The last datagram for EPU0 was not closed because we reached end of run or because it was full! The datagram closing reason was " << lastReasonDataGram
-	  	  << " and the datagram closing action was " << lastActionDataGram << std::endl;
+      if (m_fullDataGramSiu0==0 && m_endCountDataGramSiu0==0) {
+        std::cout << "Warning! The last datagram for SIU0 was not closed because it was full or because we reached end of count! The datagram closing reason was " 
+                  << lastReasonDataGram << " and the datagram closing action was " << lastActionDataGram << std::endl;
       }
     }
     m_digiEvent->Clear();
@@ -1546,19 +1546,19 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
     if (m_digiEvent->getMetaEvent().datagram().crate() != enums::Lsf::Siu1) {
       std::cout << "Anders! You fucked up! This should have been been from Siu1, but it's not! It is " << m_digiEvent->getMetaEvent().datagram().crate() << std::endl;
     } else {
-      m_endRunDataGramSiu1 = 0;
-      m_fullDataGramSiu1   = 0;
+      m_endCountDataGramSiu1 = 0;
+      m_fullDataGramSiu1     = 0;
       int lastReasonDataGram = m_digiEvent->getMetaEvent().datagram().closeReason();
       int lastActionDataGram  = m_digiEvent->getMetaEvent().datagram().closeAction();
-      if (lastActionDataGram == enums::Lsf::Close::Stop) {
-        m_endRunDataGramSiu1 = 1;
+      if (lastReasonDataGram == enums::Lsf::Close::CountedOut) {
+        m_endCountDataGramSiu1 = 1;
       }
       if (lastReasonDataGram == enums::Lsf::Close::Full) {
         m_fullDataGramSiu1 = 1;
       }
-      if (m_endRunDataGramSiu1==0 && m_fullDataGramSiu1==0) {
-        std::cout << "Warning! The last datagram for SIU1 was not closed because we reached end of run or because it was full! The datagram closing reason was " << lastReasonDataGram
-		  << " and the datagram closing action was " << lastActionDataGram << std::endl;
+      if (m_fullDataGramSiu1==0 && m_endCountDataGramSiu1==0) {
+        std::cout << "Warning! The last datagram for SIU1 was not closed because it was full or because we reached end of count! The datagram closing reason was " 
+                  << lastReasonDataGram << " and the datagram closing action was " << lastActionDataGram << std::endl;
       }
     }
     m_digiEvent->Clear();
@@ -2216,11 +2216,11 @@ void TestReport::generateReport()
     if (m_firstDataGramSiu0 != 0) {
       (*m_report) << "@li Problem! The first datagram in SIU0 did not have sequence number 0! It was @b " << m_firstDataGramSiu0 << "." << endl;
     }
-    if (m_endRunDataGramSiu0== 0 && m_fullDataGramSiu0==1) {
-      (*m_report) << "@li Problem! The last datagram from SIU0 was not closed because of end of run, but because it was full! Are we missing events?" << endl;
+    if (m_endCountDataGramSiu0==0 && m_fullDataGramSiu0==1) {
+      (*m_report) << "@li Problem! The last datagram from SIU0 was not closed because of end of count, but because it was full! Are we missing events?" << endl;
     }
-    if (m_endRunDataGramSiu0 ==0 && m_fullDataGramSiu0==0) {
-      (*m_report) << "@li Problem! The last datagram from SIU0 was not closed neither because of end of run neither because it was full. See logfile for more details!" << endl;
+    if (m_endCountDataGramSiu0==0 && m_fullDataGramSiu0==0) {
+      (*m_report) << "@li Problem! The last datagram from SIU0 was not closed neither because of end of count nor because it was full. See logfile for more details!" << endl;
     }
   }
 
@@ -2236,11 +2236,11 @@ void TestReport::generateReport()
     if (m_firstDataGramSiu1 != 0) {
       (*m_report) << "@li Problem! The first datagram in SIU1 did not have sequence number 0! It was @b " << m_firstDataGramSiu1 << "." << endl;
     }
-    if (m_endRunDataGramSiu1== 0 && m_fullDataGramSiu1==1) {
-      (*m_report) << "@li Problem! The last datagram from SIU1 was not closed because of end of run, but because it was full! Are we missing events?" << endl;
+    if (m_endCountDataGramSiu1==0 && m_fullDataGramSiu1==1) {
+      (*m_report) << "@li Problem! The last datagram from SIU1 was not closed because of end of count, but because it was full! Are we missing events?" << endl;
     }
-    if (m_endRunDataGramSiu1 ==0 && m_fullDataGramSiu1==0) {
-      (*m_report) << "@li Problem! The last datagram from SIU1 was not closed neither because of end of run neither because it was full. See logfile for more details!" << endl;
+    if (m_endCountDataGramSiu1==0 && m_fullDataGramSiu1==0) {
+      (*m_report) << "@li Problem! The last datagram from SIU1 was not closed neither because of end of count nor because it was full. See logfile for more details!" << endl;
     }
   }
 
@@ -3227,6 +3227,7 @@ void TestReport::produceCalEneSum2DPlot()
   string file = m_prefix;
   file += "_calSumEne";
   PlotAttribute att(file.c_str(), "Sum of crystal energies in the CAL cluster (MeV). Note that there is only one CAL cluster produced by CalRecon at the moment. Energy measured in each crystal is obtained by using the getEnergy() member function of the CalXtalRecData class.", "calSumEne", 1);
+  att.m_statMode = 111111;
   producePlot(m_calSumEne, att);
   insertPlot(att);
 }
@@ -3621,7 +3622,7 @@ void TestReport::produceAcdTkrReconPlots()
   file = m_prefix;
   file += "_AcdInEfficMap";
   
-  PlotAttribute att(file.c_str(), "Fraction of tracks extapolated to tile NOT MATCHED with hits.  By ACD Gem ID.", "AcdInEfficMap");
+  PlotAttribute att(file.c_str(), "Fraction of tracks extrapolated to tile NOT MATCHED with hits.  By ACD Gem ID.", "AcdInEfficMap");
   att.m_statMode = 0;
   producePlot(m_AcdInEfficMap, att);
   insertPlot(att);  

@@ -421,7 +421,7 @@ class TestReport {
   unsigned int m_thisDataGramSiu0;
   unsigned int m_previousDataGramSiu0;
   unsigned int m_previousPreviousDataGramSiu0;
-  int m_endRunDataGramSiu0;
+  int m_endCountDataGramSiu0;
   int m_fullDataGramSiu0;
   int m_beginRunDataGramSiu0;
 
@@ -432,7 +432,7 @@ class TestReport {
   unsigned int m_thisDataGramSiu1;
   unsigned int m_previousDataGramSiu1;
   unsigned int m_previousPreviousDataGramSiu1;
-  int m_endRunDataGramSiu1;
+  int m_endCountDataGramSiu1;
   int m_fullDataGramSiu1;
   int m_beginRunDataGramSiu1;
 
