@@ -3536,10 +3536,10 @@ void TestReport::produceAcdDigiPlots()
 {
 
   // divide out some plots to have effics
-  Float_t vetoToHitRatio = efficDivide(*m_AcdVetoMap,*m_AcdHitMap,kTRUE);
+  Float_t singleVetoRatio = efficDivide(*m_AcdTileIdOneVeto,*m_AcdVetoMap);
+  Float_t vetoToHitRatio = efficDivide(*m_AcdVetoMap,*m_AcdHitMap);
   Float_t singlePmtRatio = efficDivide(*m_AcdTileIdOnePMT,*m_AcdHitMap);
-  Float_t singleVetoRatio = efficDivide(*m_AcdTileIdOneVeto,*m_AcdHitMap);
-
+  
   string file(m_prefix);
 
   file += "_nAcdDigis";
@@ -3572,7 +3572,7 @@ void TestReport::produceAcdDigiPlots()
 
   file = m_prefix;
   file += "_AcdTileIdOneVeto";
-  att.set(file.c_str(), "Fraction of single vetos.  This is the fractions of Digis where only one of the two PMT was above Veto threshold,", "AcdTileIdOneVeto");
+  att.set(file.c_str(), "Fraction of single vetos.  This is the RATIO of digis where only one of the two PMTs was above Veto threshold to the number of digis where either PMT was above the VETO threshold", "AcdTileIdOneVeto");
   att.m_statMode = 0;
   producePlot(m_AcdTileIdOneVeto, att);
   insertPlot(att);
