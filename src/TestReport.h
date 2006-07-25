@@ -414,6 +414,7 @@ class TestReport {
   int m_fullDataGramEpu2;
   int m_beginRunDataGramEpu2;
 
+  int m_counterCyclesSiu0;
   int m_counterDataDiagramsSiu0;
   int m_nbrDataGramsSiu0;
   int m_nbrEventsDataGramsSiu0;
@@ -425,6 +426,7 @@ class TestReport {
   int m_fullDataGramSiu0;
   int m_beginRunDataGramSiu0;
 
+  int m_counterCyclesSiu1;
   int m_counterDataDiagramsSiu1;
   int m_nbrDataGramsSiu1;
   int m_nbrEventsDataGramsSiu1;

@@ -240,3 +240,6 @@ v3r6p10	Fixed end of count datagram check for the SIUs.
 July 10, 2006: eac
 v3r6p11	Fix one of the ACD veto fraction plot to show fraction of digi above threshold, rather than below.  
         Also, make single veto fraction relative to total number of vetos, not total number of digis.
+
+July 25, 2006: awb
+v3r6p12 Improve lost datagram code for LCI (well, the SIUs). 

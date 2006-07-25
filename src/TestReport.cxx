@@ -118,6 +118,7 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_endRunDataGramEpu2(0),
     m_fullDataGramEpu2(0),
     m_beginRunDataGramEpu2(0),
+    m_counterCyclesSiu0(0),
     m_counterDataDiagramsSiu0(0),
     m_nbrDataGramsSiu0(0),
     m_nbrEventsDataGramsSiu0(0),
@@ -128,6 +129,7 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_endCountDataGramSiu0(0), 
     m_fullDataGramSiu0(0),
     m_beginRunDataGramSiu0(0),
+    m_counterCyclesSiu1(0),
     m_counterDataDiagramsSiu1(0),
     m_nbrDataGramsSiu1(0),
     m_nbrEventsDataGramsSiu1(0),
@@ -851,6 +853,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   // Loop over events:
   for(int iEvent = 0; iEvent != m_nEvent; ++iEvent) {
 
+    //if ( iEvent % 1000 == 0 ) {
     if ( iEvent % 1000 == 0 ) {
       std::cout << "Event number " << iEvent << std::endl;
     }
@@ -870,8 +873,8 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
     if (m_digiFile) {
       m_digiBranch->GetEntry(iEvent);
 
+      // 
       analyzeDigiTree();
-
 
 
       // Datagrams:
@@ -980,10 +983,23 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       if (m_digiEvent->getMetaEvent().datagram().crate() == enums::Lsf::Siu0) {
         m_thisDataGramSiu0 = m_digiEvent->getMetaEvent().datagram().datagrams();
 
+        // Look for gaps and commanded acquisisations:
+        if (m_thisDataGramSiu0 < m_previousDataGramSiu0) {
+          m_counterCyclesSiu0++;
+          if (m_thisDataGramSiu0 != 0) {
+            m_counterDataDiagramsSiu0 = m_counterDataDiagramsSiu0 + m_thisDataGramSiu0;
+	  }
+	} 
+        if ((m_thisDataGramSiu0>m_previousDataGramSiu0) && (m_thisDataGramSiu0-m_previousDataGramSiu0) > 1) {
+  	  m_counterDataDiagramsSiu0 = m_counterDataDiagramsSiu0 + (m_thisDataGramSiu0-m_previousDataGramSiu0-1);
+	}
+      
+
+        // This is not very useful for LCI runs, but I'll keep it for now:
         m_nbrEventsDataGramsSiu0++;
         lastDatagramEventSiu0 = iEvent;
       
-	// First event in first datagram for EPU0?
+	// First event in first datagram for SIU0?
         if (firstDatagramEventSiu0 == -1) {
           listDataGramsSiu0.push_back(m_thisDataGramSiu0);
 
@@ -1013,10 +1029,22 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       if (m_digiEvent->getMetaEvent().datagram().crate() == enums::Lsf::Siu1) {
         m_thisDataGramSiu1 = m_digiEvent->getMetaEvent().datagram().datagrams();
 
+        // Look for gaps and commanded acquisisations:
+        if (m_thisDataGramSiu1 < m_previousDataGramSiu1) {
+          m_counterCyclesSiu1++;
+          if (m_thisDataGramSiu1 != 0) {
+            m_counterDataDiagramsSiu1 = m_counterDataDiagramsSiu1 + m_thisDataGramSiu1;
+	  }
+	} 
+        if ((m_thisDataGramSiu1>m_previousDataGramSiu1) && (m_thisDataGramSiu1-m_previousDataGramSiu1) > 1) {
+  	  m_counterDataDiagramsSiu1 = m_counterDataDiagramsSiu1 + (m_thisDataGramSiu1-m_previousDataGramSiu1-1);
+	}
+
+        // This is not very useful for LCI runs, but I'll keep it for now:
         m_nbrEventsDataGramsSiu1++;
         lastDatagramEventSiu1 = iEvent;
       
-	// First event in first datagram for EPU0?
+	// First event in first datagram for SIU1?
         if (firstDatagramEventSiu1 == -1) {
           listDataGramsSiu1.push_back(m_thisDataGramSiu1);
 
@@ -2137,17 +2165,18 @@ void TestReport::generateReport()
     (*m_report) << "@li There were @b " << m_nbrDataGramsEpu2 << " datagrams from EPU2 in this run with in average @b " << ((float) m_nbrEventsDataGramsEpu2 / (float) m_nbrDataGramsEpu2) << " events per datagram." << endl;
   }
   if (m_nbrDataGramsSiu0 > 0) {
-    (*m_report) << "@li There were @b " << m_nbrDataGramsSiu0 << " datagrams from SIU0 in this run with in average @b " << ((float) m_nbrEventsDataGramsSiu0 / (float) m_nbrDataGramsSiu0) << " events per datagram." << endl;
+    (*m_report) << "@li There were @b " << (m_counterCyclesSiu0+1) << " cycles with a maximum of @b " << m_nbrDataGramsSiu0 << " datagrams per cycle from SIU0 in this run with in average @b " << ((float) m_nbrEventsDataGramsSiu0 / ((float) m_nbrDataGramsSiu0 * (float) (m_counterCyclesSiu0+1.0))) << " events per datagram." << endl;
   }
   if (m_nbrDataGramsSiu1 > 0) {
-    (*m_report) << "@li There were @b " << m_nbrDataGramsSiu1 << " datagrams from SIU1 in this run with in average @b " << ((float) m_nbrEventsDataGramsSiu1 / (float) m_nbrDataGramsSiu1) << " events per datagram." << endl;
+    (*m_report) << "@li There were @b " << (m_counterCyclesSiu1+1) << " cycles with a maximum of @b " << m_nbrDataGramsSiu1 << " datagrams per cycle from SIU1 in this run with in average @b " << ((float) m_nbrEventsDataGramsSiu1 / ((float) m_nbrDataGramsSiu1 * (float) (m_counterCyclesSiu1+1.0))) << " events per datagram." << endl;
   }
+
 
 
   // EPU0:
   if (m_nbrEventsDataGramsEpu0 > 0) {
     if (m_counterDataDiagramsEpu0 != 0) {
-      (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagramsEpu0 << " datagrams from EPU0 in this run!" << endl;
+      (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagramsEpu0 << " datagram(s) from EPU0 in this run!" << endl;
     }
 
     if (m_beginRunDataGramEpu0 != 1) {
@@ -2167,7 +2196,7 @@ void TestReport::generateReport()
   // EPU1:
   if (m_nbrEventsDataGramsEpu1 > 0) {
     if (m_counterDataDiagramsEpu1 != 0) {
-      (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagramsEpu1 << " datagrams from EPU1 in this run!" << endl;
+      (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagramsEpu1 << " datagram(s) from EPU1 in this run!" << endl;
     }
 
     if (m_beginRunDataGramEpu1 != 1) {
@@ -2187,7 +2216,7 @@ void TestReport::generateReport()
   // EPU2:
   if (m_nbrEventsDataGramsEpu2 > 0) {
     if (m_counterDataDiagramsEpu2 != 0) {
-      (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagramsEpu2 << " datagrams from EPU2 in this run!" << endl;
+      (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagramsEpu2 << " datagram(s) from EPU2 in this run!" << endl;
     }
 
     if (m_beginRunDataGramEpu2 != 1) {
@@ -2207,7 +2236,7 @@ void TestReport::generateReport()
   // SIU0
   if (m_nbrEventsDataGramsSiu0 > 0) {
     if (m_counterDataDiagramsSiu0 != 0) {
-      (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagramsSiu0 << " datagrams from SIU0 in this run!" << endl;
+      (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagramsSiu0 << " datagram(s) from SIU0 in this run!" << endl;
     }
 
     if (m_beginRunDataGramSiu0 != 1) {
@@ -2227,7 +2256,7 @@ void TestReport::generateReport()
   // SIU1
   if (m_nbrEventsDataGramsSiu1 > 0) {
     if (m_counterDataDiagramsSiu1 != 0) {
-      (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagramsSiu1 << " datagrams from SIU1 in this run!" << endl;
+      (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagramsSiu1 << " datagram(s) from SIU1 in this run!" << endl;
     }
 
     if (m_beginRunDataGramSiu1 != 1) {
