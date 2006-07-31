@@ -243,3 +243,6 @@ v3r6p11	Fix one of the ACD veto fraction plot to show fraction of digi above thr
 
 July 25, 2006: awb
 v3r6p12 Improve lost datagram code for LCI (well, the SIUs). 
+
+July 31, 2006: awb
+v3r6p13 Added histogram for number of events per datagram.

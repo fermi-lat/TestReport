@@ -372,6 +372,28 @@ TestReport::TestReport(const char* dir, const char* prefix,
   att.set("Crate number (Epu0 - Epu1 - Epu2 - Siu0 - Siu1 - Aux)","Number of events");
   setHistParameters(m_epu,att);
 
+  m_datagramsEPU0 = new TH1F("datagramsEPU0","Number of events per datagram - EPU0",50,-1,100);
+  att.set("Number of events per datagram - EPU0","Number of events");
+  setHistParameters(m_datagramsEPU0,att);
+
+  m_datagramsEPU1 = new TH1F("datagramsEPU1","Number of events per datagram - EPU1",50,-1,100);
+  att.set("Number of events per datagram - EPU1","Number of events");
+  setHistParameters(m_datagramsEPU1,att);
+
+  m_datagramsEPU2 = new TH1F("datagramsEPU2","Number of events per datagram - EPU2",50,-1,100);
+  att.set("Number of events per datagram - EPU2","Number of events");
+  setHistParameters(m_datagramsEPU2,att);
+
+  m_datagramsSIU0 = new TH1F("datagramsSIU0","Number of events per datagram - SIU0",50,-1,100);
+  att.set("Number of events per datagram - SIU0","Number of events");
+  setHistParameters(m_datagramsSIU0,att);
+
+  m_datagramsSIU1 = new TH1F("datagramsSIU1","Number of events per datagram - SIU1",50,-1,100);
+  att.set("Number of events per datagram - SIU1","Number of events");
+  setHistParameters(m_datagramsSIU1,att);
+
+
+
   m_triggerRate = new TH1F("triggerRate","Trigger rate for 30 equally spaced time intervals",30,0,30);
   att.set("Trigger rate for 30 time intervals","Trigger rate [Hz]");
   setHistParameters(m_triggerRate,att);
@@ -765,6 +787,15 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   // Ground ID changes?
   m_counterGroundID = 0;
 
+  // Number of events per datagram:
+  int nbrEventsDatagram[5];
+  int idDatagram[5];
+
+  for (int iLoop = 0; iLoop < 5; ++iLoop) {
+    nbrEventsDatagram[iLoop] = 0;
+    idDatagram[iLoop]        = 0;
+  }
+
 
   // Look at first and last event:
   if(m_digiFile) {
@@ -873,8 +904,54 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
     if (m_digiFile) {
       m_digiBranch->GetEntry(iEvent);
 
-      // 
       analyzeDigiTree();
+
+
+      // Events per datagram: Only for EPUs and SIUs!      
+      int cpuNumber = m_digiEvent->getMetaEvent().datagram().crate(); 
+      if (cpuNumber>-1 && cpuNumber<5) {
+        if (m_digiEvent->getMetaEvent().datagram().datagrams() == idDatagram[cpuNumber]) {
+          nbrEventsDatagram[cpuNumber]++;
+	} 
+        if (m_digiEvent->getMetaEvent().datagram().datagrams() != idDatagram[cpuNumber]) {
+          if (cpuNumber==enums::Lsf::Epu0) {
+	    m_datagramsEPU0->Fill(nbrEventsDatagram[cpuNumber]);
+	  }
+          if (cpuNumber==enums::Lsf::Epu1) {
+	    m_datagramsEPU1->Fill(nbrEventsDatagram[cpuNumber]);
+	  }
+          if (cpuNumber==enums::Lsf::Epu2) {
+	    m_datagramsEPU2->Fill(nbrEventsDatagram[cpuNumber]);
+	  }
+          if (cpuNumber==enums::Lsf::Siu0) {
+	    m_datagramsSIU0->Fill(nbrEventsDatagram[cpuNumber]);
+	  }
+          if (cpuNumber==enums::Lsf::Siu1) {
+	    m_datagramsSIU1->Fill(nbrEventsDatagram[cpuNumber]);
+	  }
+	  //
+          idDatagram[cpuNumber] = m_digiEvent->getMetaEvent().datagram().datagrams();
+          nbrEventsDatagram[cpuNumber] = 0;
+	}
+	// Last event:
+        if (iEvent == (m_nEvent-1)) {
+          if (nbrEventsDatagram[0] != 0) {
+            m_datagramsEPU0->Fill(nbrEventsDatagram[0]);
+	  }
+          if (nbrEventsDatagram[1] != 0) {
+            m_datagramsEPU1->Fill(nbrEventsDatagram[1]);
+          }
+          if (nbrEventsDatagram[2] != 0) {
+            m_datagramsEPU2->Fill(nbrEventsDatagram[2]);
+	  }
+          if (nbrEventsDatagram[3] != 0) {
+            m_datagramsSIU0->Fill(nbrEventsDatagram[3]);
+          }
+          if (nbrEventsDatagram[4] != 0) {
+            m_datagramsSIU1->Fill(nbrEventsDatagram[4]);
+	  }
+	}
+      }
 
 
       // Datagrams:
@@ -3416,6 +3493,43 @@ void TestReport::produceEpuPlot()
   PlotAttribute att(file.c_str(), "Crate number","epu",true);
   producePlot(m_epu, att);
   insertPlot(att);
+
+  if (m_nbrEventsDataGramsEpu0 > 0 ) {
+    file = m_prefix;
+    file += "_datagramsEPU0";
+    att.set(file.c_str(), "Number of events per datagram - EPU0","datagramsEPU0",true);
+    producePlot(m_datagramsEPU0, att);
+    insertPlot(att);
+  }
+  if (m_nbrEventsDataGramsEpu1 > 0 ) {
+    file = m_prefix;
+    file += "_datagramsEPU1";
+    att.set(file.c_str(), "Number of events per datagram - EPU1","datagramsEPU1",true);
+    producePlot(m_datagramsEPU1, att);
+    insertPlot(att);
+  }
+  if (m_nbrEventsDataGramsEpu2 > 0 ) {
+    file = m_prefix;
+    file += "_datagramsEPU2";
+    att.set(file.c_str(), "Number of events per datagram - EPU2","datagramsEPU2",true);
+    producePlot(m_datagramsEPU2, att);
+    insertPlot(att);
+  }
+  if (m_nbrEventsDataGramsSiu0 > 0 ) {
+    file = m_prefix;
+    file += "_datagramsSIU0";
+    att.set(file.c_str(), "Number of events per datagram - SIU0","datagramsSIU0",true);
+    producePlot(m_datagramsSIU0, att);
+    insertPlot(att);
+  }
+  if (m_nbrEventsDataGramsSiu1 > 0 ) {
+    file = m_prefix;
+    file += "_datagramsSiu1";
+    att.set(file.c_str(), "Number of events per datagram - SIU1","datagramsSIU1",true);
+    producePlot(m_datagramsSIU1, att);
+    insertPlot(att);
+  }
+
 }
 
 void TestReport::produceGemDiscardedPlot()

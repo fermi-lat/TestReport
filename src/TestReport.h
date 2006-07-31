@@ -629,6 +629,12 @@ class TestReport {
   // epu number
   TH1F* m_epu;
 
+  TH1F* m_datagramsEPU0;
+  TH1F* m_datagramsEPU1;
+  TH1F* m_datagramsEPU2;
+  TH1F* m_datagramsSIU0;
+  TH1F* m_datagramsSIU1;
+
   // GEM discarded events:
   TH1F* m_gemDiscarded;
   TH1F* m_gemDiscardedTime;
