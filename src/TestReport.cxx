@@ -2223,7 +2223,7 @@ void TestReport::generateReport()
     (*m_report) << "@li There were no gaps in the extended GEM sequence counter." << endl;
   }
 
-  (*m_report) << "@li There were @b " << m_nbrMissingTimeTone << " missing Time tones, @b " << m_nbrFlywheeling << " flywheeling, @b " << m_nbrIncomplete << " incomplete time tones, @b " << m_nbrMissingGps << " missing GPS locks, @b " << m_nbrMissingCpuPps << " missing 1-PPS signals at CPU level and @b " << m_nbrMissingLatPps << " missing 1-PPS signals at LAT level." << endl; 
+  (*m_report) << "@li There were @b " << m_nbrMissingTimeTone << " events with a missing Time tone, @b " << m_nbrFlywheeling << " flywheeling events, @b " << m_nbrIncomplete << " events with an incomplete time tone, @b " << m_nbrMissingGps << " events with a missing GPS lock, @b " << m_nbrMissingCpuPps << " events with a missing 1-PPS signal at CPU level and @b " << m_nbrMissingLatPps << " events with a missing 1-PPS signal at LAT level." << endl; 
 
   if (m_extendedCountersFlag != 0) {
     (*m_report) << "@li Problem! At least one of the extended counters decreased from one event to the next one  @b " << m_extendedCountersFlag << " times! Check the log file for more details." << endl;
