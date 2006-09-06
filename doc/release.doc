@@ -251,4 +251,5 @@ August 18, 2006: awb
 v3r6p14 Corrected text about missing time tones.
 
 September 6, 2006: awb
-v3r6p15	Fixed bug in TKR layers per tower (first half was repeated twice).
+v3r6p15	Fixed bug in TKR layers per tower (first half was repeated twice). Hmmm .... probably benign .... 
+        only a (not used) label problem.
