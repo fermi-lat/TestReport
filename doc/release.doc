@@ -249,3 +249,6 @@ v3r6p13 Added histogram for number of events per datagram.
 
 August 18, 2006: awb
 v3r6p14 Corrected text about missing time tones.
+
+September 6, 2006: awb
+v3r6p15	Fixed bug in TKR layers per tower (first half was repeated twice).

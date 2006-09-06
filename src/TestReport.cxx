@@ -2499,7 +2499,7 @@ void TestReport::generateDigiReport()
 
   file = m_prefix;
   file += "_layersPerTower_2";
-  att.set(file.c_str(), "Number of planes that are hit in a tower(for tower 8 to tower 15).", "layersPerTower_1", 1, 0, 18, 18, 909, 615, 111);
+  att.set(file.c_str(), "Number of planes that are hit in a tower(for tower 8 to tower 15).", "layersPerTower_2", 1, 0, 18, 18, 909, 615, 111);
   producePlot((TObject**) m_nLayer+8, att, 4, 2);
   insertPlot(att);
 
