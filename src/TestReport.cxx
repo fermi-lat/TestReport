@@ -142,7 +142,8 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_beginRunDataGramSiu1(0),
     m_nEvent(0), 
     m_nbrPrescaled(0), 
-    m_nbrDeadZone(0), 
+    m_nbrDeadZone(0),
+    m_nbrDiscarded(0), 
     m_deltaSequenceNbrEvents(0),
     m_nTkrTrigger(0), 
     m_nEventBadStrip(0), 
@@ -803,6 +804,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
     ULong64_t gemSequenceFirst  = m_digiEvent->getMetaEvent().scalers().sequence();
     ULong64_t gemPrescaledFirst = m_digiEvent->getMetaEvent().scalers().prescaled();
     ULong64_t gemDeadZoneFirst  = m_digiEvent->getMetaEvent().scalers().deadzone();
+    ULong64_t gemDiscardedFirst = m_digiEvent->getMetaEvent().scalers().discarded();
     ULong64_t liveTimeFirst     = m_digiEvent->getMetaEvent().scalers().livetime();
     elapsedTimeFirst            = m_digiEvent->getMetaEvent().scalers().elapsed();
     firstFlywheeling            = m_digiEvent->getMetaEvent().time().current().flywheeling();
@@ -814,6 +816,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
     ULong64_t gemSequenceLast  = m_digiEvent->getMetaEvent().scalers().sequence();
     ULong64_t gemPrescaledLast = m_digiEvent->getMetaEvent().scalers().prescaled();
     ULong64_t gemDeadZoneLast  = m_digiEvent->getMetaEvent().scalers().deadzone();
+    ULong64_t gemDiscardedLast = m_digiEvent->getMetaEvent().scalers().discarded();
     ULong64_t liveTimeLast     = m_digiEvent->getMetaEvent().scalers().livetime();
     elapsedTimeLast            = m_digiEvent->getMetaEvent().scalers().elapsed();
     lastFlywheeling            = m_digiEvent->getMetaEvent().time().current().flywheeling();
@@ -828,6 +831,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
     // Context information:
     m_nbrPrescaled           = gemPrescaledLast - gemPrescaledFirst;
     m_nbrDeadZone            = gemDeadZoneLast  - gemDeadZoneFirst;
+    m_nbrDiscarded           = gemDiscardedLast - gemDiscardedFirst;
     m_deltaSequenceNbrEvents = m_nEvent - (gemSequenceLast-gemSequenceFirst + 1);
 
     // Livetime: 
@@ -2202,7 +2206,7 @@ void TestReport::generateReport()
   (*m_report) << "@li Time of the first trigger: <b>" << ctime((time_t*) (&m_startTime)) << " (GMT) </b>";
   (*m_report) << "@li Time of the last trigger: <b>" << ctime((time_t*) (&m_endTime)) << " (GMT) </b>";
   (*m_report) << "@li Duration: <b>" << m_endTime - m_startTime << " seconds" << "</b>" << endl;
-  (*m_report) << "@li Trigger rate: <b>" << double(m_nEvent)/(m_endTime - m_startTime) << " hz" << "</b>" << endl;
+  (*m_report) << "@li Trigger rate: <b>" << double(m_nEvent)/(m_endTime - m_startTime) << " Hz" << "</b>" << endl;
   (*m_report) << "   " << endl;
 
   if (m_counterGroundID == 0) {
@@ -2212,15 +2216,16 @@ void TestReport::generateReport()
   }
   (*m_report) << "   " << endl;
 
-  // Needs FSW 08-06-09:
-  //(*m_report) << "@li Livetime: <b> " << (m_liveTime * 100.0) << "% </b>" << endl;  
+  // Needs Spectrum Astro FSW!:
+  (*m_report) << "@li Livetime: <b> " << (m_liveTime * 100.0) << "% </b>" << endl;  
 
-  (*m_report) << "@li There were @b " << m_nbrPrescaled << " prescaled events and @b " << m_nbrDeadZone  << " dead zone events." << endl;
+  (*m_report) << "@li There were @b " << m_nbrPrescaled << " prescaled events (@b" << double (m_nbrPrescaled)/(m_endTime - m_startTime) <<" Hz), @b " << m_nbrDeadZone  << " dead zone events (@b" << double(m_nbrDeadZone)/(m_endTime - m_startTime) <<" Hz) and @b " << m_nbrDiscarded << " discarded events (@b" << double (m_nbrDiscarded)/(m_endTime - m_startTime) <<" Hz)." << endl;
+
 
   if (m_deltaSequenceNbrEvents != 0) {
     (*m_report) << "@li The number of events in the digi file does not agree with the extended GEM sequence counter! The difference is @b " << m_deltaSequenceNbrEvents << " events. Is the onboard filter running?" << endl;
   } else {
-    (*m_report) << "@li There were no gaps in the extended GEM sequence counter." << endl;
+    (*m_report) << "@li The number of events in the digi file agrees with the extended GEM sequence counter!" << endl;
   }
 
   (*m_report) << "@li There were @b " << m_nbrMissingTimeTone << " events with a missing Time tone, @b " << m_nbrFlywheeling << " flywheeling events, @b " << m_nbrIncomplete << " events with an incomplete time tone, @b " << m_nbrMissingGps << " events with a missing GPS lock, @b " << m_nbrMissingCpuPps << " events with a missing 1-PPS signal at CPU level and @b " << m_nbrMissingLatPps << " events with a missing 1-PPS signal at LAT level." << endl; 
