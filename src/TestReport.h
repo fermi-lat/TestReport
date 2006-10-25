@@ -521,7 +521,7 @@ class TestReport {
   Int_t m_eventPhaseError;
   Int_t m_eventTimeoutError;
 
-
+  Int_t m_eventIsPeriodic;
 
   // Acd Digi based histograms
   TH1F* m_AcdTileIdOnePMT;
@@ -547,6 +547,8 @@ class TestReport {
 
   // Triggger rates:
   TH1F* m_triggerRate;
+  TH1F* m_triggerLivetimeRate;
+  TH1F* m_livetimeRate;
   TH1F* m_deadzoneRate;
   TH1F* m_discardedRate;
 

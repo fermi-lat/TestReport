@@ -256,3 +256,10 @@ v3r6p15	Fixed bug in TKR layers per tower (first half was repeated twice). Hmmm 
 
 September 12, 2006: awb
 	Added rate of some quantities. Uncommented the livetime calculation.
+
+October 24, 2006: awb
+v3r6p16	- Not plot CAL occupancy for periodic triggers.
+	- Added livetime corrected average trigger rate.
+        - Added time plot of livetime.
+	- Fixed time of first and last event.
+        - Fixed stat opt for some plots.

@@ -184,6 +184,7 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_eventGtccError(0),
     m_eventPhaseError(0),
     m_eventTimeoutError(0),
+    m_eventIsPeriodic(0),
     m_AcdTileIdOnePMT(0), 
     m_AcdTileIdOneVeto(0),
     m_AcdHitMap(0), 
@@ -394,10 +395,17 @@ TestReport::TestReport(const char* dir, const char* prefix,
   setHistParameters(m_datagramsSIU1,att);
 
 
-
   m_triggerRate = new TH1F("triggerRate","Trigger rate for 30 equally spaced time intervals",30,0,30);
   att.set("Trigger rate for 30 time intervals","Trigger rate [Hz]");
   setHistParameters(m_triggerRate,att);
+
+  m_triggerLivetimeRate = new TH1F("triggerLivetimeRate","Livetime corrected trigger rate for 30 equally spaced time intervals",30,0,30);
+  att.set("Livetime corrected trigger rate for 30 time intervals","Livetime corrected trigger rate [Hz]");
+  setHistParameters(m_triggerLivetimeRate,att);
+
+  m_livetimeRate = new TH1F("livetimeRate","Livetime for 30 equally spaced time intervals",30,0,30);
+  att.set("Livetime for 30 time intervals","Livetime [%]");
+  setHistParameters(m_livetimeRate,att);
 
   m_deadzoneRate = new TH1F("deadzoneRate","Deadzone rate for 30 equally spaced time intervals",30,0,30);
   att.set("Deadzone rate for 30 time intervals","Deadzone rate [Hz]");
@@ -735,8 +743,8 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
  
 
   // For testing: awb
-  int nEvent = 20000;
-  m_nEvent = nEvent;
+  //int nEvent = 2000;
+  //m_nEvent = nEvent;
 
   // List of datagrams:
   std::list<int> listDataGramsEpu0;
@@ -757,6 +765,10 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   Int_t intervalCounter  = 1;
 
   Int_t eventCounter = 0;
+
+  ULong64_t livetimeFirst = 0;
+  ULong64_t livetimeLast = 0;
+
 
   ULong64_t deadzoneCounter  = 0;
   ULong64_t discardedCounter = 0;
@@ -1341,6 +1353,12 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       ULong64_t thisPrescaled = m_digiEvent->getMetaEvent().scalers().prescaled();
       ULong64_t thisSequence  = m_digiEvent->getMetaEvent().scalers().sequence();
 
+      // For livetime calculations:
+      if (livetimeFirst == 0) {
+        livetimeFirst = thisLiveTime;
+      }       
+
+
       if (iEvent > 0) { 
         Long64_t deltaDeadZone = thisDeadZone - previousDeadZone; 
         deadzoneCounter         = deadzoneCounter + deltaDeadZone;        
@@ -1404,12 +1422,31 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       // Trigger rates:
       if (deltaTime >= cutTime) {
         float rate;
+        float rateLivetimeCorrected;
+        float liveTimeFraction;
         if (deltaTimeInterval != 0) {
           rate = (float) eventCounter/ (float) (deltaTimeInterval * 50 * std::pow(10.0, -9));
+
+          // Livetime:
+          livetimeLast          = thisLiveTime;
+          liveTimeFraction      = (livetimeLast - livetimeFirst) / (float) (deltaTimeInterval);
+          
+          if (liveTimeFraction <= 0) {
+	    std::cout << "Problem! The livetime is coming out as " << liveTimeFraction << "   " << livetimeLast << "   " << livetimeFirst << "   " << deltaTimeInterval << "   " << " in event "  
+                      << iEvent << std::endl;
+            rateLivetimeCorrected = -1.0;
+	  } else { 
+            rateLivetimeCorrected = rate / liveTimeFraction;
+	  }
+          liveTimeFraction = liveTimeFraction * 100.0;
 	} else {
-	  rate = -1.0;
+	  rate                  = -1.0;
+          rateLivetimeCorrected = -1.0;
+	  liveTimeFraction      = -1.0;
 	}
         m_triggerRate->Fill(intervalCounter-1,rate);
+        m_triggerLivetimeRate->Fill(intervalCounter-1,rateLivetimeCorrected);
+        m_livetimeRate->Fill(intervalCounter-1,liveTimeFraction);
 
 	// Deadzone rates:
         if (deltaTimeInterval != 0) {
@@ -1433,6 +1470,9 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
         eventCounter     = 0;
         deadzoneCounter  = 0;
         discardedCounter = 0;
+
+        livetimeFirst = 0;
+        livetimeLast  = 0;
       }
 
 
@@ -1487,16 +1527,49 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
         if (m_isLATTE == 1) {
 	  m_startTime = m_digiEvent->getEbfTimeSec();
         } else {
-	  UInt_t myTimeStamp1 = m_digiEvent->getMetaEvent().time().current().timeSecs();
-	  UInt_t myTimeStamp2 = m_digiEvent->getMetaEvent().time().timeTicks();
-	  UInt_t myTimeStamp3 = m_digiEvent->getMetaEvent().time().current().timeHack().ticks();
-	  UInt_t myTimeStamp4 = m_digiEvent->getMetaEvent().time().previous().timeHack().ticks();
+	  // LAT nominal system clock:
+	  double LATSystemClock = 20000000.0;
+
+	  // Warren's empirical LAT system clock correction from SLAC and NRL:
+	  double warrenLATSystemClockCorrection = 100.0;
+
+	  // Ugly!
+          double RollOver = 33554432.0;
+
+          // Number of ticks between current event and the current 1-PPS:
+	  double awbTicks1 = double (m_digiEvent->getMetaEvent().time().timeTicks()) - double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks());
+	  // Rollover? Should never be more than one! BTW, JJ has a much smarter way to do this rollover check ... :-)
+	  if (awbTicks1 < 0) {
+	    awbTicks1 = awbTicks1 + RollOver;
+	  }
           
-          // This is overkill:
-          if (myTimeStamp3 != myTimeStamp4) {
-            m_startTime = myTimeStamp1 + (myTimeStamp2/(myTimeStamp3-myTimeStamp4)) + deltaTimeUgly;
+	  
+	  // Check that the two TimeTones are OK and different:
+	  if (!(m_digiEvent->getMetaEvent().time().current().flywheeling()) &&
+	      !(m_digiEvent->getMetaEvent().time().current().missingCpuPps()) &&
+	      !(m_digiEvent->getMetaEvent().time().current().missingLatPps()) &&
+	      !(m_digiEvent->getMetaEvent().time().current().missingTimeTone()) &&
+	      !(m_digiEvent->getMetaEvent().time().previous().flywheeling()) &&
+	      !(m_digiEvent->getMetaEvent().time().previous().missingCpuPps()) &&
+	      !(m_digiEvent->getMetaEvent().time().previous().missingLatPps()) &&
+	      !(m_digiEvent->getMetaEvent().time().previous().missingTimeTone()) &&
+	      (m_digiEvent->getMetaEvent().time().current().timeHack().ticks() != m_digiEvent->getMetaEvent().time().previous().timeHack().ticks())) { 
+
+ 	    // Then use full formula for correcting system clock drift using last two TimeTones i.e. extrapolation
+	    double awbTicks2 = double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks()) - double (m_digiEvent->getMetaEvent().time().previous().timeHack().ticks());
+	    // Rollover? Should never be more than one rollover! BTW, JJ has a much smarter way to do this rollover check ... :-)
+	    if (awbTicks2 < 0) {
+ 	      awbTicks2 = awbTicks2 + RollOver;
+	    }
+
+	    // Timestamp: 
+	    m_startTime = double (m_digiEvent->getMetaEvent().time().current().timeSecs()) + (awbTicks1/awbTicks2);
+            m_startTime = m_startTime + deltaTimeUgly;
 	  } else {
-            m_startTime = myTimeStamp1 + deltaTimeUgly;
+	  	  
+	    // Cannot use TimeTone(s) - will assume nominal value for the LAT system clock
+	    m_startTime = double (m_digiEvent->getMetaEvent().time().current().timeSecs());  
+            m_startTime = m_startTime + deltaTimeUgly;
 	  }
 	}
       }
@@ -1532,16 +1605,47 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
         if (m_isLATTE == 1) { 
 	  m_endTime = m_digiEvent->getEbfTimeSec();
 	} else {
-	  UInt_t myTimeStamp1 = m_digiEvent->getMetaEvent().time().current().timeSecs();
-	  UInt_t myTimeStamp2 = m_digiEvent->getMetaEvent().time().timeTicks();
-	  UInt_t myTimeStamp3 = m_digiEvent->getMetaEvent().time().current().timeHack().ticks();
-	  UInt_t myTimeStamp4 = m_digiEvent->getMetaEvent().time().previous().timeHack().ticks();
+	  // LAT nominal system clock:
+	  double LATSystemClock = 20000000.0;
 
-	  // This is still overkill:
-          if (myTimeStamp3 != myTimeStamp4) {
-            m_endTime = myTimeStamp1 + (myTimeStamp2/(myTimeStamp3-myTimeStamp4)) + deltaTimeUgly;
-          } else {
-            m_endTime = myTimeStamp1 + deltaTimeUgly;
+	  // Warren's empirical LAT system clock correction from SLAC and NRL:
+	  double warrenLATSystemClockCorrection = 100.0;
+
+	  // Ugly!
+          double RollOver = 33554432.0;
+
+          // Number of ticks between current event and the current 1-PPS:
+	  double awbTicks1 = double (m_digiEvent->getMetaEvent().time().timeTicks()) - double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks());
+	  // Rollover? Should never be more than one! BTW, JJ has a much smarter way to do this rollover check ... :-)
+	  if (awbTicks1 < 0) {
+	    awbTicks1 = awbTicks1 + RollOver;
+	  }
+          
+	  // Check that the two TimeTones are OK and different:
+	  if (!(m_digiEvent->getMetaEvent().time().current().flywheeling()) &&
+	      !(m_digiEvent->getMetaEvent().time().current().missingCpuPps()) &&
+	      !(m_digiEvent->getMetaEvent().time().current().missingLatPps()) &&
+	      !(m_digiEvent->getMetaEvent().time().current().missingTimeTone()) &&
+	      !(m_digiEvent->getMetaEvent().time().previous().flywheeling()) &&
+	      !(m_digiEvent->getMetaEvent().time().previous().missingCpuPps()) &&
+	      !(m_digiEvent->getMetaEvent().time().previous().missingLatPps()) &&
+	      !(m_digiEvent->getMetaEvent().time().previous().missingTimeTone()) &&
+	      (m_digiEvent->getMetaEvent().time().current().timeHack().ticks() != m_digiEvent->getMetaEvent().time().previous().timeHack().ticks())) { 
+
+ 	    // Then use full formula for correcting system clock drift using last two TimeTones i.e. extrapolation
+	    double awbTicks2 = double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks()) - double (m_digiEvent->getMetaEvent().time().previous().timeHack().ticks());
+	    // Rollover? Should never be more than one rollover! BTW, JJ has a much smarter way to do this rollover check ... :-)
+	    if (awbTicks2 < 0) {
+	      awbTicks2 = awbTicks2 + RollOver;
+	    }
+
+	    // Timestamp: 
+	    m_endTime = double (m_digiEvent->getMetaEvent().time().current().timeSecs()) + (awbTicks1/awbTicks2);
+            m_endTime = m_endTime + deltaTimeUgly;
+	  } else {
+	    // Cannot use TimeTone(s) - will assume nominal value for the LAT system clock
+	    m_endTime = double (m_digiEvent->getMetaEvent().time().current().timeSecs()) + (awbTicks1 / (LATSystemClock + warrenLATSystemClockCorrection));
+            m_endTime = m_endTime + deltaTimeUgly;
 	  }
 	}
       }
@@ -1868,6 +1972,13 @@ void TestReport::analyzeDigiTree()
     if( (cond >> i) & 1) {
       ++m_nEvtGemTrigger[i];
     }
+  }
+
+  // Periodic trigger?
+  if ((m_digiEvent->getGem().getConditionSummary()) & 32) {
+    m_eventIsPeriodic = 1;
+  } else {
+    m_eventIsPeriodic = 0;
   }
 
   // Conditions arrival time: Take out periodic triggers!
@@ -2207,6 +2318,7 @@ void TestReport::generateReport()
   (*m_report) << "@li Time of the last trigger: <b>" << ctime((time_t*) (&m_endTime)) << " (GMT) </b>";
   (*m_report) << "@li Duration: <b>" << m_endTime - m_startTime << " seconds" << "</b>" << endl;
   (*m_report) << "@li Trigger rate: <b>" << double(m_nEvent)/(m_endTime - m_startTime) << " Hz" << "</b>" << endl;
+  (*m_report) << "@li Livetime corrected trigger rate: <b>" << ((double(m_nEvent)/(m_endTime - m_startTime))/m_liveTime) << " Hz" << "</b>" << endl;
   (*m_report) << "   " << endl;
 
   if (m_counterGroundID == 0) {
@@ -2412,6 +2524,7 @@ void TestReport::generateDigiReport()
   string file = m_prefix;
   file += "_condSummary";
   PlotAttribute att(file.c_str(), "GEM condition summary word. The word is deduced by combining bit patterns from the table shown below. For example, an event with both the TKR trigger bit and the CAL low trigger bit set in GEM has the condition summary word of @latex $2^{2} + 2^{1} = 6$ @endlatex @html 2<sup>2</sup> + 2<sup>1</sup> = 6 @endhtml", "condSummary", 1);
+  att.m_statMode = 11;
   producePlot(m_condSummary, att);
   insertPlot(att);
   *(m_report) << "@latexonly \\nopagebreak @endlatexonly" << endl;
@@ -2421,6 +2534,7 @@ void TestReport::generateDigiReport()
   file = m_prefix;
   file += "_trigger";
   att.set(file.c_str(), "Trigger word calculated by triggerAlg. The word is deduced by combining bit patterns from the table shown below. For example, an event with both the TKR trigger bit and the CAL Low trigger bit set has the GLT word of @latex $2^{1} + 2^{2} = 6$ @endlatex @html 2<sup>1</sup> + 2<sup>2</sup> = 6 @endhtml.", "trigger", 1);
+  att.m_statMode = 11;
   producePlot(m_trigger, att);
   insertPlot(att);
   *(m_report) << "@latexonly \\nopagebreak @endlatexonly" << endl;
@@ -2527,7 +2641,9 @@ void TestReport::generateDigiReport()
 
   (*m_report) << "@section calDigi CAL Digitization" << endl;
 
-  produceCalNhits2DPlot();
+  if (m_eventIsPeriodic == 0) {
+    produceCalNhits2DPlot();
+  }
 
   // ACD digis:
   (*m_report) << "@section acdDigi ACD Digitization" << endl;
@@ -3213,13 +3329,13 @@ void TestReport::produceCalNhits2DPlot()
 
   string file(m_prefix);
   file += "_nCalHits2d";
-  PlotAttribute att(file.c_str(), "Average number of crystal hits in a particular CAL layer. Note 0 hit is not used to calculate the average", "nCalHits2d");
+  PlotAttribute att(file.c_str(), "Average number of crystal hits in a particular CAL layer. Note 0 hit is not used to calculate the average. Periodic triggers have been taken out.", "nCalHits2d");
   producePlot(m_nCalHit2D, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_nZeroCalHit2d";
-  att.set(file.c_str(), "Fraction of events with zero hits in a particular CAL layer", "nZeroCalHit2d");
+  att.set(file.c_str(), "Fraction of events with zero hits in a particular CAL layer. Periodic triggers have been taken out.", "nZeroCalHit2d");
   producePlot(m_nZeroCalHit2D, att);
   insertPlot(att);
 }
@@ -3393,16 +3509,33 @@ void TestReport::produceTriggerRatePlot()
   string file(m_prefix);
   file += "_triggerRate";
   PlotAttribute att(file.c_str(), "Trigger rates for 30 time intervals","triggerRate",true);
+  att.m_statMode = 11;
   producePlot(m_triggerRate, att);
   insertPlot(att);
 
+
+  file += "_triggerLivetimeRate";
+  att.set(file.c_str(), "Livetime corrected trigger rates for 30 time intervals","triggerLivetimeRate",true);
+  att.m_statMode = 11;
+  producePlot(m_triggerLivetimeRate, att);
+  insertPlot(att);
+
+  file += "_livetimeRate";
+  att.set(file.c_str(), "Livetime in percent for 30 time intervals","livetimeRate",true);
+  att.m_statMode = 11;
+  producePlot(m_livetimeRate, att);
+  insertPlot(att);
+
+
   file += "_deadzoneRate";
   att.set(file.c_str(), "Deadzone rates for 30 time intervals","deadzoneRate",true);
+  att.m_statMode = 11;
   producePlot(m_deadzoneRate, att);
   insertPlot(att);
 
   file += "_discardedRate";
   att.set(file.c_str(), "Discarded rates for 30 time intervals","discardedRate",true);
+  att.m_statMode = 11;
   producePlot(m_discardedRate, att);
   insertPlot(att);
 }
@@ -3413,18 +3546,21 @@ void TestReport::produceTriggerPerTowerPlot()
   string file(m_prefix);
   file += "_tkrPerTower";
   PlotAttribute att(file.c_str(), "Number of TKR triggers per tower","tkrPerTower");
+  att.m_statMode = 11;
   producePlot(m_tkrPerTower, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_calLoPerTower";
   att.set(file.c_str(), "Number of CAL LO triggers per tower","calLoPerTower");
+  att.m_statMode = 11;
   producePlot(m_calLoPerTower, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_calHiPerTower";
   att.set(file.c_str(), "Number of CAL Hi triggers per tower","calHiPerTower");
+  att.m_statMode = 11;
   producePlot(m_calHiPerTower, att);
   insertPlot(att);
 }
@@ -3471,12 +3607,14 @@ void TestReport::produceAcdTriggerPlots()
   string file(m_prefix);
   file += "_acdGemVeto";
   PlotAttribute att(file.c_str(), "Number of Acd Gem vetos by tile.  Expect to see spikes at 15,31,47,63.  These are the large tiles at the bottom of the sides of the ACD.","AcdVetoPerTile");
+  att.m_statMode = 11;
   producePlot(m_AcdGemVetoMap, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_acdRoiVeto";
   att.set(file.c_str(), "Number of Acd ROI by tower,  This bit is set if any of the tile in the ROI fired a veto.  This bit is independent of if the Tower bit is set.","AcdRoiPerTower");
+  att.m_statMode = 11;
   m_AcdGemRoiMap->SetMinimum(0.);
   producePlot(m_AcdGemRoiMap, att);
   insertPlot(att);
@@ -3484,6 +3622,7 @@ void TestReport::produceAcdTriggerPlots()
   file = m_prefix;
   file += "_acdCnoVeto";
   att.set(file.c_str(), "Number of Acd Cno by board.  This bit is the OR of all the CNO signals on a single board. Because of the tile to board mapping, a factor two variation between boards is normal.","AcdCnoPerBoard");
+  att.m_statMode = 11;
   m_AcdGemCnoMap->SetMinimum(0.);
   producePlot(m_AcdGemCnoMap, att);
   insertPlot(att);
@@ -3496,6 +3635,7 @@ void TestReport::produceEpuPlot()
   string file(m_prefix);
   file += "_epu";
   PlotAttribute att(file.c_str(), "Crate number","epu",true);
+  att.m_statMode = 11;
   producePlot(m_epu, att);
   insertPlot(att);
 
@@ -3700,7 +3840,7 @@ void TestReport::produceAcdDigiPlots()
   file = m_prefix;
   file += "_AcdHitMap";
   att.set(file.c_str(), "ACD Gem ID for all Digis.  Expectect to see spikes at 15,31,47,63.  These are the large tiles at the bottom of the sides of the ACD.", "AcdHitMap" );
-  att.m_statMode = 0;
+  att.m_statMode = 11;
   producePlot(m_AcdHitMap, att);
   insertPlot(att);  
 

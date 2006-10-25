@@ -34,7 +34,7 @@ my $pdfFile = 'refman.pdf';
 my $htmlFile = 'index.html';
 my $pwd =  $ENV{PWD};
 
-my $appRoot = '/nfs/farm/g/glast/u33/borgland/Releases/EngineeringModel-v6r070329p28/Code-opt/svac/';
+my $appRoot = '/nfs/farm/g/glast/u33/borgland/commit/svac/';
 my $testReportVersion = 'v3r6p15';
 my $emVersion = 'v6r070329p28';
 my $cmtPath = "$appRoot:/nfs/farm/g/glast/u09/builds/rh9_gcc32opt/EngineeringModel/EngineeringModel-$emVersion";
