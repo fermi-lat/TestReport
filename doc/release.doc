@@ -263,3 +263,6 @@ v3r6p16	- Not plot CAL occupancy for periodic triggers.
         - Added time plot of livetime.
 	- Fixed time of first and last event.
         - Fixed stat opt for some plots.
+
+October 26, 2006: awb
+v3r6p17 - Added plot of datagram creation time minus event time. 

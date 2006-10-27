@@ -638,6 +638,12 @@ class TestReport {
   TH1F* m_datagramsSIU0;
   TH1F* m_datagramsSIU1;
 
+  TH1F* m_deltaTimeDGCTEvtEPU0;
+  TH1F* m_deltaTimeDGCTEvtEPU1;
+  TH1F* m_deltaTimeDGCTEvtEPU2;
+  TH1F* m_deltaTimeDGCTEvtSIU0;
+  TH1F* m_deltaTimeDGCTEvtSIU1;
+
   // GEM discarded events:
   TH1F* m_gemDiscarded;
   TH1F* m_gemDiscardedTime;
