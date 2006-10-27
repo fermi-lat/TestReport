@@ -394,24 +394,24 @@ TestReport::TestReport(const char* dir, const char* prefix,
   att.set("Number of events per datagram - SIU1","Number of events");
   setHistParameters(m_datagramsSIU1,att);
 
-  m_deltaTimeDGCTEvtEPU0 = new TH1F("deltaTimeDGCTEvtEPU0","CCSDS Secondary Header Time minus the event time for EPU0",50,0.0,25.0);
-  att.set("CCSDS Secondary Header Time minus the event time for EPU0","Number of events");
+  m_deltaTimeDGCTEvtEPU0 = new TH1F("deltaTimeDGCTEvtEPU0","CCSDS Secondary Header Time minus the event time for events from EPU0 [seconds]",50,0.0,10.0);
+  att.set("CCSDS time minus the event time for events from EPU1 [seconds]","Number of events");
   setHistParameters(m_deltaTimeDGCTEvtEPU0,att);
 
-  m_deltaTimeDGCTEvtEPU1 = new TH1F("deltaTimeDGCTEvtEPU1","CCSDS Secondary Header Time minus the event time for EPU1",50,0.0,25.0);
-  att.set("CCSDS Secondary Header Time minus the event time for EPU1","Number of events");
+  m_deltaTimeDGCTEvtEPU1 = new TH1F("deltaTimeDGCTEvtEPU1","CCSDS Secondary Header Time minus the event time for events from EPU1 [seconds]",50,0.0,10.0);
+  att.set("CCSDS Time minus the event time for events from EPU1 [seconds]","Number of events");
   setHistParameters(m_deltaTimeDGCTEvtEPU1,att);
 
-  m_deltaTimeDGCTEvtEPU2 = new TH1F("deltaTimeDGCTEvtEPU2","CCSDS Secondary Header Time minus the event time for EPU2",50,0.0,25.0);
-  att.set("CCSDS Secondary Header Time minus the event time for EPU2","Number of events");
+  m_deltaTimeDGCTEvtEPU2 = new TH1F("deltaTimeDGCTEvtEPU2","CCSDS Secondary Header Time minus the event time for events from EPU2 [seconds]",50,0.0,10.0);
+  att.set("CCSDS Time minus the event time for events from EPU2 [seconds]","Number of events");
   setHistParameters(m_deltaTimeDGCTEvtEPU2,att);
 
-  m_deltaTimeDGCTEvtSIU0 = new TH1F("deltaTimeDGCTEvtSIU0","CCSDS Secondary Header Time minus the event time for SIU0",50,0.0,25.0);
-  att.set("CCSDS Secondary Header Time minus the event time for SIU0","Number of events");
+  m_deltaTimeDGCTEvtSIU0 = new TH1F("deltaTimeDGCTEvtSIU0","CCSDS Secondary Header Time minus the event time for events from SIU0 [seconds]",50,0.0,10.0);
+  att.set("CCSDS Time minus the event time for events from SIU0 [seconds]","Number of events");
   setHistParameters(m_deltaTimeDGCTEvtSIU0,att);
 
-  m_deltaTimeDGCTEvtSIU1 = new TH1F("deltaTimeDGCTEvtSIU1","CCSDS Secondary Header Time minus the event time for SIU1",50,0.0,25.0);
-  att.set("CCSDS Secondary Header Time minus the event time for SIU1","Number of events");
+  m_deltaTimeDGCTEvtSIU1 = new TH1F("deltaTimeDGCTEvtSIU1","CCSDS Secondary Header Time minus the event time for events from SIU1 [seconds]",50,0.0,10.0);
+  att.set("CCSDS Time minus the event time for events from SIU1 [seconds]","Number of events");
   setHistParameters(m_deltaTimeDGCTEvtSIU1,att);
 
   m_triggerRate = new TH1F("triggerRate","Trigger rate for 30 equally spaced time intervals",30,0,30);
@@ -762,7 +762,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
  
 
   // For testing: awb
-  //int nEvent = 2000;
+  //int nEvent = 10000;
   //m_nEvent = nEvent;
 
   // List of datagrams:
@@ -1536,26 +1536,31 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
         //
         // Time from Mission elapsed time to Unix time and then from PDT to GMT:
         //
-        Int_t deltaTimeUgly = 978307200 + 25200; 
+        Int_t deltaTimeUgly = 978307200;// + 25200; 
 
         double myTimeStamp;
 
-	// LAT nominal system clock:                                                                                                                                                                          
+	// LAT nominal system clock:
+                                                                                                                                                                          
 	double LATSystemClock = 20000000.0;
 
-	// Warren's empirical LAT system clock correction from SLAC and NRL:                                                                                                                                  
+	// Warren's empirical LAT system clock correction from SLAC and NRL:
+                                                                                                                                  
 	double warrenLATSystemClockCorrection = 100.0;
 
-	// Ugly!                                                                                                                                                                                              
-	double RollOver = 33554432.0;
+	// Ugly!
+        double RollOver = 33554432.0;
 
-	// Number of ticks between current event and the current 1-PPS:                                                                                                                                       
+	// Number of ticks between current event and the current 1-PPS:
+                                                                                                                                       
 	double awbTicks1 = double (m_digiEvent->getMetaEvent().time().timeTicks()) - double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks());
-	// Rollover? Should never be more than one! BTW, JJ has a much smarter way to do this rollover check ... :-)                                                                                          
+	// Rollover? Should never be more than one! BTW, JJ has a much smarter way to do this rollover check ... :-)
+                                                                                          
 	if (awbTicks1 < 0) {
 	  awbTicks1 = awbTicks1 + RollOver;
 	}
-	// Check that the two TimeTones are OK and different:                                                                                                                                                 
+	// Check that the two TimeTones are OK and different:
+                                                                                                                                                 
 	if (!(m_digiEvent->getMetaEvent().time().current().flywheeling()) &&
 	    !(m_digiEvent->getMetaEvent().time().current().missingCpuPps()) &&
 	    !(m_digiEvent->getMetaEvent().time().current().missingLatPps()) &&
@@ -1566,24 +1571,28 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	    !(m_digiEvent->getMetaEvent().time().previous().missingTimeTone()) &&
 	    (m_digiEvent->getMetaEvent().time().current().timeHack().ticks() != m_digiEvent->getMetaEvent().time().previous().timeHack().ticks())) {
 
-	  // Then use full formula for correcting system clock drift using last two TimeTones i.e. extrapolation                                                                                              
+	  // Then use full formula for correcting system clock drift using last two TimeTones i.e. extrapolation
+                                                                                              
 	  double awbTicks2 = double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks()) - double (m_digiEvent->getMetaEvent().time().previous().timeHack().ticks());
-	  // Rollover? Should never be more than one rollover! BTW, JJ has a much smarter way to do this rollover check ... :-)                                                                               
+	  // Rollover? Should never be more than one rollover! BTW, JJ has a much smarter way to do this rollover check ... :-)
+                                                                               
 	  if (awbTicks2 < 0) {
 	    awbTicks2 = awbTicks2 + RollOver;
 	  }
 
-	  // Timestamp:                                                                                                                                                                                       
+	  // Timestamp:
 	  myTimeStamp = double (m_digiEvent->getMetaEvent().time().current().timeSecs()) + (awbTicks1/awbTicks2);
 	  myTimeStamp = myTimeStamp + deltaTimeUgly;
 	} else {
-	  // Cannot use TimeTone(s) - will assume nominal value for the LAT system clock                                                                                                                      
+	  // Cannot use TimeTone(s) - will assume nominal value for the LAT system clock
+                                                                                                                      
 	  myTimeStamp = double (m_digiEvent->getMetaEvent().time().current().timeSecs()) + (awbTicks1 / (LATSystemClock + warrenLATSystemClockCorrection));
 	  myTimeStamp = myTimeStamp + deltaTimeUgly;
 	}
         double myTimeDiff = m_digiEvent->getCcsds().getUtc() - myTimeStamp;
         if (myTimeDiff < 0) {
-	  std::cout << "Problem! Time difference is negative in event " << iEvent << "  " << (m_digiEvent->getCcsds().getUtc()) << "   " << myTimeStamp << std::endl;
+	  std::cout << "Problem! Time difference is negative in event " << iEvent << "  " << myTimeDiff << "   " << (m_digiEvent->getCcsds().getUtc()) 
+                    << "   " << myTimeStamp << std::endl;
 	}
 
 	int mycpuNumber=  m_digiEvent->getMetaEvent().datagram().crate();
@@ -1663,7 +1672,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	  } else {
 	  	  
 	    // Cannot use TimeTone(s) - will assume nominal value for the LAT system clock
-	    m_startTime = double (m_digiEvent->getMetaEvent().time().current().timeSecs());  
+            m_startTime = double (m_digiEvent->getMetaEvent().time().current().timeSecs()) + (awbTicks1 / (LATSystemClock + warrenLATSystemClockCorrection));
             m_startTime = m_startTime + deltaTimeUgly;
 	  }
 	}
@@ -3775,40 +3784,40 @@ void TestReport::produceEpuPlot()
     if (m_nbrEventsDataGramsEpu0 > 0 ) {
       file = m_prefix;
       file += "_deltaTimeDGCTEvtEPU0";
-      att.set(file.c_str(), "CCSDS Secondary Header Time minus the event time for EPU0","deltaTimeDGCTEvtEPU0",true);
-      att.m_statMode = 111111;
+      att.set(file.c_str(), "CCSDS Secondary Header Time minus the event time for events from EPU0 [seconds]","deltaTimeDGCTEvtEPU0",true);
+      att.m_statMode = 11;
       producePlot(m_deltaTimeDGCTEvtEPU0, att);
       insertPlot(att);
     }
     if (m_nbrEventsDataGramsEpu1 > 0 ) {
       file = m_prefix;
       file += "_deltaTimeDGCTEvtEPU1";
-      att.set(file.c_str(), "CCSDS Secondary Header Time minus the event time for EPU1","deltaTimeDGCTEvtEPU1",true);
-      att.m_statMode = 111111;
+      att.set(file.c_str(), "CCSDS Secondary Header Time minus the event time for events from EPU1 [seconds]","deltaTimeDGCTEvtEPU1",true);
+      att.m_statMode = 11;
       producePlot(m_deltaTimeDGCTEvtEPU1, att);
       insertPlot(att);
     }
     if (m_nbrEventsDataGramsEpu2 > 0 ) {
       file = m_prefix;
       file += "_deltaTimeDGCTEvtEPU2";
-      att.set(file.c_str(), "CCSDS Secondary Header Time minus the event time for EPU2","deltaTimeDGCTEvtEPU2",true);
-      att.m_statMode = 111111;
+      att.set(file.c_str(), "CCSDS Secondary Header Time minus the event time for events from EPU2 [seconds]","deltaTimeDGCTEvtEPU2",true);
+      att.m_statMode = 11;
       producePlot(m_deltaTimeDGCTEvtEPU2, att);
       insertPlot(att);
     }
     if (m_nbrEventsDataGramsSiu0 > 0 ) {
       file = m_prefix;
       file += "_deltaTimeDGCTEvtSIU0";
-      att.set(file.c_str(), "CCSDS Secondary Header Time minus the event time for SIU0","deltaTimeDGCTEvtSIU0",true);
-      att.m_statMode = 111111;
+      att.set(file.c_str(), "CCSDS Secondary Header Time minus the event time for events from SIU0 [seconds]","deltaTimeDGCTEvtSIU0",true);
+      att.m_statMode = 11;
       producePlot(m_deltaTimeDGCTEvtSIU0, att);
       insertPlot(att);
     }
     if (m_nbrEventsDataGramsSiu1 > 0 ) {
       file = m_prefix;
       file += "_deltaTimeDGCTEvtSIU1";
-      att.set(file.c_str(), "CCSDS Secondary Header Time minus the event time for SIU1","deltaTimeDGCTEvtESIU1",true);
-      att.m_statMode = 111111;
+      att.set(file.c_str(), "CCSDS Secondary Header Time minus the event time for events from SIU1 [seconds]","deltaTimeDGCTEvtESIU1",true);
+      att.m_statMode = 11;
       producePlot(m_deltaTimeDGCTEvtSIU1, att);
       insertPlot(att);
     }
