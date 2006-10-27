@@ -394,7 +394,6 @@ TestReport::TestReport(const char* dir, const char* prefix,
   att.set("Number of events per datagram - SIU1","Number of events");
   setHistParameters(m_datagramsSIU1,att);
 
-  // awb
   m_deltaTimeDGCTEvtEPU0 = new TH1F("deltaTimeDGCTEvtEPU0","CCSDS Secondary Header Time minus the event time for EPU0",50,0.0,25.0);
   att.set("CCSDS Secondary Header Time minus the event time for EPU0","Number of events");
   setHistParameters(m_deltaTimeDGCTEvtEPU0,att);
@@ -414,7 +413,6 @@ TestReport::TestReport(const char* dir, const char* prefix,
   m_deltaTimeDGCTEvtSIU1 = new TH1F("deltaTimeDGCTEvtSIU1","CCSDS Secondary Header Time minus the event time for SIU1",50,0.0,25.0);
   att.set("CCSDS Secondary Header Time minus the event time for SIU1","Number of events");
   setHistParameters(m_deltaTimeDGCTEvtSIU1,att);
-
 
   m_triggerRate = new TH1F("triggerRate","Trigger rate for 30 equally spaced time intervals",30,0,30);
   att.set("Trigger rate for 30 time intervals","Trigger rate [Hz]");
@@ -1585,7 +1583,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	}
         double myTimeDiff = m_digiEvent->getCcsds().getUtc() - myTimeStamp;
         if (myTimeDiff < 0) {
-	  std::cout << "AWB: Time difference is negative in event " << iEvent << "  " << (m_digiEvent->getCcsds().getUtc()) << "   " << myTimeStamp << std::endl;
+	  std::cout << "Problem! Time difference is negative in event " << iEvent << "  " << (m_digiEvent->getCcsds().getUtc()) << "   " << myTimeStamp << std::endl;
 	}
 
 	int mycpuNumber=  m_digiEvent->getMetaEvent().datagram().crate();
@@ -3772,12 +3770,13 @@ void TestReport::produceEpuPlot()
     insertPlot(att);
   }
 
-  // awb
+
   if (m_isLATTE != 1) {
     if (m_nbrEventsDataGramsEpu0 > 0 ) {
       file = m_prefix;
       file += "_deltaTimeDGCTEvtEPU0";
       att.set(file.c_str(), "CCSDS Secondary Header Time minus the event time for EPU0","deltaTimeDGCTEvtEPU0",true);
+      att.m_statMode = 111111;
       producePlot(m_deltaTimeDGCTEvtEPU0, att);
       insertPlot(att);
     }
@@ -3785,6 +3784,7 @@ void TestReport::produceEpuPlot()
       file = m_prefix;
       file += "_deltaTimeDGCTEvtEPU1";
       att.set(file.c_str(), "CCSDS Secondary Header Time minus the event time for EPU1","deltaTimeDGCTEvtEPU1",true);
+      att.m_statMode = 111111;
       producePlot(m_deltaTimeDGCTEvtEPU1, att);
       insertPlot(att);
     }
@@ -3792,6 +3792,7 @@ void TestReport::produceEpuPlot()
       file = m_prefix;
       file += "_deltaTimeDGCTEvtEPU2";
       att.set(file.c_str(), "CCSDS Secondary Header Time minus the event time for EPU2","deltaTimeDGCTEvtEPU2",true);
+      att.m_statMode = 111111;
       producePlot(m_deltaTimeDGCTEvtEPU2, att);
       insertPlot(att);
     }
@@ -3799,6 +3800,7 @@ void TestReport::produceEpuPlot()
       file = m_prefix;
       file += "_deltaTimeDGCTEvtSIU0";
       att.set(file.c_str(), "CCSDS Secondary Header Time minus the event time for SIU0","deltaTimeDGCTEvtSIU0",true);
+      att.m_statMode = 111111;
       producePlot(m_deltaTimeDGCTEvtSIU0, att);
       insertPlot(att);
     }
@@ -3806,6 +3808,7 @@ void TestReport::produceEpuPlot()
       file = m_prefix;
       file += "_deltaTimeDGCTEvtSIU1";
       att.set(file.c_str(), "CCSDS Secondary Header Time minus the event time for SIU1","deltaTimeDGCTEvtESIU1",true);
+      att.m_statMode = 111111;
       producePlot(m_deltaTimeDGCTEvtSIU1, att);
       insertPlot(att);
     }
