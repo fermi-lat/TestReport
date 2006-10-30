@@ -478,7 +478,7 @@ class TestReport {
   UInt_t m_endTime;
 
   // Livetime:
-  float m_liveTime;
+  double m_liveTime;
 
   // Extended counters problem?
   Int_t m_extendedCountersFlag;
@@ -643,6 +643,12 @@ class TestReport {
   TH1F* m_deltaTimeDGCTEvtEPU2;
   TH1F* m_deltaTimeDGCTEvtSIU0;
   TH1F* m_deltaTimeDGCTEvtSIU1;
+
+  TH1F* m_deltaEventIDEPU0;
+  TH1F* m_deltaEventIDEPU1;
+  TH1F* m_deltaEventIDEPU2;
+  TH1F* m_deltaEventIDSIU0;
+  TH1F* m_deltaEventIDSIU1;
 
   // GEM discarded events:
   TH1F* m_gemDiscarded;

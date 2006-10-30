@@ -394,25 +394,47 @@ TestReport::TestReport(const char* dir, const char* prefix,
   att.set("Number of events per datagram - SIU1","Number of events");
   setHistParameters(m_datagramsSIU1,att);
 
-  m_deltaTimeDGCTEvtEPU0 = new TH1F("deltaTimeDGCTEvtEPU0","CCSDS Secondary Header Time minus the event time for events from EPU0 [seconds]",50,0.0,10.0);
+  m_deltaTimeDGCTEvtEPU0 = new TH1F("deltaTimeDGCTEvtEPU0","CCSDS Secondary Header Time minus the event time for events from EPU0 [seconds]",50,0.0,1.0);
   att.set("CCSDS time minus the event time for events from EPU1 [seconds]","Number of events");
   setHistParameters(m_deltaTimeDGCTEvtEPU0,att);
 
-  m_deltaTimeDGCTEvtEPU1 = new TH1F("deltaTimeDGCTEvtEPU1","CCSDS Secondary Header Time minus the event time for events from EPU1 [seconds]",50,0.0,10.0);
+  m_deltaTimeDGCTEvtEPU1 = new TH1F("deltaTimeDGCTEvtEPU1","CCSDS Secondary Header Time minus the event time for events from EPU1 [seconds]",50,0.0,1.0);
   att.set("CCSDS Time minus the event time for events from EPU1 [seconds]","Number of events");
   setHistParameters(m_deltaTimeDGCTEvtEPU1,att);
 
-  m_deltaTimeDGCTEvtEPU2 = new TH1F("deltaTimeDGCTEvtEPU2","CCSDS Secondary Header Time minus the event time for events from EPU2 [seconds]",50,0.0,10.0);
+  m_deltaTimeDGCTEvtEPU2 = new TH1F("deltaTimeDGCTEvtEPU2","CCSDS Secondary Header Time minus the event time for events from EPU2 [seconds]",50,0.0,1.0);
   att.set("CCSDS Time minus the event time for events from EPU2 [seconds]","Number of events");
   setHistParameters(m_deltaTimeDGCTEvtEPU2,att);
 
-  m_deltaTimeDGCTEvtSIU0 = new TH1F("deltaTimeDGCTEvtSIU0","CCSDS Secondary Header Time minus the event time for events from SIU0 [seconds]",50,0.0,10.0);
+  m_deltaTimeDGCTEvtSIU0 = new TH1F("deltaTimeDGCTEvtSIU0","CCSDS Secondary Header Time minus the event time for events from SIU0 [seconds]",50,0.0,1.0);
   att.set("CCSDS Time minus the event time for events from SIU0 [seconds]","Number of events");
   setHistParameters(m_deltaTimeDGCTEvtSIU0,att);
 
-  m_deltaTimeDGCTEvtSIU1 = new TH1F("deltaTimeDGCTEvtSIU1","CCSDS Secondary Header Time minus the event time for events from SIU1 [seconds]",50,0.0,10.0);
+  m_deltaTimeDGCTEvtSIU1 = new TH1F("deltaTimeDGCTEvtSIU1","CCSDS Secondary Header Time minus the event time for events from SIU1 [seconds]",50,0.0,1.0);
   att.set("CCSDS Time minus the event time for events from SIU1 [seconds]","Number of events");
   setHistParameters(m_deltaTimeDGCTEvtSIU1,att);
+
+  m_deltaEventIDEPU0 = new TH1F("deltaEventIDEPU0","Delta Event ID For Successive Events From EPU0",50,0.0,3.0);
+  att.set("Delta Event ID For Successive Events From EPU0","Number of events");
+  setHistParameters(m_deltaEventIDEPU0,att);
+
+  m_deltaEventIDEPU1 = new TH1F("deltaEventIDEPU1","Delta Event ID For Successive Events From EPU1",50,0.0,3.0);
+  att.set("Delta Event ID For Successive Events From EPU1","Number of events");
+  setHistParameters(m_deltaEventIDEPU1,att);
+
+  m_deltaEventIDEPU2 = new TH1F("deltaEventIDEPU2","Delta Event ID For Successive Events From EPU2",50,0.0,3.0);
+  att.set("Delta Event ID For Successive Events From EPU2","Number of events");
+  setHistParameters(m_deltaEventIDEPU2,att);
+
+  m_deltaEventIDSIU0 = new TH1F("deltaEventIDSIU0","Delta Event ID For Successive Events From SIU0",50,0.0,3.0);
+  att.set("Delta Event ID For Successive Events From SIU0","Number of events");
+  setHistParameters(m_deltaEventIDSIU0,att);
+
+  m_deltaEventIDSIU1 = new TH1F("deltaEventIDSIU1","Delta Event ID For Successive Events From SIU1",50,0.0,3.0);
+  att.set("Delta Event ID For Successive Events From SIU1","Number of events");
+  setHistParameters(m_deltaEventIDSIU1,att);
+
+
 
   m_triggerRate = new TH1F("triggerRate","Trigger rate for 30 equally spaced time intervals",30,0,30);
   att.set("Trigger rate for 30 time intervals","Trigger rate [Hz]");
@@ -829,6 +851,23 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   }
 
 
+  // Delta Event ID doe each CPU:
+  ULong64_t previousEventIDEPU0 = 0;
+  ULong64_t currentEventIDEPU0  = 0;
+
+  ULong64_t previousEventIDEPU1 = 0;
+  ULong64_t currentEventIDEPU1  = 0;
+
+  ULong64_t previousEventIDEPU2 = 0;
+  ULong64_t currentEventIDEPU2  = 0;
+
+  ULong64_t previousEventIDSIU0 = 0;
+  ULong64_t currentEventIDSIU0  = 0;
+
+  ULong64_t previousEventIDSIU1 = 0;
+  ULong64_t currentEventIDSIU1  = 0;
+
+
   // Look at first and last event:
   if(m_digiFile) {
     m_digiBranch->GetEntry(0);
@@ -1209,7 +1248,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	      }
 	    }
  	  } 
-	  //std::cout << "AWB: Datagrams for EPU0 are " << std::endl;
+	  //std::cout << "Datagrams for EPU0 are " << std::endl;
 	  //std::copy(listDataGramsEpu0.begin(),listDataGramsEpu0.end(),std::ostream_iterator<int>(std::cout,"\n"));
         }
 
@@ -1234,7 +1273,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	      }
 	    }
  	  } 
-	  //std::cout << "AWB: Datagrams for EPU1 are " << std::endl;
+	  //std::cout << "Datagrams for EPU1 are " << std::endl;
 	  //std::copy(listDataGramsEpu1.begin(),listDataGramsEpu1.end(),std::ostream_iterator<int>(std::cout,"\n"));
         }
 
@@ -1259,7 +1298,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	      }
 	    }
  	  } 
-	  //std::cout << "AWB: Datagrams for EPU2 are " << std::endl;
+	  //std::cout << "Datagrams for EPU2 are " << std::endl;
 	  //std::copy(listDataGramsEpu2.begin(),listDataGramsEpu2.end(),std::ostream_iterator<int>(std::cout,"\n"));
         }
 
@@ -1284,7 +1323,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	      }
 	    }
  	  } 
-	  //std::cout << "AWB: Datagrams for SIU0 are " << std::endl;
+	  //std::cout << "Datagrams for SIU0 are " << std::endl;
 	  //std::copy(listDataGramsSiu0.begin(),listDataGramsSiu0.end(),std::ostream_iterator<int>(std::cout,"\n"));
         }
 
@@ -1309,7 +1348,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	      }
 	    }
  	  } 
-	  //std::cout << "AWB: Datagrams for SIU1 are " << std::endl;
+	  //std::cout << "Datagrams for SIU1 are " << std::endl;
 	  //std::copy(listDataGramsSiu1.begin(),listDataGramsSiu1.end(),std::ostream_iterator<int>(std::cout,"\n"));
         }
       }
@@ -1530,7 +1569,8 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       previousGemDiscarded = thisGemDiscarded;
       previousGemDeadzone  = thisGemDeadzone;
 
-      // awb 
+
+      // Only for FSW:
       if (m_isLATTE != 1) {
         
         //
@@ -1553,11 +1593,11 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 
 	// Number of ticks between current event and the current 1-PPS:
                                                                                                                                        
-	double awbTicks1 = double (m_digiEvent->getMetaEvent().time().timeTicks()) - double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks());
+	double tmpTicks1 = double (m_digiEvent->getMetaEvent().time().timeTicks()) - double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks());
 	// Rollover? Should never be more than one! BTW, JJ has a much smarter way to do this rollover check ... :-)
                                                                                           
-	if (awbTicks1 < 0) {
-	  awbTicks1 = awbTicks1 + RollOver;
+	if (tmpTicks1 < 0) {
+	  tmpTicks1 = tmpTicks1 + RollOver;
 	}
 	// Check that the two TimeTones are OK and different:
                                                                                                                                                  
@@ -1573,20 +1613,20 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 
 	  // Then use full formula for correcting system clock drift using last two TimeTones i.e. extrapolation
                                                                                               
-	  double awbTicks2 = double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks()) - double (m_digiEvent->getMetaEvent().time().previous().timeHack().ticks());
+	  double tmpTicks2 = double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks()) - double (m_digiEvent->getMetaEvent().time().previous().timeHack().ticks());
 	  // Rollover? Should never be more than one rollover! BTW, JJ has a much smarter way to do this rollover check ... :-)
                                                                                
-	  if (awbTicks2 < 0) {
-	    awbTicks2 = awbTicks2 + RollOver;
+	  if (tmpTicks2 < 0) {
+	    tmpTicks2 = tmpTicks2 + RollOver;
 	  }
 
 	  // Timestamp:
-	  myTimeStamp = double (m_digiEvent->getMetaEvent().time().current().timeSecs()) + (awbTicks1/awbTicks2);
+	  myTimeStamp = double (m_digiEvent->getMetaEvent().time().current().timeSecs()) + (tmpTicks1/tmpTicks2);
 	  myTimeStamp = myTimeStamp + deltaTimeUgly;
 	} else {
 	  // Cannot use TimeTone(s) - will assume nominal value for the LAT system clock
                                                                                                                       
-	  myTimeStamp = double (m_digiEvent->getMetaEvent().time().current().timeSecs()) + (awbTicks1 / (LATSystemClock + warrenLATSystemClockCorrection));
+	  myTimeStamp = double (m_digiEvent->getMetaEvent().time().current().timeSecs()) + (tmpTicks1 / (LATSystemClock + warrenLATSystemClockCorrection));
 	  myTimeStamp = myTimeStamp + deltaTimeUgly;
 	}
         double myTimeDiff = m_digiEvent->getCcsds().getUtc() - myTimeStamp;
@@ -1596,22 +1636,91 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	}
 
 	int mycpuNumber=  m_digiEvent->getMetaEvent().datagram().crate();
-	if (mycpuNumber>-1 && cpuNumber<5) {
+	if (mycpuNumber>-1 && mycpuNumber<5) {
 	  if (cpuNumber==enums::Lsf::Epu0) {
 	    m_deltaTimeDGCTEvtEPU0->Fill(myTimeDiff);
           }
-	  if (cpuNumber==enums::Lsf::Epu1) {
+	  if (mycpuNumber==enums::Lsf::Epu1) {
 	    m_deltaTimeDGCTEvtEPU1->Fill(myTimeDiff);
           }
-	  if (cpuNumber==enums::Lsf::Epu2) {
+	  if (mycpuNumber==enums::Lsf::Epu2) {
 	    m_deltaTimeDGCTEvtEPU2->Fill(myTimeDiff);
           }
-	  if (cpuNumber==enums::Lsf::Siu0) {
+	  if (mycpuNumber==enums::Lsf::Siu0) {
 	    m_deltaTimeDGCTEvtSIU0->Fill(myTimeDiff);
           }
-	  if (cpuNumber==enums::Lsf::Siu1) {
+	  if (mycpuNumber==enums::Lsf::Siu1) {
 	    m_deltaTimeDGCTEvtSIU1->Fill(myTimeDiff);
           }
+	}
+
+        // Delta Event ID:
+	if (mycpuNumber>-1 && mycpuNumber<5) {
+
+	  if (mycpuNumber==enums::Lsf::Epu0) {
+            currentEventIDEPU0 = m_digiEvent->getMetaEvent().scalers().sequence();
+            if (previousEventIDEPU0 != 0) {	
+              if (currentEventIDEPU0 <= previousEventIDEPU0) {
+	        std::cout << "Warning! Problems with the delta Event ID in EPU0! " << iEvent << "   " << currentEventIDEPU0 << "   " << previousEventIDEPU0 << std::endl;
+	      } else {
+                double DeltaEventID = double (currentEventIDEPU0) - double (previousEventIDEPU0);
+                m_deltaEventIDEPU0->Fill(DeltaEventID);
+	      }
+	    }
+            previousEventIDEPU0 = currentEventIDEPU0;
+	  }
+
+	  if (mycpuNumber==enums::Lsf::Epu1) {
+            currentEventIDEPU1 = m_digiEvent->getMetaEvent().scalers().sequence();
+            if (previousEventIDEPU1 != 0) {	
+              if (currentEventIDEPU1 <= previousEventIDEPU1) {
+	        std::cout << "Warning! Problems with the delta Event ID in EPU1! " << iEvent << "   " << currentEventIDEPU1 << "   " << previousEventIDEPU1 << std::endl;
+	      } else {
+                double DeltaEventID = double (currentEventIDEPU1) - double (previousEventIDEPU1);
+                m_deltaEventIDEPU1->Fill(DeltaEventID);
+	      }
+	    }
+            previousEventIDEPU1 = currentEventIDEPU1;
+	  }
+
+	  if (mycpuNumber==enums::Lsf::Epu2) {
+            currentEventIDEPU2 = m_digiEvent->getMetaEvent().scalers().sequence();
+            if (previousEventIDEPU2 != 0) {	
+              if (currentEventIDEPU2 <= previousEventIDEPU2) {
+	        std::cout << "Warning! Problems with the delta Event ID in EPU2! " << iEvent << "   " << currentEventIDEPU2 << "   " << previousEventIDEPU2 << std::endl;
+	      } else { 
+                double DeltaEventID = double (currentEventIDEPU2) - double (previousEventIDEPU2);
+                m_deltaEventIDEPU2->Fill(DeltaEventID);
+	      }
+	    }
+            previousEventIDEPU2 = currentEventIDEPU2;
+	  }
+
+	  if (mycpuNumber==enums::Lsf::Siu0) {
+            currentEventIDSIU0 = m_digiEvent->getMetaEvent().scalers().sequence();
+            if (previousEventIDSIU0 != 0) {	
+              if (currentEventIDSIU0 <= previousEventIDSIU0) {
+	        std::cout << "Warning! Problems with the delta Event ID in SIU0! " << iEvent << "   " << currentEventIDSIU0 << "   " << previousEventIDSIU0 << std::endl;
+	      } else {
+                double DeltaEventID = double (currentEventIDSIU0) - double (previousEventIDSIU0);
+                m_deltaEventIDSIU0->Fill(DeltaEventID);
+	      }
+	    }
+            previousEventIDSIU0 = currentEventIDSIU0;
+	  }
+
+	  if (mycpuNumber==enums::Lsf::Siu1) {
+            currentEventIDSIU1 = m_digiEvent->getMetaEvent().scalers().sequence();
+            if (previousEventIDSIU1 != 0) {	
+              if (currentEventIDSIU1 <= previousEventIDSIU1) {
+	        std::cout << "Warning! Problems with the delta Event ID in SIU1! " << iEvent << "   " << currentEventIDSIU1 << "   " << previousEventIDSIU1 << std::endl;
+	      } else {
+                double DeltaEventID = double (currentEventIDSIU1) - double (previousEventIDSIU1);
+                m_deltaEventIDSIU1->Fill(DeltaEventID);
+	      }
+	    }
+            previousEventIDSIU1 = currentEventIDSIU1;
+	  }
 	}
       }
 
@@ -1641,10 +1750,10 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
           double RollOver = 33554432.0;
 
           // Number of ticks between current event and the current 1-PPS:
-	  double awbTicks1 = double (m_digiEvent->getMetaEvent().time().timeTicks()) - double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks());
+	  double tmpTicks1 = double (m_digiEvent->getMetaEvent().time().timeTicks()) - double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks());
 	  // Rollover? Should never be more than one! BTW, JJ has a much smarter way to do this rollover check ... :-)
-	  if (awbTicks1 < 0) {
-	    awbTicks1 = awbTicks1 + RollOver;
+	  if (tmpTicks1 < 0) {
+	    tmpTicks1 = tmpTicks1 + RollOver;
 	  }
           
 	  
@@ -1660,19 +1769,19 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	      (m_digiEvent->getMetaEvent().time().current().timeHack().ticks() != m_digiEvent->getMetaEvent().time().previous().timeHack().ticks())) { 
 
  	    // Then use full formula for correcting system clock drift using last two TimeTones i.e. extrapolation
-	    double awbTicks2 = double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks()) - double (m_digiEvent->getMetaEvent().time().previous().timeHack().ticks());
+	    double tmpTicks2 = double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks()) - double (m_digiEvent->getMetaEvent().time().previous().timeHack().ticks());
 	    // Rollover? Should never be more than one rollover! BTW, JJ has a much smarter way to do this rollover check ... :-)
-	    if (awbTicks2 < 0) {
- 	      awbTicks2 = awbTicks2 + RollOver;
+	    if (tmpTicks2 < 0) {
+ 	      tmpTicks2 = tmpTicks2 + RollOver;
 	    }
 
 	    // Timestamp: 
-	    m_startTime = double (m_digiEvent->getMetaEvent().time().current().timeSecs()) + (awbTicks1/awbTicks2);
+	    m_startTime = double (m_digiEvent->getMetaEvent().time().current().timeSecs()) + (tmpTicks1/tmpTicks2);
             m_startTime = m_startTime + deltaTimeUgly;
 	  } else {
 	  	  
 	    // Cannot use TimeTone(s) - will assume nominal value for the LAT system clock
-            m_startTime = double (m_digiEvent->getMetaEvent().time().current().timeSecs()) + (awbTicks1 / (LATSystemClock + warrenLATSystemClockCorrection));
+            m_startTime = double (m_digiEvent->getMetaEvent().time().current().timeSecs()) + (tmpTicks1 / (LATSystemClock + warrenLATSystemClockCorrection));
             m_startTime = m_startTime + deltaTimeUgly;
 	  }
 	}
@@ -1719,10 +1828,10 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
           double RollOver = 33554432.0;
 
           // Number of ticks between current event and the current 1-PPS:
-	  double awbTicks1 = double (m_digiEvent->getMetaEvent().time().timeTicks()) - double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks());
+	  double tmpTicks1 = double (m_digiEvent->getMetaEvent().time().timeTicks()) - double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks());
 	  // Rollover? Should never be more than one! BTW, JJ has a much smarter way to do this rollover check ... :-)
-	  if (awbTicks1 < 0) {
-	    awbTicks1 = awbTicks1 + RollOver;
+	  if (tmpTicks1 < 0) {
+	    tmpTicks1 = tmpTicks1 + RollOver;
 	  }
           
 	  // Check that the two TimeTones are OK and different:
@@ -1737,18 +1846,18 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	      (m_digiEvent->getMetaEvent().time().current().timeHack().ticks() != m_digiEvent->getMetaEvent().time().previous().timeHack().ticks())) { 
 
  	    // Then use full formula for correcting system clock drift using last two TimeTones i.e. extrapolation
-	    double awbTicks2 = double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks()) - double (m_digiEvent->getMetaEvent().time().previous().timeHack().ticks());
+	    double tmpTicks2 = double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks()) - double (m_digiEvent->getMetaEvent().time().previous().timeHack().ticks());
 	    // Rollover? Should never be more than one rollover! BTW, JJ has a much smarter way to do this rollover check ... :-)
-	    if (awbTicks2 < 0) {
-	      awbTicks2 = awbTicks2 + RollOver;
+	    if (tmpTicks2 < 0) {
+	      tmpTicks2 = tmpTicks2 + RollOver;
 	    }
 
 	    // Timestamp: 
-	    m_endTime = double (m_digiEvent->getMetaEvent().time().current().timeSecs()) + (awbTicks1/awbTicks2);
+	    m_endTime = double (m_digiEvent->getMetaEvent().time().current().timeSecs()) + (tmpTicks1/tmpTicks2);
             m_endTime = m_endTime + deltaTimeUgly;
 	  } else {
 	    // Cannot use TimeTone(s) - will assume nominal value for the LAT system clock
-	    m_endTime = double (m_digiEvent->getMetaEvent().time().current().timeSecs()) + (awbTicks1 / (LATSystemClock + warrenLATSystemClockCorrection));
+	    m_endTime = double (m_digiEvent->getMetaEvent().time().current().timeSecs()) + (tmpTicks1 / (LATSystemClock + warrenLATSystemClockCorrection));
             m_endTime = m_endTime + deltaTimeUgly;
 	  }
 	}
@@ -2421,8 +2530,8 @@ void TestReport::generateReport()
   (*m_report) << "@li Time of the first trigger: <b>" << ctime((time_t*) (&m_startTime)) << " (GMT) </b>";
   (*m_report) << "@li Time of the last trigger: <b>" << ctime((time_t*) (&m_endTime)) << " (GMT) </b>";
   (*m_report) << "@li Duration: <b>" << m_endTime - m_startTime << " seconds" << "</b>" << endl;
-  (*m_report) << "@li Trigger rate: <b>" << double(m_nEvent)/(m_endTime - m_startTime) << " Hz" << "</b>" << endl;
-  (*m_report) << "@li Livetime corrected trigger rate: <b>" << ((double(m_nEvent)/(m_endTime - m_startTime))/m_liveTime) << " Hz" << "</b>" << endl;
+  (*m_report) << "@li Trigger rate: <b>" << double(m_nEvent)/ double (m_endTime - m_startTime) << " Hz" << "</b>" << endl;
+  (*m_report) << "@li Livetime corrected trigger rate: <b>" << (double(m_nEvent) / double (m_endTime - m_startTime)) / m_liveTime << " Hz" << "</b>" << endl;
   (*m_report) << "   " << endl;
 
   if (m_counterGroundID == 0) {
@@ -2435,7 +2544,7 @@ void TestReport::generateReport()
   // Needs Spectrum Astro FSW!:
   (*m_report) << "@li Livetime: <b> " << (m_liveTime * 100.0) << "% </b>" << endl;  
 
-  (*m_report) << "@li There were @b " << m_nbrPrescaled << " prescaled events (@b" << double (m_nbrPrescaled)/(m_endTime - m_startTime) <<" Hz), @b " << m_nbrDeadZone  << " dead zone events (@b" << double(m_nbrDeadZone)/(m_endTime - m_startTime) <<" Hz) and @b " << m_nbrDiscarded << " discarded events (@b" << double (m_nbrDiscarded)/(m_endTime - m_startTime) <<" Hz)." << endl;
+  (*m_report) << "@li There were @b " << m_nbrPrescaled << " prescaled events (<b>" << double (m_nbrPrescaled)/ double ((m_endTime - m_startTime)) <<" Hz</b>), @b " << m_nbrDeadZone  << " dead zone events (<b>" << double (m_nbrDeadZone)/ double ((m_endTime - m_startTime)) <<" Hz</b>) and @b " << m_nbrDiscarded << " discarded events (<b>" << double (m_nbrDiscarded)/ double ((m_endTime - m_startTime))  <<" Hz</b>)." << endl;
 
 
   if (m_deltaSequenceNbrEvents != 0) {
@@ -3617,26 +3726,28 @@ void TestReport::produceTriggerRatePlot()
   producePlot(m_triggerRate, att);
   insertPlot(att);
 
-
+  file = m_prefix;
   file += "_triggerLivetimeRate";
   att.set(file.c_str(), "Livetime corrected trigger rates for 30 time intervals","triggerLivetimeRate",true);
   att.m_statMode = 11;
   producePlot(m_triggerLivetimeRate, att);
   insertPlot(att);
 
+  file = m_prefix;
   file += "_livetimeRate";
   att.set(file.c_str(), "Livetime in percent for 30 time intervals","livetimeRate",true);
   att.m_statMode = 11;
   producePlot(m_livetimeRate, att);
   insertPlot(att);
 
-
+  file = m_prefix;
   file += "_deadzoneRate";
   att.set(file.c_str(), "Deadzone rates for 30 time intervals","deadzoneRate",true);
   att.m_statMode = 11;
   producePlot(m_deadzoneRate, att);
   insertPlot(att);
 
+  file = m_prefix;
   file += "_discardedRate";
   att.set(file.c_str(), "Discarded rates for 30 time intervals","discardedRate",true);
   att.m_statMode = 11;
@@ -3785,7 +3896,7 @@ void TestReport::produceEpuPlot()
       file = m_prefix;
       file += "_deltaTimeDGCTEvtEPU0";
       att.set(file.c_str(), "CCSDS Secondary Header Time minus the event time for events from EPU0 [seconds]","deltaTimeDGCTEvtEPU0",true);
-      att.m_statMode = 11;
+      att.m_statMode = 1111;
       producePlot(m_deltaTimeDGCTEvtEPU0, att);
       insertPlot(att);
     }
@@ -3793,7 +3904,7 @@ void TestReport::produceEpuPlot()
       file = m_prefix;
       file += "_deltaTimeDGCTEvtEPU1";
       att.set(file.c_str(), "CCSDS Secondary Header Time minus the event time for events from EPU1 [seconds]","deltaTimeDGCTEvtEPU1",true);
-      att.m_statMode = 11;
+      att.m_statMode = 1111;
       producePlot(m_deltaTimeDGCTEvtEPU1, att);
       insertPlot(att);
     }
@@ -3801,7 +3912,7 @@ void TestReport::produceEpuPlot()
       file = m_prefix;
       file += "_deltaTimeDGCTEvtEPU2";
       att.set(file.c_str(), "CCSDS Secondary Header Time minus the event time for events from EPU2 [seconds]","deltaTimeDGCTEvtEPU2",true);
-      att.m_statMode = 11;
+      att.m_statMode = 1111;
       producePlot(m_deltaTimeDGCTEvtEPU2, att);
       insertPlot(att);
     }
@@ -3809,7 +3920,7 @@ void TestReport::produceEpuPlot()
       file = m_prefix;
       file += "_deltaTimeDGCTEvtSIU0";
       att.set(file.c_str(), "CCSDS Secondary Header Time minus the event time for events from SIU0 [seconds]","deltaTimeDGCTEvtSIU0",true);
-      att.m_statMode = 11;
+      att.m_statMode = 1111;
       producePlot(m_deltaTimeDGCTEvtSIU0, att);
       insertPlot(att);
     }
@@ -3817,10 +3928,52 @@ void TestReport::produceEpuPlot()
       file = m_prefix;
       file += "_deltaTimeDGCTEvtSIU1";
       att.set(file.c_str(), "CCSDS Secondary Header Time minus the event time for events from SIU1 [seconds]","deltaTimeDGCTEvtESIU1",true);
-      att.m_statMode = 11;
+      att.m_statMode = 1111;
       producePlot(m_deltaTimeDGCTEvtSIU1, att);
       insertPlot(att);
     }
+
+    if (m_nbrEventsDataGramsEpu0 > 0 ) {
+      file = m_prefix;
+      file += "_deltaEventIDEPU0";
+      att.set(file.c_str(), "Delta Event ID For Successive Events From EPU0","deltaEventIDEPU0",true);
+      att.m_statMode = 1111;
+      producePlot(m_deltaEventIDEPU0, att);
+      insertPlot(att);
+    }
+    if (m_nbrEventsDataGramsEpu1 > 0 ) {
+      file = m_prefix;
+      file += "_deltaEventIDEPU1";
+      att.set(file.c_str(), "Delta Event ID For Successive Events From EPU1","deltaEventIDEPU1",true);
+      att.m_statMode = 1111;
+      producePlot(m_deltaEventIDEPU1, att);
+      insertPlot(att);
+    }
+    if (m_nbrEventsDataGramsEpu2 > 0 ) {
+      file = m_prefix;
+      file += "_deltaEventIDEPU2";
+      att.set(file.c_str(), "Delta Event ID For Successive Events From EPU2","deltaEventIDEPU2",true);
+      att.m_statMode = 1111;
+      producePlot(m_deltaEventIDEPU2, att);
+      insertPlot(att);
+    }
+    if (m_nbrEventsDataGramsSiu0 > 0 ) {
+      file = m_prefix;
+      file += "_deltaEventIDSIU0";
+      att.set(file.c_str(), "Delta Event ID For Successive Events From SIU0","deltaEventIDSIU0",true);
+      att.m_statMode = 1111;
+      producePlot(m_deltaEventIDSIU0, att);
+      insertPlot(att);
+    }
+    if (m_nbrEventsDataGramsSiu1 > 0 ) {
+      file = m_prefix;
+      file += "_deltaEventIDSIU1";
+      att.set(file.c_str(), "Delta Event ID For Successive Events From SIU1","deltaEventIDSIU1",true);
+      att.m_statMode = 1111;
+      producePlot(m_deltaEventIDSIU1, att);
+      insertPlot(att);
+    }
+
   }
 }
 

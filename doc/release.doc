@@ -268,10 +268,14 @@ October 26, 2006: awb
 v3r6p17 - Added plot of datagram creation time minus event time. 
 
 October 26, 2006: awb
-v3r6p18 - Added correct stat mode for the new histograms.
+v3r6p18 Added correct stat mode for the new histograms.
 
 October 26, 2006: awb
-v3r6p19 - Fixed some things.
+v3r6p19 Fixed some things.
 
+October 30,2 006: awb
+v3r6p20	- Added histogram for delta event ID per CPU.
+	- Fixed bug in datagram creation time minus event time plots. 
+        - Fixed bug in calculation of average rates.
 
 
