@@ -395,7 +395,7 @@ TestReport::TestReport(const char* dir, const char* prefix,
   setHistParameters(m_datagramsSIU1,att);
 
   m_deltaTimeDGCTEvtEPU0 = new TH1F("deltaTimeDGCTEvtEPU0","CCSDS Secondary Header Time minus the event time for events from EPU0 [seconds]",50,0.0,1.0);
-  att.set("CCSDS time minus the event time for events from EPU1 [seconds]","Number of events");
+  att.set("CCSDS time minus the event time for events from EPU0 [seconds]","Number of events");
   setHistParameters(m_deltaTimeDGCTEvtEPU0,att);
 
   m_deltaTimeDGCTEvtEPU1 = new TH1F("deltaTimeDGCTEvtEPU1","CCSDS Secondary Header Time minus the event time for events from EPU1 [seconds]",50,0.0,1.0);

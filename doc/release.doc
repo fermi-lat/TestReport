@@ -278,4 +278,5 @@ v3r6p20	- Added histogram for delta event ID per CPU.
 	- Fixed bug in datagram creation time minus event time plots. 
         - Fixed bug in calculation of average rates.
 
-
+October 31,2 006: awb
+v3r6p21	Corrected typo in axis label in one histogram.
