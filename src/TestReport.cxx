@@ -1631,8 +1631,9 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	}
         double myTimeDiff = m_digiEvent->getCcsds().getUtc() - myTimeStamp;
         if (myTimeDiff < 0) {
-	  std::cout << "Problem! Time difference is negative in event " << iEvent << "  " << myTimeDiff << "   " << (m_digiEvent->getCcsds().getUtc()) 
-                    << "   " << myTimeStamp << std::endl;
+	  std::cout.setf(ios::fixed);
+	  std::cout << "Problem! Time difference is negative in event " << iEvent << "  " << myTimeDiff << "   " << std::setprecision(20) << (m_digiEvent->getCcsds().getUtc()) 
+                    << "   " << myTimeStamp << std::setprecision(5) << std::endl;
 	}
 
 	int mycpuNumber=  m_digiEvent->getMetaEvent().datagram().crate();
@@ -2530,7 +2531,10 @@ void TestReport::generateReport()
   (*m_report) << "@li Time of the first trigger: <b>" << ctime((time_t*) (&m_startTime)) << " (GMT) </b>";
   (*m_report) << "@li Time of the last trigger: <b>" << ctime((time_t*) (&m_endTime)) << " (GMT) </b>";
   (*m_report) << "@li Duration: <b>" << m_endTime - m_startTime << " seconds" << "</b>" << endl;
-  (*m_report) << "@li Trigger rate: <b>" << double(m_nEvent)/ double (m_endTime - m_startTime) << " Hz" << "</b>" << endl;
+
+  m_report->setf(ios::fixed);
+
+  (*m_report) << "@li Trigger rate: <b>" <<std::setprecision(1) <<  double(m_nEvent)/ double (m_endTime - m_startTime) << " Hz" << "</b>" << endl;
   (*m_report) << "@li Livetime corrected trigger rate: <b>" << (double(m_nEvent) / double (m_endTime - m_startTime)) / m_liveTime << " Hz" << "</b>" << endl;
   (*m_report) << "   " << endl;
 

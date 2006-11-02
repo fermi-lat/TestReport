@@ -280,3 +280,6 @@ v3r6p20	- Added histogram for delta event ID per CPU.
 
 October 31,2 006: awb
 v3r6p21	Corrected typo in axis label in one histogram.
+
+November 1, 2006: awn
+v3r6p22	Fixed formating in report.
