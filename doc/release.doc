@@ -286,3 +286,8 @@ v3r6p22	Fixed formating in report.
 
 November 2, 2006: awb
 v3r6p23 Fixed bug in 'Not plot CAL occupancy for periodic triggers.'.
+
+November 3, 2006: awb
+v3r6p24	- Fixed normalization in CAL plots without periodic triggers.
+	- Plot negative delta GEM IDs, not only print a warning in case it happens.
+ 	- Added expected livetime.

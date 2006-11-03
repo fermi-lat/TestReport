@@ -140,7 +140,8 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_endCountDataGramSiu1(0),
     m_fullDataGramSiu1(0),
     m_beginRunDataGramSiu1(0),
-    m_nEvent(0), 
+    m_nEvent(0),
+    m_nEventNoPeriodic(0), 
     m_nbrPrescaled(0), 
     m_nbrDeadZone(0),
     m_nbrDiscarded(0), 
@@ -155,7 +156,11 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_nEventBadTot(0), 
     m_startTime(0), 
     m_endTime(0),
-    m_liveTime(0), 
+    m_liveTime(0),
+    m_elapsedTime(0),
+    m_nbrEventsNormal(0),
+    m_nbrEvents4Range(0),
+    m_nbrEvents4RangeNonZS(0), 
     m_extendedCountersFlag(0),
     m_nbrFlywheeling(0), 
     m_nbrIncomplete(0), 
@@ -747,7 +752,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
     m_digiBranch->SetAddress(&m_digiEvent);
   }
 
-  // Make sure we have the same number of event sin the input files:
+  // Make sure we have the same number of events in the input files:
   m_nEvent   = -1;
   int nMc    = -1;
   int nRecon = -1;
@@ -912,6 +917,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
     } else {
       m_liveTime = -1.0;
     }
+    m_elapsedTime = elapsedTimeLast - elapsedTimeFirst;
 
     // For trigger rates in time intervals:
     deltaTimeInterval = (elapsedTimeLast - elapsedTimeFirst)/nbrTimeIntervals;
@@ -1663,10 +1669,9 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
             if (previousEventIDEPU0 != 0) {	
               if (currentEventIDEPU0 <= previousEventIDEPU0) {
 	        std::cout << "Warning! Problems with the delta Event ID in EPU0! " << iEvent << "   " << currentEventIDEPU0 << "   " << previousEventIDEPU0 << std::endl;
-	      } else {
-                double DeltaEventID = double (currentEventIDEPU0) - double (previousEventIDEPU0);
-                m_deltaEventIDEPU0->Fill(DeltaEventID);
 	      }
+              double DeltaEventID = double (currentEventIDEPU0) - double (previousEventIDEPU0);
+              m_deltaEventIDEPU0->Fill(DeltaEventID);
 	    }
             previousEventIDEPU0 = currentEventIDEPU0;
 	  }
@@ -1676,10 +1681,9 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
             if (previousEventIDEPU1 != 0) {	
               if (currentEventIDEPU1 <= previousEventIDEPU1) {
 	        std::cout << "Warning! Problems with the delta Event ID in EPU1! " << iEvent << "   " << currentEventIDEPU1 << "   " << previousEventIDEPU1 << std::endl;
-	      } else {
-                double DeltaEventID = double (currentEventIDEPU1) - double (previousEventIDEPU1);
-                m_deltaEventIDEPU1->Fill(DeltaEventID);
 	      }
+              double DeltaEventID = double (currentEventIDEPU1) - double (previousEventIDEPU1);
+              m_deltaEventIDEPU1->Fill(DeltaEventID);
 	    }
             previousEventIDEPU1 = currentEventIDEPU1;
 	  }
@@ -1689,10 +1693,9 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
             if (previousEventIDEPU2 != 0) {	
               if (currentEventIDEPU2 <= previousEventIDEPU2) {
 	        std::cout << "Warning! Problems with the delta Event ID in EPU2! " << iEvent << "   " << currentEventIDEPU2 << "   " << previousEventIDEPU2 << std::endl;
-	      } else { 
-                double DeltaEventID = double (currentEventIDEPU2) - double (previousEventIDEPU2);
-                m_deltaEventIDEPU2->Fill(DeltaEventID);
-	      }
+	      } 
+              double DeltaEventID = double (currentEventIDEPU2) - double (previousEventIDEPU2);
+              m_deltaEventIDEPU2->Fill(DeltaEventID);
 	    }
             previousEventIDEPU2 = currentEventIDEPU2;
 	  }
@@ -1702,10 +1705,9 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
             if (previousEventIDSIU0 != 0) {	
               if (currentEventIDSIU0 <= previousEventIDSIU0) {
 	        std::cout << "Warning! Problems with the delta Event ID in SIU0! " << iEvent << "   " << currentEventIDSIU0 << "   " << previousEventIDSIU0 << std::endl;
-	      } else {
-                double DeltaEventID = double (currentEventIDSIU0) - double (previousEventIDSIU0);
-                m_deltaEventIDSIU0->Fill(DeltaEventID);
-	      }
+	      } 
+              double DeltaEventID = double (currentEventIDSIU0) - double (previousEventIDSIU0);
+              m_deltaEventIDSIU0->Fill(DeltaEventID);
 	    }
             previousEventIDSIU0 = currentEventIDSIU0;
 	  }
@@ -1715,10 +1717,9 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
             if (previousEventIDSIU1 != 0) {	
               if (currentEventIDSIU1 <= previousEventIDSIU1) {
 	        std::cout << "Warning! Problems with the delta Event ID in SIU1! " << iEvent << "   " << currentEventIDSIU1 << "   " << previousEventIDSIU1 << std::endl;
-	      } else {
-                double DeltaEventID = double (currentEventIDSIU1) - double (previousEventIDSIU1);
-                m_deltaEventIDSIU1->Fill(DeltaEventID);
-	      }
+	      } 
+              double DeltaEventID = double (currentEventIDSIU1) - double (previousEventIDSIU1);
+              m_deltaEventIDSIU1->Fill(DeltaEventID);
 	    }
             previousEventIDSIU1 = currentEventIDSIU1;
 	  }
@@ -2193,7 +2194,20 @@ void TestReport::analyzeDigiTree()
     m_eventIsPeriodic = 1;
   } else {
     m_eventIsPeriodic = 0;
+    m_nEventNoPeriodic++;
   }
+
+  // Readout modes:
+  if (m_digiEvent->getEventSummaryData().readout4()==0 && m_digiEvent->getEventSummaryData().zeroSuppress()==1) {
+    m_nbrEventsNormal++;
+  }
+  if (m_digiEvent->getEventSummaryData().readout4()==1 && m_digiEvent->getEventSummaryData().zeroSuppress()==1) {
+    m_nbrEvents4Range++;
+  }
+  if (m_digiEvent->getEventSummaryData().readout4()==1 && m_digiEvent->getEventSummaryData().zeroSuppress()==0) {
+    m_nbrEvents4RangeNonZS++;
+  }
+
 
   // Conditions arrival time: Take out periodic triggers!
   if (!(m_digiEvent->getGem().getConditionSummary() & 32)) {
@@ -2547,9 +2561,19 @@ void TestReport::generateReport()
   }
   (*m_report) << "   " << endl;
 
-  // Needs Spectrum Astro FSW!:
+  // Needs Spectrum Astro FSW!: awb
   (*m_report) << "@li Livetime: <b> " << (m_liveTime * 100.0) << "% </b>" << endl;  
 
+  if (m_deltaSequenceNbrEvents == 0) {
+    (*m_report) << "@li Expected livetime from event readout categories: <b> " <<  (1.0 - ((m_nbrEventsNormal*529.0 + m_nbrEvents4Range*1318.0 + m_nbrEvents4RangeNonZS*12500.0)/ double (m_elapsedTime))) * 100.0 << "%</b>. This estimate is only valid if the filter is not running!" << std::endl;
+  }
+
+  if ((m_nbrEventsNormal+m_nbrEvents4Range+m_nbrEvents4RangeNonZS) != m_nEvent) {
+    std::cout << "AWB: Problem!!!!! " << (m_nbrEventsNormal+m_nbrEvents4Range+m_nbrEvents4RangeNonZS) << "   " << m_nEvent << "   " << m_nbrEventsNormal << "   " << m_nbrEvents4Range << "   " 
+              << m_nbrEvents4RangeNonZS << std::endl; 
+  }
+
+  (*m_report) << "   " << endl;
   (*m_report) << "@li There were @b " << m_nbrPrescaled << " prescaled events (<b>" << double (m_nbrPrescaled)/ double ((m_endTime - m_startTime)) <<" Hz</b>), @b " << m_nbrDeadZone  << " dead zone events (<b>" << double (m_nbrDeadZone)/ double ((m_endTime - m_startTime)) <<" Hz</b>) and @b " << m_nbrDiscarded << " discarded events (<b>" << double (m_nbrDiscarded)/ double ((m_endTime - m_startTime))  <<" Hz</b>)." << endl;
 
 
@@ -2559,6 +2583,7 @@ void TestReport::generateReport()
     (*m_report) << "@li The number of events in the digi file agrees with the extended GEM sequence counter!" << endl;
   }
 
+  (*m_report) << "   " << endl;
   (*m_report) << "@li There were @b " << m_nbrMissingTimeTone << " events with a missing Time tone, @b " << m_nbrFlywheeling << " flywheeling events, @b " << m_nbrIncomplete << " events with an incomplete time tone, @b " << m_nbrMissingGps << " events with a missing GPS lock, @b " << m_nbrMissingCpuPps << " events with a missing 1-PPS signal at CPU level and @b " << m_nbrMissingLatPps << " events with a missing 1-PPS signal at LAT level." << endl; 
 
   if (m_extendedCountersFlag != 0) {
@@ -3538,8 +3563,9 @@ void TestReport::produceCalNhits2DPlot()
 	}
 	m_nCalHit2D->Fill(j, i, double(m_nCalHit[i][j])/m_nEvtCalHit[i][j]);
       }
-      if(m_nEvent > m_nEvtCalHit[i][j]) {
-	m_nZeroCalHit2D->Fill(j, i, double(m_nEvent-m_nEvtCalHit[i][j])/m_nEvent);
+      if(m_nEventNoPeriodic > m_nEvtCalHit[i][j]) {
+	//m_nZeroCalHit2D->Fill(j, i, double(m_nEvent-m_nEvtCalHit[i][j])/m_nEvent);
+        m_nZeroCalHit2D->Fill(j, i, double(m_nEventNoPeriodic-m_nEvtCalHit[i][j])/m_nEventNoPeriodic);
       }
     }
   }

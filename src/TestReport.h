@@ -440,6 +440,7 @@ class TestReport {
 
   /// number of events in the digi root file
   int m_nEvent;
+  int m_nEventNoPeriodic;
 
   // Number of GEM related quantities:
   ULong64_t m_nbrPrescaled;
@@ -479,6 +480,12 @@ class TestReport {
 
   // Livetime:
   double m_liveTime;
+ 
+  ULong64_t m_elapsedTime;
+
+  int m_nbrEventsNormal;
+  int m_nbrEvents4Range;
+  int m_nbrEvents4RangeNonZS;
 
   // Extended counters problem?
   Int_t m_extendedCountersFlag;
