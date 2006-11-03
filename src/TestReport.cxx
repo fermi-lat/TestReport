@@ -2400,8 +2400,10 @@ void TestReport::analyzeDigiTree()
       int tower = p->getPackedId().getTower();
       int layer = p->getPackedId().getLayer();
 
-      ++m_nCalHit[tower][layer];
-      isHit[tower][layer] = 1;
+      if (m_eventIsPeriodic == 0) {
+        ++m_nCalHit[tower][layer];
+        isHit[tower][layer] = 1;
+      }
     }
   }
 
@@ -2858,9 +2860,7 @@ void TestReport::generateDigiReport()
 
   (*m_report) << "@section calDigi CAL Digitization" << endl;
 
-  if (m_eventIsPeriodic == 0) {
-    produceCalNhits2DPlot();
-  }
+  produceCalNhits2DPlot();
 
   // ACD digis:
   (*m_report) << "@section acdDigi ACD Digitization" << endl;
