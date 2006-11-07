@@ -789,8 +789,8 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
  
 
   // For testing: awb
-  //int nEvent = 10000;
-  //m_nEvent = nEvent;
+  int nEvent = 10000;
+  m_nEvent = nEvent;
 
   // List of datagrams:
   std::list<int> listDataGramsEpu0;
@@ -1580,9 +1580,9 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       if (m_isLATTE != 1) {
         
         //
-        // Time from Mission elapsed time to Unix time and then from PDT to GMT:
+        // Time from Mission elapsed time to Unix time:
         //
-        Int_t deltaTimeUgly = 978307200;// + 25200; 
+        Int_t deltaTimeUgly = 978307200; 
 
         double myTimeStamp;
 
@@ -1744,9 +1744,9 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       static UInt_t prevLPpcT = lPpcT;
 
       //
-      // Time from Mission elapsed time to Unix time and then from PDT to GMT:
+      // Time from Mission elapsed time to Unix time:
       //
-      Int_t deltaTimeUgly = 978307200 + 25200; 
+      Int_t deltaTimeUgly = 978307200;
 
       if(iEvent == 0) {
         if (m_isLATTE == 1) {
@@ -2584,12 +2584,12 @@ void TestReport::generateReport()
   }
   (*m_report) << "   " << endl;
 
-  (*m_report) << "@li Time of the first trigger: <b>" << ctime((time_t*) (&m_startTime)) << " (GMT) </b>";
-  (*m_report) << "@li Time of the last trigger: <b>" << ctime((time_t*) (&m_endTime)) << " (GMT) </b>";
+  (*m_report) << "@li New Time of the first trigger: <b>" << asctime((struct tm*) (gmtime((time_t*) (&m_startTime)))) << " (GMT) </b>";
+  (*m_report) << "@li New Time of the last trigger: <b>" << asctime((struct tm*) (gmtime((time_t*) (&m_endTime)))) << " (GMT) </b>";
   (*m_report) << "@li Duration: <b>" << m_endTime - m_startTime << " seconds" << "</b>" << endl;
 
-  m_report->setf(ios::fixed);
 
+  m_report->setf(ios::fixed);
   (*m_report) << "@li Trigger rate: <b>" <<std::setprecision(1) <<  double(m_nEvent)/ double (m_endTime - m_startTime) << " Hz" << "</b>" << endl;
   (*m_report) << "@li Livetime corrected trigger rate: <b>" << (double(m_nEvent) / double (m_endTime - m_startTime)) / m_liveTime << " Hz" << "</b>" << endl;
   (*m_report) << "   " << endl;
