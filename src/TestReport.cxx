@@ -789,8 +789,8 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
  
 
   // For testing: awb
-  int nEvent = 10000;
-  m_nEvent = nEvent;
+  //int nEvent = 10000;
+  //m_nEvent = nEvent;
 
   // List of datagrams:
   std::list<int> listDataGramsEpu0;
