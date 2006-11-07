@@ -1586,27 +1586,25 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 
         double myTimeStamp;
 
-	// LAT nominal system clock:
-                                                                                                                                                                          
+        // LAT nominal system clock:
 	double LATSystemClock = 20000000.0;
 
 	// Warren's empirical LAT system clock correction from SLAC and NRL:
-                                                                                                                                  
-	double warrenLATSystemClockCorrection = 100.0;
+	//double warrenLATSystemClockCorrection = 100.0;
+        double warrenLATSystemClockCorrection = 0.0;
 
 	// Ugly!
         double RollOver = 33554432.0;
 
 	// Number of ticks between current event and the current 1-PPS:
-                                                                                                                                       
 	double tmpTicks1 = double (m_digiEvent->getMetaEvent().time().timeTicks()) - double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks());
+
 	// Rollover? Should never be more than one! BTW, JJ has a much smarter way to do this rollover check ... :-)
-                                                                                          
 	if (tmpTicks1 < 0) {
 	  tmpTicks1 = tmpTicks1 + RollOver;
 	}
+
 	// Check that the two TimeTones are OK and different:
-                                                                                                                                                 
 	if (!(m_digiEvent->getMetaEvent().time().current().flywheeling()) &&
 	    !(m_digiEvent->getMetaEvent().time().current().missingCpuPps()) &&
 	    !(m_digiEvent->getMetaEvent().time().current().missingLatPps()) &&
@@ -1618,21 +1616,33 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	    (m_digiEvent->getMetaEvent().time().current().timeHack().ticks() != m_digiEvent->getMetaEvent().time().previous().timeHack().ticks())) {
 
 	  // Then use full formula for correcting system clock drift using last two TimeTones i.e. extrapolation
-                                                                                              
 	  double tmpTicks2 = double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks()) - double (m_digiEvent->getMetaEvent().time().previous().timeHack().ticks());
+
 	  // Rollover? Should never be more than one rollover! BTW, JJ has a much smarter way to do this rollover check ... :-)
-                                                                               
 	  if (tmpTicks2 < 0) {
 	    tmpTicks2 = tmpTicks2 + RollOver;
 	  }
+
+          // New
+	  int secDiff = m_digiEvent->getMetaEvent().time().current().timeSecs() - m_digiEvent->getMetaEvent().time().previous().timeSecs();
+	  if (secDiff != 1) {
+	    tmpTicks2 = tmpTicks2 + double(secDiff-1)*RollOver;
+	    tmpTicks2 = tmpTicks2 / double (secDiff);
+	  };        
+	  if (secDiff != 1) {
+	    std::cout.setf(ios::fixed);
+	    std::cout << "LAT System clock between 1-PPS: Close to 20M? " << (tmpTicks2-LATSystemClock) << "   " << std::setprecision(6) << tmpTicks2 << "   " 
+                      << LATSystemClock << std::endl;
+	  }
+	  // End new!
+
 
 	  // Timestamp:
 	  myTimeStamp = double (m_digiEvent->getMetaEvent().time().current().timeSecs()) + (tmpTicks1/tmpTicks2);
 	  myTimeStamp = myTimeStamp + deltaTimeUgly;
 	} else {
-	  // Cannot use TimeTone(s) - will assume nominal value for the LAT system clock
-                                                                                                                      
-	  myTimeStamp = double (m_digiEvent->getMetaEvent().time().current().timeSecs()) + (tmpTicks1 / (LATSystemClock + warrenLATSystemClockCorrection));
+	  // Cannot use TimeTone(s) - will assume nominal value for the LAT system clock                                                                                              
+   	  myTimeStamp = double (m_digiEvent->getMetaEvent().time().current().timeSecs()) + (tmpTicks1 / (LATSystemClock + warrenLATSystemClockCorrection));
 	  myTimeStamp = myTimeStamp + deltaTimeUgly;
 	}
         double myTimeDiff = m_digiEvent->getCcsds().getUtc() - myTimeStamp;
@@ -1746,19 +1756,20 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	  double LATSystemClock = 20000000.0;
 
 	  // Warren's empirical LAT system clock correction from SLAC and NRL:
-	  double warrenLATSystemClockCorrection = 100.0;
+	  //double warrenLATSystemClockCorrection = 100.0;
+          double warrenLATSystemClockCorrection = 0.0;
 
 	  // Ugly!
           double RollOver = 33554432.0;
 
           // Number of ticks between current event and the current 1-PPS:
 	  double tmpTicks1 = double (m_digiEvent->getMetaEvent().time().timeTicks()) - double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks());
+
 	  // Rollover? Should never be more than one! BTW, JJ has a much smarter way to do this rollover check ... :-)
 	  if (tmpTicks1 < 0) {
 	    tmpTicks1 = tmpTicks1 + RollOver;
 	  }
-          
-	  
+          	  
 	  // Check that the two TimeTones are OK and different:
 	  if (!(m_digiEvent->getMetaEvent().time().current().flywheeling()) &&
 	      !(m_digiEvent->getMetaEvent().time().current().missingCpuPps()) &&
@@ -1776,6 +1787,19 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	    if (tmpTicks2 < 0) {
  	      tmpTicks2 = tmpTicks2 + RollOver;
 	    }
+
+            // New
+	    int secDiff = m_digiEvent->getMetaEvent().time().current().timeSecs() - m_digiEvent->getMetaEvent().time().previous().timeSecs();
+	    if (secDiff != 1) {
+	      tmpTicks2 = tmpTicks2 + double(secDiff-1)*RollOver;
+	      tmpTicks2 = tmpTicks2 / double (secDiff);
+	    };        
+	    if (secDiff != 1) {
+	      std::cout.setf(ios::fixed);
+	      std::cout << "LAT System clock between 1-PPS: Close to 20M? " << (tmpTicks2-LATSystemClock) << "   " << std::setprecision(10) << tmpTicks2 << "   " 
+                      << LATSystemClock << std::endl;
+	    }
+	    // End new!
 
 	    // Timestamp: 
 	    m_startTime = double (m_digiEvent->getMetaEvent().time().current().timeSecs()) + (tmpTicks1/tmpTicks2);
@@ -1824,13 +1848,15 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	  double LATSystemClock = 20000000.0;
 
 	  // Warren's empirical LAT system clock correction from SLAC and NRL:
-	  double warrenLATSystemClockCorrection = 100.0;
+	  //double warrenLATSystemClockCorrection = 100.0;
+          double warrenLATSystemClockCorrection = 0.0;
 
 	  // Ugly!
           double RollOver = 33554432.0;
 
           // Number of ticks between current event and the current 1-PPS:
 	  double tmpTicks1 = double (m_digiEvent->getMetaEvent().time().timeTicks()) - double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks());
+
 	  // Rollover? Should never be more than one! BTW, JJ has a much smarter way to do this rollover check ... :-)
 	  if (tmpTicks1 < 0) {
 	    tmpTicks1 = tmpTicks1 + RollOver;
@@ -1849,10 +1875,24 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 
  	    // Then use full formula for correcting system clock drift using last two TimeTones i.e. extrapolation
 	    double tmpTicks2 = double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks()) - double (m_digiEvent->getMetaEvent().time().previous().timeHack().ticks());
+
 	    // Rollover? Should never be more than one rollover! BTW, JJ has a much smarter way to do this rollover check ... :-)
 	    if (tmpTicks2 < 0) {
 	      tmpTicks2 = tmpTicks2 + RollOver;
 	    }
+
+            // New
+	    int secDiff = m_digiEvent->getMetaEvent().time().current().timeSecs() - m_digiEvent->getMetaEvent().time().previous().timeSecs();
+	    if (secDiff != 1) {
+	      tmpTicks2 = tmpTicks2 + double(secDiff-1)*RollOver;
+	      tmpTicks2 = tmpTicks2 / double (secDiff);
+	    };        
+	    if (secDiff != 1) {
+	      std::cout.setf(ios::fixed);
+	      std::cout << "LAT System clock between 1-PPS: Close to 20M? " << (tmpTicks2-LATSystemClock) << "   " << std::setprecision(10) << tmpTicks2 << "   " 
+                        << LATSystemClock << std::endl;
+	    }
+	    // End new!
 
 	    // Timestamp: 
 	    m_endTime = double (m_digiEvent->getMetaEvent().time().current().timeSecs()) + (tmpTicks1/tmpTicks2);

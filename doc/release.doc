@@ -291,3 +291,6 @@ November 3, 2006: awb
 v3r6p24	- Fixed normalization in CAL plots without periodic triggers.
 	- Plot negative delta GEM IDs, not only print a warning in case it happens.
  	- Added expected livetime.
+
+November 7, 2006: awb
+v3r6p25	Fixed time calculations when more than one second between current and previous timetone 1-PPS.
