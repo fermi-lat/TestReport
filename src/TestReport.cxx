@@ -1604,6 +1604,16 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	  tmpTicks1 = tmpTicks1 + RollOver;
 	}
 
+	// Multiple rollovers?
+	int diffSecs = m_digiEvent->getMetaEvent().time().timeHack().hacks() - m_digiEvent->getMetaEvent().time().current().timeHack().hacks();   
+	if (diffSecs != 0) {
+	  std::cout << "Warning: More than one second between the event and the current timetone! Event is " << iEvent << "   " << diffSecs << "  " 
+                    << m_digiEvent->getMetaEvent().time().timeHack().hacks() << "   " << m_digiEvent->getMetaEvent().time().current().timeHack().hacks() << std::endl;
+	  tmpTicks1 = tmpTicks1 + double(diffSecs)*RollOver;
+	  tmpTicks1 = tmpTicks1 / double (diffSecs);
+	};        
+
+
 	// Check that the two TimeTones are OK and different:
 	if (!(m_digiEvent->getMetaEvent().time().current().flywheeling()) &&
 	    !(m_digiEvent->getMetaEvent().time().current().missingCpuPps()) &&
@@ -1769,6 +1779,15 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	  if (tmpTicks1 < 0) {
 	    tmpTicks1 = tmpTicks1 + RollOver;
 	  }
+
+  	  // Multiple rollovers?
+	  int diffSecs = m_digiEvent->getMetaEvent().time().timeHack().hacks() - m_digiEvent->getMetaEvent().time().current().timeHack().hacks();   
+	  if (diffSecs != 0) {
+	    std::cout << "Warning: More than one second between the event and the current timetone! Event is " << iEvent << "   " << diffSecs << "  " 
+                      << m_digiEvent->getMetaEvent().time().timeHack().hacks() << "   " << m_digiEvent->getMetaEvent().time().current().timeHack().hacks() << std::endl;
+	    tmpTicks1 = tmpTicks1 + double(diffSecs)*RollOver;
+	    tmpTicks1 = tmpTicks1 / double (diffSecs);
+	  };        
           	  
 	  // Check that the two TimeTones are OK and different:
 	  if (!(m_digiEvent->getMetaEvent().time().current().flywheeling()) &&

@@ -298,3 +298,8 @@ v3r6p25	Fixed time calculations when more than one second between current and pr
 November 7, 2006: awb
 v3r6p26	Now use gmtime to avoid Daylight Savings Time bug.
 
+
+November 7, 2006: awb
+v3r6p27	Another tag, another rollover ....
+
+
