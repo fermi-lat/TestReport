@@ -374,6 +374,9 @@ class TestReport {
   // LATTE?
   int m_isLATTE;
 
+  // Bay 10, layer 0 split:
+  int m_bay10Layer0SplitDefault;
+
   // Ground ID:
   unsigned int m_firstGroundID;
   unsigned int m_lastGroundID;

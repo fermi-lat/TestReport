@@ -298,8 +298,8 @@ v3r6p25	Fixed time calculations when more than one second between current and pr
 November 7, 2006: awb
 v3r6p26	Now use gmtime to avoid Daylight Savings Time bug.
 
-
 November 7, 2006: awb
 v3r6p27	Another tag, another rollover ....
 
-
+November 10, 2006: awb
+v3r6p28 Added explicit check to see if we read out hits from the left in TKR Bay 10, layer 0.

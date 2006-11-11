@@ -84,6 +84,7 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_trigger(0), 
     m_nBadEvts(0), 
     m_isLATTE(0),
+    m_bay10Layer0SplitDefault(0),
     m_firstGroundID(0),
     m_lastGroundID(0),
     m_previousGroundID(0),
@@ -789,7 +790,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
  
 
   // For testing: awb
-  //int nEvent = 10000;
+  //int nEvent = 1000;
   //m_nEvent = nEvent;
 
   // List of datagrams:
@@ -2373,6 +2374,14 @@ void TestReport::analyzeDigiTree()
     int iView = (view == GlastAxis::X) ? 0 : 1;
     int plane = Geo::instance()->getPlane(biLayer, iView);
 
+    // Bay 10, layer split:
+    if (tower==10 && plane==0) {
+      if (tkrDigi->getLastController0Strip() != -1) {
+        m_bay10Layer0SplitDefault = 1;
+      }
+    } 
+
+
     ++nDigi[tower];
 
     ++nPlane[tower];
@@ -2619,6 +2628,13 @@ void TestReport::generateReport()
     (*m_report) << "@li Warning! The ground ID changed @b " << m_counterGroundID << " times during the run! The first event had ground ID @b " << m_firstGroundID << " while the last event had ground ID @b " << m_lastGroundID << ". See the log file for more details. " << endl;
   }
   (*m_report) << "   " << endl;
+
+
+  if (m_bay10Layer0SplitDefault == 1) {
+    (*m_report) << "   " << endl;
+    (*m_report) << "@li Warning: We are reading out hits from the left in TKR Bay 10, layer 0! Is this intentional?" << endl;
+    (*m_report) << "   " << endl;
+  }
 
   // Needs Spectrum Astro FSW!: awb
   (*m_report) << "@li Livetime: <b> " << (m_liveTime * 100.0) << "% </b>" << endl;  
