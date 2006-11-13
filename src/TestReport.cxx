@@ -2669,19 +2669,19 @@ void TestReport::generateReport()
 
  
   if (m_nbrDataGramsEpu0 > 0) {
-    (*m_report) << "@li There were @b " << m_nbrDataGramsEpu0 << " datagrams from EPU0 in this run with in average @b " << ((float) m_nbrEventsDataGramsEpu0 / (float) m_nbrDataGramsEpu0) << " events per datagram." << endl;
+    (*m_report) << "@li There were @b " << m_nbrDataGramsEpu0 << " datagrams from EPU0 in this run with in average <b> " << ((float) m_nbrEventsDataGramsEpu0 / (float) m_nbrDataGramsEpu0) << " </b> events per datagram." << endl;
   }
   if (m_nbrDataGramsEpu1 > 0) {
-    (*m_report) << "@li There were @b " << m_nbrDataGramsEpu1 << " datagrams from EPU1 in this run with in average @b " << ((float) m_nbrEventsDataGramsEpu1 / (float) m_nbrDataGramsEpu1) << " events per datagram." << endl;
+    (*m_report) << "@li There were @b " << m_nbrDataGramsEpu1 << " datagrams from EPU1 in this run with in average <b> " << ((float) m_nbrEventsDataGramsEpu1 / (float) m_nbrDataGramsEpu1) << " </b> events per datagram." << endl;
   }
   if (m_nbrDataGramsEpu2 > 0) {
-    (*m_report) << "@li There were @b " << m_nbrDataGramsEpu2 << " datagrams from EPU2 in this run with in average @b " << ((float) m_nbrEventsDataGramsEpu2 / (float) m_nbrDataGramsEpu2) << " events per datagram." << endl;
+    (*m_report) << "@li There were @b " << m_nbrDataGramsEpu2 << " datagrams from EPU2 in this run with in average <b> " << ((float) m_nbrEventsDataGramsEpu2 / (float) m_nbrDataGramsEpu2) << " </b> events per datagram." << endl;
   }
   if (m_nbrDataGramsSiu0 > 0) {
-    (*m_report) << "@li There were @b " << (m_counterCyclesSiu0+1) << " cycles with a maximum of @b " << m_nbrDataGramsSiu0 << " datagrams per cycle from SIU0 in this run with in average @b " << ((float) m_nbrEventsDataGramsSiu0 / ((float) m_nbrDataGramsSiu0 * (float) (m_counterCyclesSiu0+1.0))) << " events per datagram." << endl;
+    (*m_report) << "@li There were @b " << (m_counterCyclesSiu0+1) << " cycles with a maximum of @b " << m_nbrDataGramsSiu0 << " datagrams per cycle from SIU0 in this run with in average <b> " << ((float) m_nbrEventsDataGramsSiu0 / ((float) m_nbrDataGramsSiu0 * (float) (m_counterCyclesSiu0+1.0))) << " </b> events per datagram." << endl;
   }
   if (m_nbrDataGramsSiu1 > 0) {
-    (*m_report) << "@li There were @b " << (m_counterCyclesSiu1+1) << " cycles with a maximum of @b " << m_nbrDataGramsSiu1 << " datagrams per cycle from SIU1 in this run with in average @b " << ((float) m_nbrEventsDataGramsSiu1 / ((float) m_nbrDataGramsSiu1 * (float) (m_counterCyclesSiu1+1.0))) << " events per datagram." << endl;
+    (*m_report) << "@li There were @b " << (m_counterCyclesSiu1+1) << " cycles with a maximum of @b " << m_nbrDataGramsSiu1 << " datagrams per cycle from SIU1 in this run with in average <b> " << ((float) m_nbrEventsDataGramsSiu1 / ((float) m_nbrDataGramsSiu1 * (float) (m_counterCyclesSiu1+1.0))) << " </b> events per datagram." << endl;
   }
 
 
