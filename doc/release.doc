@@ -306,3 +306,6 @@ v3r6p28 Added explicit check to see if we read out hits from the left in TKR Bay
 
 November 13, 2006: awb
 v3r6p29	Added check for gaps in datagram sequence number.
+
+November 14, 2006: awb
+v3r6p30	Made rate plots linear scale.

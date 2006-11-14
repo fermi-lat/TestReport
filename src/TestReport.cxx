@@ -2874,7 +2874,7 @@ void TestReport::generateReport()
   if (m_nbrEventsDataGramsSiu0 > 0) {
     if (m_datagramGapsSIU0 != 0) {
       (*m_report) << "   " << endl;
-      (*m_report) << "@li Problem! There were @b " << m_datagramGapsSIU0 << " datagram sequence number gaps from SIU0 in this run! " << ;
+      (*m_report) << "@li Problem! There were @b " << m_datagramGapsSIU0 << " datagram sequence number gaps from SIU0 in this run! " ;
       if (m_counterDataDiagramsSiu0 == 0) {
         (*m_report) << "@li Since no datagrams were actually dropped this could be the 4.2s CCSDS time shift!" << endl;
       }
@@ -2884,7 +2884,7 @@ void TestReport::generateReport()
   if (m_nbrEventsDataGramsSiu1 > 0) {
     if (m_datagramGapsSIU1 != 0) {
       (*m_report) << "   " << endl;
-      (*m_report) << "@li Problem! There were @b " << m_datagramGapsSIU1 << " datagram sequence number gaps from SIU1 in this run!" << endl;
+      (*m_report) << "@li Problem! There were @b " << m_datagramGapsSIU1 << " datagram sequence number gaps from SIU1 in this run! " ;
       if (m_counterDataDiagramsSiu1 == 0) {
         (*m_report) << "@li Since no datagrams were actually dropped this could be the 4.2s CCSDS time shift!" << endl;
       }
@@ -3930,35 +3930,35 @@ void TestReport::produceTriggerRatePlot()
 {
   string file(m_prefix);
   file += "_triggerRate";
-  PlotAttribute att(file.c_str(), "Trigger rates for 30 time intervals","triggerRate",true);
+  PlotAttribute att(file.c_str(), "Trigger rates for 30 time intervals","triggerRate");
   att.m_statMode = 11;
   producePlot(m_triggerRate, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_triggerLivetimeRate";
-  att.set(file.c_str(), "Livetime corrected trigger rates for 30 time intervals","triggerLivetimeRate",true);
+  att.set(file.c_str(), "Livetime corrected trigger rates for 30 time intervals","triggerLivetimeRate");
   att.m_statMode = 11;
   producePlot(m_triggerLivetimeRate, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_livetimeRate";
-  att.set(file.c_str(), "Livetime in percent for 30 time intervals","livetimeRate",true);
+  att.set(file.c_str(), "Livetime in percent for 30 time intervals","livetimeRate");
   att.m_statMode = 11;
   producePlot(m_livetimeRate, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_deadzoneRate";
-  att.set(file.c_str(), "Deadzone rates for 30 time intervals","deadzoneRate",true);
+  att.set(file.c_str(), "Deadzone rates for 30 time intervals","deadzoneRate");
   att.m_statMode = 11;
   producePlot(m_deadzoneRate, att);
   insertPlot(att);
 
   file = m_prefix;
   file += "_discardedRate";
-  att.set(file.c_str(), "Discarded rates for 30 time intervals","discardedRate",true);
+  att.set(file.c_str(), "Discarded rates for 30 time intervals","discardedRate");
   att.m_statMode = 11;
   producePlot(m_discardedRate, att);
   insertPlot(att);
