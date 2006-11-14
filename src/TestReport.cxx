@@ -97,7 +97,7 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_previousDataGramEpu0(0),
     m_previousPreviousDataGramEpu0(0),
     m_endRunDataGramEpu0(0),
-     m_fullDataGramEpu0(0),
+    m_fullDataGramEpu0(0),
     m_beginRunDataGramEpu0(0),
     m_counterDataDiagramsEpu1(0),
     m_nbrDataGramsEpu1(0),
@@ -107,7 +107,7 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_previousDataGramEpu1(0),
     m_previousPreviousDataGramEpu1(0),
     m_endRunDataGramEpu1(0),
-     m_fullDataGramEpu1(0),
+    m_fullDataGramEpu1(0),
     m_beginRunDataGramEpu1(0),
     m_counterDataDiagramsEpu2(0),
     m_nbrDataGramsEpu2(0),
@@ -141,6 +141,11 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_endCountDataGramSiu1(0),
     m_fullDataGramSiu1(0),
     m_beginRunDataGramSiu1(0),
+    m_datagramGapsEPU0(0),
+    m_datagramGapsEPU1(0),
+    m_datagramGapsEPU2(0),
+    m_datagramGapsSIU0(0),
+    m_datagramGapsSIU1(0),
     m_nEvent(0),
     m_nEventNoPeriodic(0), 
     m_nbrPrescaled(0), 
@@ -790,7 +795,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
  
 
   // For testing: awb
-  //int nEvent = 1000;
+  //int nEvent = 10000;
   //m_nEvent = nEvent;
 
   // List of datagrams:
@@ -961,6 +966,12 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   m_nbrEventsDataGramsSiu0 = 0;
   m_nbrEventsDataGramsSiu1 = 0;
 
+  int previousDatagramGapsEPU0 = 0;
+  int previousDatagramGapsEPU1 = 0;
+  int previousDatagramGapsEPU2 = 0;
+  int previousDatagramGapsSIU0 = 0;
+  int previousDatagramGapsSIU1 = 0;
+
 
   // Loop over events:
   for(int iEvent = 0; iEvent != m_nEvent; ++iEvent) {
@@ -986,6 +997,48 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       m_digiBranch->GetEntry(iEvent);
 
       analyzeDigiTree();
+
+
+      // Gaps in datagram sequence number?
+      int mycpuNumber      = m_digiEvent->getMetaEvent().datagram().crate(); 
+      int myDatagramSecNbr = m_digiEvent->getMetaEvent().datagram().datagrams();  
+      if (mycpuNumber==enums::Lsf::Epu0) {
+        if ((myDatagramSecNbr != previousDatagramGapsEPU0) && ((myDatagramSecNbr-previousDatagramGapsEPU0)!=1)) {
+          m_datagramGapsEPU0++;
+	  std::cout << "Warning! There was a gap in the datagram sequence number for EPU0! " << iEvent << "   " << myDatagramSecNbr << "   " << previousDatagramGapsEPU0 << std::endl;  
+	}
+        previousDatagramGapsEPU0 = myDatagramSecNbr;
+      }
+      if (mycpuNumber==enums::Lsf::Epu1) {
+        if ((myDatagramSecNbr != previousDatagramGapsEPU1) && ((myDatagramSecNbr-previousDatagramGapsEPU1)!=1)) {
+          m_datagramGapsEPU1++;
+	  std::cout << "Warning! There was a gap in the datagram sequence number for EPU1! " << iEvent << "   " << myDatagramSecNbr << "   " << previousDatagramGapsEPU1 << std::endl;  
+	}
+        previousDatagramGapsEPU1 = myDatagramSecNbr;
+      }
+      if (mycpuNumber==enums::Lsf::Epu2) {
+        if ((myDatagramSecNbr != previousDatagramGapsEPU2) && ((myDatagramSecNbr-previousDatagramGapsEPU2)!=1)) {
+          m_datagramGapsEPU2++;
+	  std::cout << "Warning! There was a gap in the datagram sequence number for EPU2! " << iEvent << "   " << myDatagramSecNbr << "   " << previousDatagramGapsEPU2 << std::endl;  
+	}
+        previousDatagramGapsEPU2 = myDatagramSecNbr;
+      }
+      if (mycpuNumber==enums::Lsf::Siu0) {
+        if ((myDatagramSecNbr != previousDatagramGapsSIU0) && ((myDatagramSecNbr-previousDatagramGapsSIU0)!=1)) {
+          m_datagramGapsSIU0++;
+	  std::cout << "Warning! There was a gap in the datagram sequence number for SIU0! " << iEvent << "   " << myDatagramSecNbr << "   " << previousDatagramGapsSIU0 << std::endl;  
+	}
+        previousDatagramGapsSIU0 = myDatagramSecNbr;
+      }
+      if (mycpuNumber==enums::Lsf::Siu1) {
+        if ((myDatagramSecNbr != previousDatagramGapsSIU1) && ((myDatagramSecNbr-previousDatagramGapsSIU1)!=1)) {
+          m_datagramGapsSIU1++;
+	  std::cout << "Warning! There was a gap in the datagram sequence number for SIU1! " << iEvent << "   " << myDatagramSecNbr << "   " << previousDatagramGapsSIU1 << std::endl;  
+ 	}
+        previousDatagramGapsSIU1 = myDatagramSecNbr;
+     }                
+
+
 
 
       // Events per datagram: Only for EPUs and SIUs!      
@@ -2417,8 +2470,8 @@ void TestReport::analyzeDigiTree()
     int tot0 = tkrDigi->getToT(0);
     int tot1 = tkrDigi->getToT(1);
 
-    if((tot0>0 && lowCount==0)|| (tot1>0 && highCount==0)) badTot = true;
-    if((tot0==0 && lowCount>0)|| (tot1==0 && highCount>0)) zeroTot = true;
+    if((tot0>0  && lowCount==0) || (tot1>0  && highCount==0)) badTot  = true;
+    if((tot0==0 && lowCount>0)  || (tot1==0 && highCount>0))  zeroTot = true;
     
     if (tot0<0 || tot0>g_overlapTot || tot1<0 || tot1>g_overlapTot) ++m_nEvtInvalidTot; 
     if (tot0>g_satTot && tot0!=g_overlapTot) ++m_nEvtInvalidTot; 
@@ -2453,11 +2506,11 @@ void TestReport::analyzeDigiTree()
 
   }
 
-  if(badStrip) ++m_nEventBadStrip;
+  if(badStrip)  ++m_nEventBadStrip;
   if(moreStrip) ++m_nEventMoreStrip;
-  if(badTot) ++m_nEventBadTot;
-  if(zeroTot) ++m_nEventZeroTot;
-  if(satTot) ++m_nEventSatTot;
+  if(badTot)    ++m_nEventBadTot;
+  if(zeroTot)   ++m_nEventZeroTot;
+  if(satTot)    ++m_nEventSatTot;
 
   int maxNDigi = 0;
   for(int i = 0; i != g_nTower; ++i) {
@@ -2644,7 +2697,7 @@ void TestReport::generateReport()
   }
 
   if ((m_nbrEventsNormal+m_nbrEvents4Range+m_nbrEvents4RangeNonZS) != m_nEvent) {
-    std::cout << "AWB: Problem!!!!! " << (m_nbrEventsNormal+m_nbrEvents4Range+m_nbrEvents4RangeNonZS) << "   " << m_nEvent << "   " << m_nbrEventsNormal << "   " << m_nbrEvents4Range << "   " 
+    std::cout << "Problem!!!!! " << (m_nbrEventsNormal+m_nbrEvents4Range+m_nbrEvents4RangeNonZS) << "   " << m_nEvent << "   " << m_nbrEventsNormal << "   " << m_nbrEvents4Range << "   " 
               << m_nbrEvents4RangeNonZS << std::endl; 
   }
 
@@ -2786,6 +2839,57 @@ void TestReport::generateReport()
     }
   }
 
+
+  // EPU0 datagram gaps:
+  if (m_nbrEventsDataGramsEpu0 > 0) {
+    if (m_datagramGapsEPU0 != 0) {
+      (*m_report) << "   " << endl;
+      (*m_report) << "@li Problem! There were @b " << m_datagramGapsEPU0 << " datagram sequence number gaps from EPU0 in this run! " ;
+      if (m_counterDataDiagramsEpu0 == 0) {
+        (*m_report) << "@li Since no datagrams were actually dropped this could be the 4.2s CCSDS time shift!" << endl;
+      }
+    }  
+  }
+  // EPU1 datagram gaps:
+  if (m_nbrEventsDataGramsEpu1 > 0) {
+    if (m_datagramGapsEPU1 != 0) {
+      (*m_report) << "   " << endl;
+      (*m_report) << "@li Problem! There were @b " << m_datagramGapsEPU1 << " datagram sequence number gaps from EPU1 in this run! ";
+      if (m_counterDataDiagramsEpu1 == 0) {
+        (*m_report) << "Since no datagrams were actually dropped this could be the 4.2s CCSDS time shift!" << endl;
+      }
+    }  
+  }
+  // EPU2 datagram gaps:
+  if (m_nbrEventsDataGramsEpu2 > 0) {
+    if (m_datagramGapsEPU2 != 0) {
+      (*m_report) << "   " << endl;
+      (*m_report) << "@li Problem! There were @b " << m_datagramGapsEPU2 << " datagram sequence number gaps from EPU2 in this run! " ;
+      if (m_counterDataDiagramsEpu2 == 0) {
+        (*m_report) << "@li Since no datagrams were actually dropped this could be the 4.2s CCSDS time shift!" << endl;
+      }
+    }  
+  }
+  // SIU0 datagram gaps:
+  if (m_nbrEventsDataGramsSiu0 > 0) {
+    if (m_datagramGapsSIU0 != 0) {
+      (*m_report) << "   " << endl;
+      (*m_report) << "@li Problem! There were @b " << m_datagramGapsSIU0 << " datagram sequence number gaps from SIU0 in this run! " << ;
+      if (m_counterDataDiagramsSiu0 == 0) {
+        (*m_report) << "@li Since no datagrams were actually dropped this could be the 4.2s CCSDS time shift!" << endl;
+      }
+    }  
+  }
+  // SIU1 datagram gaps:
+  if (m_nbrEventsDataGramsSiu1 > 0) {
+    if (m_datagramGapsSIU1 != 0) {
+      (*m_report) << "   " << endl;
+      (*m_report) << "@li Problem! There were @b " << m_datagramGapsSIU1 << " datagram sequence number gaps from SIU1 in this run!" << endl;
+      if (m_counterDataDiagramsSiu1 == 0) {
+        (*m_report) << "@li Since no datagrams were actually dropped this could be the 4.2s CCSDS time shift!" << endl;
+      }
+    }  
+  }
 
 
 

@@ -441,6 +441,12 @@ class TestReport {
   int m_fullDataGramSiu1;
   int m_beginRunDataGramSiu1;
 
+  int m_datagramGapsEPU0;
+  int m_datagramGapsEPU1;
+  int m_datagramGapsEPU2;
+  int m_datagramGapsSIU0;
+  int m_datagramGapsSIU1;
+
   /// number of events in the digi root file
   int m_nEvent;
   int m_nEventNoPeriodic;

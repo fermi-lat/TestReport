@@ -303,3 +303,6 @@ v3r6p27	Another tag, another rollover ....
 
 November 10, 2006: awb
 v3r6p28 Added explicit check to see if we read out hits from the left in TKR Bay 10, layer 0.
+
+November 13, 2006: awb
+v3r6p29	Added check for gaps in datagram sequence number.
