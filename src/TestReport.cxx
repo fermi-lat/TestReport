@@ -2846,7 +2846,7 @@ void TestReport::generateReport()
       (*m_report) << "   " << endl;
       (*m_report) << "@li Problem! There were @b " << m_datagramGapsEPU0 << " datagram sequence number gaps from EPU0 in this run! " ;
       if (m_counterDataDiagramsEpu0 == 0) {
-        (*m_report) << "@li Since no datagrams were actually dropped this could be the 4.2s CCSDS time shift!" << endl;
+        (*m_report) << "Since no datagrams were actually dropped this could be the 4.2s CCSDS time shift!" << endl;
       }
     }  
   }
@@ -2866,7 +2866,7 @@ void TestReport::generateReport()
       (*m_report) << "   " << endl;
       (*m_report) << "@li Problem! There were @b " << m_datagramGapsEPU2 << " datagram sequence number gaps from EPU2 in this run! " ;
       if (m_counterDataDiagramsEpu2 == 0) {
-        (*m_report) << "@li Since no datagrams were actually dropped this could be the 4.2s CCSDS time shift!" << endl;
+        (*m_report) << "Since no datagrams were actually dropped this could be the 4.2s CCSDS time shift!" << endl;
       }
     }  
   }
@@ -2876,7 +2876,7 @@ void TestReport::generateReport()
       (*m_report) << "   " << endl;
       (*m_report) << "@li Problem! There were @b " << m_datagramGapsSIU0 << " datagram sequence number gaps from SIU0 in this run! " ;
       if (m_counterDataDiagramsSiu0 == 0) {
-        (*m_report) << "@li Since no datagrams were actually dropped this could be the 4.2s CCSDS time shift!" << endl;
+        (*m_report) << "Since no datagrams were actually dropped this could be the 4.2s CCSDS time shift!" << endl;
       }
     }  
   }
@@ -2886,7 +2886,7 @@ void TestReport::generateReport()
       (*m_report) << "   " << endl;
       (*m_report) << "@li Problem! There were @b " << m_datagramGapsSIU1 << " datagram sequence number gaps from SIU1 in this run! " ;
       if (m_counterDataDiagramsSiu1 == 0) {
-        (*m_report) << "@li Since no datagrams were actually dropped this could be the 4.2s CCSDS time shift!" << endl;
+        (*m_report) << "Since no datagrams were actually dropped this could be the 4.2s CCSDS time shift!" << endl;
       }
     }  
   }
