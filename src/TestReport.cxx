@@ -1024,14 +1024,14 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
         previousDatagramGapsEPU2 = myDatagramSecNbr;
       }
       if (mycpuNumber==enums::Lsf::Siu0) {
-        if ((myDatagramSecNbr != previousDatagramGapsSIU0) && ((myDatagramSecNbr-previousDatagramGapsSIU0)!=1)) {
+        if ((myDatagramSecNbr != previousDatagramGapsSIU0) && ((myDatagramSecNbr-previousDatagramGapsSIU0)!=1) && myDatagramSecNbr!=0) {
           m_datagramGapsSIU0++;
 	  std::cout << "Warning! There was a gap in the datagram sequence number for SIU0! " << iEvent << "   " << myDatagramSecNbr << "   " << previousDatagramGapsSIU0 << std::endl;  
 	}
         previousDatagramGapsSIU0 = myDatagramSecNbr;
       }
       if (mycpuNumber==enums::Lsf::Siu1) {
-        if ((myDatagramSecNbr != previousDatagramGapsSIU1) && ((myDatagramSecNbr-previousDatagramGapsSIU1)!=1)) {
+        if ((myDatagramSecNbr != previousDatagramGapsSIU1) && ((myDatagramSecNbr-previousDatagramGapsSIU1)!=1) && myDatagramSecNbr!=0) {
           m_datagramGapsSIU1++;
 	  std::cout << "Warning! There was a gap in the datagram sequence number for SIU1! " << iEvent << "   " << myDatagramSecNbr << "   " << previousDatagramGapsSIU1 << std::endl;  
  	}

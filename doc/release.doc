@@ -309,3 +309,6 @@ v3r6p29	Added check for gaps in datagram sequence number.
 
 November 14, 2006: awb
 v3r6p30	Made rate plots linear scale.
+
+November 15, 2006: awb
+v3r6p31	Trying to deal with cycles and datagram gaps for LCI runs. 
