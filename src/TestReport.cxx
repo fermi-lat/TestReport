@@ -1664,7 +1664,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	    !(m_digiEvent->getMetaEvent().time().previous().missingLatPps()) &&
 	    !(m_digiEvent->getMetaEvent().time().previous().missingTimeTone()) &&
             // If more than one second, must use nominal LAT clock value:
-	    ( (m_digiEvent->getMetaEvent().time().current().timeHack().ticks() - m_digiEvent->getMetaEvent().time().previous().timeHack().ticks()) == 1)) {
+	    ( (m_digiEvent->getMetaEvent().time().current().timeSecs() - m_digiEvent->getMetaEvent().time().previous().timeSecs()) == 1)) {
 
 	  // Then use full formula for correcting system clock drift using last two TimeTones i.e. extrapolation
 	  double tmpTicks2 = double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks()) - double (m_digiEvent->getMetaEvent().time().previous().timeHack().ticks());
@@ -1816,7 +1816,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	      !(m_digiEvent->getMetaEvent().time().previous().missingLatPps()) &&
 	      !(m_digiEvent->getMetaEvent().time().previous().missingTimeTone()) &&
               // If more than one second, must use nominal value of LAT clock:
-	      ( (m_digiEvent->getMetaEvent().time().current().timeHack().ticks() - m_digiEvent->getMetaEvent().time().previous().timeHack().ticks()) == 1)) { 
+	      ( (m_digiEvent->getMetaEvent().time().current().timeSecs() - m_digiEvent->getMetaEvent().time().previous().timeSecs()) == 1)) { 
 
  	    // Then use full formula for correcting system clock drift using last two TimeTones i.e. extrapolation
 	    double tmpTicks2 = double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks()) - double (m_digiEvent->getMetaEvent().time().previous().timeHack().ticks());
@@ -1896,7 +1896,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	      !(m_digiEvent->getMetaEvent().time().previous().missingLatPps()) &&
 	      !(m_digiEvent->getMetaEvent().time().previous().missingTimeTone()) &&
 	      // If more than one second, must use nominal value:
-	      ( (m_digiEvent->getMetaEvent().time().current().timeHack().ticks() - m_digiEvent->getMetaEvent().time().previous().timeHack().ticks()) == 1)) { 
+	      ( (m_digiEvent->getMetaEvent().time().current().timeSecs() - m_digiEvent->getMetaEvent().time().previous().timeSecs()) == 1)) { 
 
  	    // Then use full formula for correcting system clock drift using last two TimeTones i.e. extrapolation
 	    double tmpTicks2 = double (m_digiEvent->getMetaEvent().time().current().timeHack().ticks()) - double (m_digiEvent->getMetaEvent().time().previous().timeHack().ticks());
