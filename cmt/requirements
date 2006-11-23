@@ -1,5 +1,5 @@
 package TestReport
-version v3r6p33
+version v3r6p34
 
 author X. Chen <xchen@slac.stanford.edu>
 
@@ -10,6 +10,8 @@ use commonRootData v*
 use mcRootData v*
 use digiRootData v*
 use reconRootData v*
+use facilities v*
+use xmlBase v* 
 
 #the following prepend makes the includes folder available locally: avoid the package_include
 macro_prepend includes "-I $(TESTREPORTROOT) " WIN32 "/I $(TESTREPORTROOT) "
@@ -23,7 +25,8 @@ macro_append ROOT_linkopts " -lHist -lGpad -lGraf -lGui -lGraf3d -lPostscript -l
 macro testreport_linkopts "$(ROOT_linkopts) $(commonRootData_linkopts) $(mcRootData_linkopts) $(digiRootData_linkopts) $(reconRootData_linkopts)"
 
 
-application TestReport *.cxx  
+application TestReport Geo.cxx Main.cxx TestReport.cxx
 
+application MergeHistFiles MergeHistFiles.cxx
 
-
+application runStrip JobConfig.cxx StripVal.cxx StripFiller.cxx StripDataFiller.cxx DigiFiller.cxx StripFiller_Digi.cxx runStrip.cxx

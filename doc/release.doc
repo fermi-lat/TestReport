@@ -318,3 +318,6 @@ v3r6p32	Fixed event time stamps.
 
 November 20, 2006: awb
 v3r6p33	Typo in previous tag fixes.
+
+November 22, 2006: eac
+v3r6p34 Added MergeHistFiles.cxx and related lines to cmt/requirements
