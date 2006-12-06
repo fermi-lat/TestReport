@@ -2455,15 +2455,20 @@ void TestReport::analyzeDigiTree()
   if(satTot)    ++m_nEventSatTot;
 
   int maxNDigi = 0;
+  int minNDigi = 37;
+
   for(int i = 0; i != g_nTower; ++i) {
     m_nHit[i]->Fill(nHit[i]);
     m_nLayer[i]->Fill(nPlane[i]);
     if(nDigi[i] > maxNDigi) maxNDigi = nDigi[i];
     if( ((tkrVector >> i) & 1) && nDigi[i] < 6) ++m_nTkrBadEvent[i];
+    if ( ((tkrVector >> i) & 1) && nDigi[i] < 6 && nDigi[i]<minNDigi) minNDigi = nDigi[i];
   }
 
   if(tkrTrigger) {
-    (maxNDigi >= 6) ? ++m_nEventDigi[6] : ++m_nEventDigi[maxNDigi];
+    // We really, really, really want the smallest number of digis and still a TKR trigger!
+    //(maxNDigi >= 6) ? ++m_nEventDigi[6] : ++m_nEventDigi[maxNDigi];
+    (minNDigi >= 6) ? ++m_nEventDigi[6] : ++m_nEventDigi[minNDigi];
   }
 
   // condition variables to indicate whether a particular layer has any hits

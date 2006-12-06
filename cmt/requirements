@@ -1,5 +1,5 @@
 package TestReport
-version v3r6p34
+version v3r6p35
 
 author X. Chen <xchen@slac.stanford.edu>
 
@@ -29,4 +29,4 @@ application TestReport Geo.cxx Main.cxx TestReport.cxx
 
 application MergeHistFiles MergeHistFiles.cxx
 
-application runStrip JobConfig.cxx StripVal.cxx StripFiller.cxx StripDataFiller.cxx DigiFiller.cxx StripFiller_Digi.cxx runStrip.cxx
+#application runStrip JobConfig.cxx StripVal.cxx StripFiller.cxx StripDataFiller.cxx DigiFiller.cxx StripFiller_Digi.cxx runStrip.cxx

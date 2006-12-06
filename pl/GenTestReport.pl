@@ -35,7 +35,7 @@ my $htmlFile = 'index.html';
 my $pwd =  $ENV{PWD};
 
 my $appRoot = '/nfs/farm/g/glast/u33/borgland/commit/svac/';
-my $testReportVersion = 'v3r6p33';
+my $testReportVersion = 'v3r6p35';
 my $emVersion = 'v6r070329p28';
 my $cmtPath = "$appRoot:/nfs/farm/g/glast/u09/builds/rh9_gcc32opt/EngineeringModel/EngineeringModel-$emVersion";
 my $cmtDir = "$appRoot/TestReport/$testReportVersion/cmt";

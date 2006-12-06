@@ -321,3 +321,7 @@ v3r6p33	Typo in previous tag fixes.
 
 November 22, 2006: eac
 v3r6p34 Added MergeHistFiles.cxx and related lines to cmt/requirements
+
+December 5, 2006: awb
+v3r6p35	- Fixed bug in <6 hits in the TKR and still a TKR trigger.
+	- Commented out runStrip from requirements file because of missing files. 
