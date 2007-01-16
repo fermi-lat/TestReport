@@ -2713,7 +2713,7 @@ void TestReport::generateReport()
     }
 
     if (m_beginRunDataGramEpu1 != 1) {
-      (*m_report) << "@li Problem! The first datagram in EPU11 was not the first datagram after the start of the run!" << endl;
+      (*m_report) << "@li Problem! The first datagram in EPU1 was not the first datagram after the start of the run!" << endl;
     }
     if (m_firstDataGramEpu1 != 0) {
       (*m_report) << "@li Problem! The first datagram in EPU1 did not have sequence number 0! It was @b " << m_firstDataGramEpu1 << "." << endl;
