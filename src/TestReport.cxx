@@ -1655,14 +1655,18 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	}
 
 	// Check that the two TimeTones are OK:
-	if (!(m_digiEvent->getMetaEvent().time().current().flywheeling()) &&
+	if (!(m_digiEvent->getMetaEvent().time().current().incomplete()) &&
+            !(m_digiEvent->getMetaEvent().time().current().flywheeling()) &&
 	    !(m_digiEvent->getMetaEvent().time().current().missingCpuPps()) &&
 	    !(m_digiEvent->getMetaEvent().time().current().missingLatPps()) &&
 	    !(m_digiEvent->getMetaEvent().time().current().missingTimeTone()) &&
+	    !(m_digiEvent->getMetaEvent().time().previous().incomplete()) &&
 	    !(m_digiEvent->getMetaEvent().time().previous().flywheeling()) &&
 	    !(m_digiEvent->getMetaEvent().time().previous().missingCpuPps()) &&
 	    !(m_digiEvent->getMetaEvent().time().previous().missingLatPps()) &&
 	    !(m_digiEvent->getMetaEvent().time().previous().missingTimeTone()) &&
+	    // Just in case (to protect from 1/0):
+            ((m_digiEvent->getMetaEvent().time().current().timeHack().ticks()) != (m_digiEvent->getMetaEvent().time().previous().timeHack().ticks())) &&
             // If more than one second, must use nominal LAT clock value:
 	    ( (m_digiEvent->getMetaEvent().time().current().timeSecs() - m_digiEvent->getMetaEvent().time().previous().timeSecs()) == 1)) {
 
@@ -1807,14 +1811,18 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	  }
           	  
 	  // Check that the two TimeTones are OK:
-	  if (!(m_digiEvent->getMetaEvent().time().current().flywheeling()) &&
+	  if (!(m_digiEvent->getMetaEvent().time().current().incomplete()) &&
+              !(m_digiEvent->getMetaEvent().time().current().flywheeling()) &&
 	      !(m_digiEvent->getMetaEvent().time().current().missingCpuPps()) &&
 	      !(m_digiEvent->getMetaEvent().time().current().missingLatPps()) &&
 	      !(m_digiEvent->getMetaEvent().time().current().missingTimeTone()) &&
+              !(m_digiEvent->getMetaEvent().time().previous().incomplete()) &&
 	      !(m_digiEvent->getMetaEvent().time().previous().flywheeling()) &&
 	      !(m_digiEvent->getMetaEvent().time().previous().missingCpuPps()) &&
 	      !(m_digiEvent->getMetaEvent().time().previous().missingLatPps()) &&
 	      !(m_digiEvent->getMetaEvent().time().previous().missingTimeTone()) &&
+              // Just in case (to protect from 1/0):
+              ((m_digiEvent->getMetaEvent().time().current().timeHack().ticks()) != (m_digiEvent->getMetaEvent().time().previous().timeHack().ticks())) &&
               // If more than one second, must use nominal value of LAT clock:
 	      ( (m_digiEvent->getMetaEvent().time().current().timeSecs() - m_digiEvent->getMetaEvent().time().previous().timeSecs()) == 1)) { 
 
@@ -1887,14 +1895,18 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	  }
           
 	  // Check that the two TimeTones are OK and different:
-	  if (!(m_digiEvent->getMetaEvent().time().current().flywheeling()) &&
+	  if (!(m_digiEvent->getMetaEvent().time().current().incomplete()) &&
+              !(m_digiEvent->getMetaEvent().time().current().flywheeling()) &&
 	      !(m_digiEvent->getMetaEvent().time().current().missingCpuPps()) &&
 	      !(m_digiEvent->getMetaEvent().time().current().missingLatPps()) &&
 	      !(m_digiEvent->getMetaEvent().time().current().missingTimeTone()) &&
+              !(m_digiEvent->getMetaEvent().time().previous().incomplete()) &&
 	      !(m_digiEvent->getMetaEvent().time().previous().flywheeling()) &&
 	      !(m_digiEvent->getMetaEvent().time().previous().missingCpuPps()) &&
 	      !(m_digiEvent->getMetaEvent().time().previous().missingLatPps()) &&
 	      !(m_digiEvent->getMetaEvent().time().previous().missingTimeTone()) &&
+              // Just in case (to protect from 1/0):
+              ((m_digiEvent->getMetaEvent().time().current().timeHack().ticks()) != (m_digiEvent->getMetaEvent().time().previous().timeHack().ticks())) &&
 	      // If more than one second, must use nominal value:
 	      ( (m_digiEvent->getMetaEvent().time().current().timeSecs() - m_digiEvent->getMetaEvent().time().previous().timeSecs()) == 1)) { 
 

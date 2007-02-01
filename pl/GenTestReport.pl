@@ -35,9 +35,9 @@ my $htmlFile = 'index.html';
 my $pwd =  $ENV{PWD};
 
 my $appRoot = '/nfs/farm/g/glast/u33/borgland/commit/svac/';
-my $testReportVersion = 'v3r6p35';
-my $emVersion = 'v6r070329p28';
-my $cmtPath = "$appRoot:/nfs/farm/g/glast/u09/builds/rh9_gcc32opt/EngineeringModel/EngineeringModel-$emVersion";
+my $testReportVersion = 'v3r6p36';
+my $emVersion = 'v7r0913p9';
+my $cmtPath = "$appRoot:/nfs/farm/g/glast/u30/builds/rh9_gcc32opt/EngineeringModel/EngineeringModel-$emVersion";
 my $cmtDir = "$appRoot/TestReport/$testReportVersion/cmt";
 my $exeDir = "$appRoot/TestReport/$testReportVersion/rh9_gcc32opt";
 my $doxyFile = "$appRoot/TestReport/$testReportVersion/src/ReportDoxyfile";
