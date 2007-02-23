@@ -328,3 +328,5 @@ v3r6p35	- Fixed bug in <6 hits in the TKR and still a TKR trigger.
 
 February 1, 2007: awb
 v3r6p36 - Additional protection against time tone 'issues'.
+
+- Increased precision to get TKR ratios correctly.
