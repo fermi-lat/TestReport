@@ -499,6 +499,9 @@ class TestReport {
   // Extended counters problem?
   Int_t m_extendedCountersFlag;
 
+  // Time tone problem?
+  Int_t m_backwardsTimeTone;
+  Int_t m_identicalTimeTones;
 
   // Timetone counters and flags:
   UInt_t m_nbrFlywheeling;

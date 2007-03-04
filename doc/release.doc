@@ -331,3 +331,6 @@ v3r6p36 - Additional protection against time tone 'issues'.
 
 February 28, 2007: awb
 v3r6p37	- Increased precision to get TKR ratios in table correctly.
+
+March 4, 2007: awb
+v3r6p38 - Explicit check on time tones to see if time go backwards or stand still.

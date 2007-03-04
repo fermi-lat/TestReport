@@ -168,6 +168,8 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_nbrEvents4Range(0),
     m_nbrEvents4RangeNonZS(0), 
     m_extendedCountersFlag(0),
+    m_backwardsTimeTone(0),
+    m_identicalTimeTones(0),
     m_nbrFlywheeling(0), 
     m_nbrIncomplete(0), 
     m_nbrMissingGps(0), 
@@ -795,7 +797,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
  
 
   // For testing: awb
-  //int nEvent = 10000;
+  //int nEvent = 50000;
   //m_nEvent = nEvent;
 
   // List of datagrams:
@@ -833,6 +835,15 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   ULong64_t previousSequence  = 0;
   ULong64_t previousPrescaled = 0;
 
+
+  // Time tones going backwards?
+  UInt_t previousTimeToneCurrentSec  = 0;
+  UInt_t previousTimeTonePreviousSec = 0;
+
+  UInt_t previousTimeToneCurrentTicks  = 0;
+  UInt_t previousTimeTonePreviousTicks = 0;
+
+
   //
   // Time tone counters and flags:
   //
@@ -848,6 +859,12 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 
   // Extended counter flag:
   m_extendedCountersFlag = 0;
+
+  // Time tone going backwards flag:
+  m_backwardsTimeTone = 0;
+
+  // Current and previous time tones identical?
+  m_identicalTimeTones = 0;  
 
   // Ground ID changes?
   m_counterGroundID = 0;
@@ -1005,6 +1022,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       if (mycpuNumber==enums::Lsf::Epu0) {
         if ((myDatagramSecNbr != previousDatagramGapsEPU0) && ((myDatagramSecNbr-previousDatagramGapsEPU0)!=1)) {
           m_datagramGapsEPU0++;
+  	  std::cout << "   " << std::endl; 
 	  std::cout << "Warning! There was a gap in the datagram sequence number for EPU0! " << iEvent << "   " << myDatagramSecNbr << "   " << previousDatagramGapsEPU0 << std::endl;  
 	}
         previousDatagramGapsEPU0 = myDatagramSecNbr;
@@ -1012,6 +1030,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       if (mycpuNumber==enums::Lsf::Epu1) {
         if ((myDatagramSecNbr != previousDatagramGapsEPU1) && ((myDatagramSecNbr-previousDatagramGapsEPU1)!=1)) {
           m_datagramGapsEPU1++;
+  	  std::cout << "   " << std::endl; 
 	  std::cout << "Warning! There was a gap in the datagram sequence number for EPU1! " << iEvent << "   " << myDatagramSecNbr << "   " << previousDatagramGapsEPU1 << std::endl;  
 	}
         previousDatagramGapsEPU1 = myDatagramSecNbr;
@@ -1019,6 +1038,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       if (mycpuNumber==enums::Lsf::Epu2) {
         if ((myDatagramSecNbr != previousDatagramGapsEPU2) && ((myDatagramSecNbr-previousDatagramGapsEPU2)!=1)) {
           m_datagramGapsEPU2++;
+  	  std::cout << "   " << std::endl; 
 	  std::cout << "Warning! There was a gap in the datagram sequence number for EPU2! " << iEvent << "   " << myDatagramSecNbr << "   " << previousDatagramGapsEPU2 << std::endl;  
 	}
         previousDatagramGapsEPU2 = myDatagramSecNbr;
@@ -1026,6 +1046,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       if (mycpuNumber==enums::Lsf::Siu0) {
         if ((myDatagramSecNbr != previousDatagramGapsSIU0) && ((myDatagramSecNbr-previousDatagramGapsSIU0)!=1) && myDatagramSecNbr!=0) {
           m_datagramGapsSIU0++;
+  	  std::cout << "   " << std::endl; 
 	  std::cout << "Warning! There was a gap in the datagram sequence number for SIU0! " << iEvent << "   " << myDatagramSecNbr << "   " << previousDatagramGapsSIU0 << std::endl;  
 	}
         previousDatagramGapsSIU0 = myDatagramSecNbr;
@@ -1033,6 +1054,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       if (mycpuNumber==enums::Lsf::Siu1) {
         if ((myDatagramSecNbr != previousDatagramGapsSIU1) && ((myDatagramSecNbr-previousDatagramGapsSIU1)!=1) && myDatagramSecNbr!=0) {
           m_datagramGapsSIU1++;
+  	  std::cout << "   " << std::endl; 
 	  std::cout << "Warning! There was a gap in the datagram sequence number for SIU1! " << iEvent << "   " << myDatagramSecNbr << "   " << previousDatagramGapsSIU1 << std::endl;  
  	}
         previousDatagramGapsSIU1 = myDatagramSecNbr;
@@ -1304,6 +1326,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
               p++;
               if (diff > 1) {
                 m_counterDataDiagramsEpu0 = m_counterDataDiagramsEpu0 + diff - 1;
+  	        std::cout << "   " << std::endl; 
 	        std::cout << "Warning! We dropped " << (diff - 1) << " datagram(s) before datagram " << (*p) << " for EPU0!" << std::endl;
 	      }
 	    }
@@ -1329,6 +1352,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
               p++;
               if (diff > 1) {
                 m_counterDataDiagramsEpu1 = m_counterDataDiagramsEpu1 + diff - 1;
+  	        std::cout << "   " << std::endl; 
 	        std::cout << "Warning! We dropped " << (diff - 1) << " datagram(s) before datagram " << (*p) << " for EPU1!" << std::endl;
 	      }
 	    }
@@ -1354,6 +1378,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
               p++;
               if (diff > 1) {
                 m_counterDataDiagramsEpu2 = m_counterDataDiagramsEpu2 + diff - 1;
+  	        std::cout << "   " << std::endl; 
 	        std::cout << "Warning! We dropped " << (diff - 1) << " datagram(s) before datagram " << (*p) << " for EPU2!" << std::endl;
 	      }
 	    }
@@ -1379,6 +1404,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
               p++;
               if (diff > 1) {
                 m_counterDataDiagramsSiu0 = m_counterDataDiagramsSiu0 + diff - 1;
+  	        std::cout << "   " << std::endl; 
 	        std::cout << "Warning! We dropped " << (diff - 1) << " datagram(s) before datagram " << (*p) << " for SIU0!" << std::endl;
 	      }
 	    }
@@ -1404,6 +1430,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
               p++;
               if (diff > 1) {
                 m_counterDataDiagramsSiu1 = m_counterDataDiagramsSiu1 + diff - 1;
+  	        std::cout << "   " << std::endl; 
 	        std::cout << "Warning! We dropped " << (diff - 1) << " datagram(s) before datagram " << (*p) << " for SIU1!" << std::endl;
 	      }
 	    }
@@ -1438,10 +1465,45 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       if (iEvent > 0) {
         if (thisGroundID != m_previousGroundID) {
           m_counterGroundID++;
+  	  std::cout << "   " << std::endl; 
 	  std::cout << "Warning! The Ground ID changed from " << m_previousGroundID << " to " << thisGroundID << " when going from event " << (iEvent-1) << " to " << iEvent << std::endl;
 	}
       }
       m_previousGroundID = thisGroundID;
+
+
+      // Time tones ging backwards?
+      UInt_t thisTimeToneCurrentSec  = m_digiEvent->getMetaEvent().time().current().timeSecs();
+      UInt_t thisTimeTonePreviousSec = m_digiEvent->getMetaEvent().time().previous().timeSecs();
+
+      UInt_t thisTimeToneCurrentTicks  = m_digiEvent->getMetaEvent().time().current().timeHack().ticks();
+      UInt_t thisTimeTonePreviousTicks = m_digiEvent->getMetaEvent().time().previous().timeHack().ticks();
+   
+      if ( (thisTimeToneCurrentSec < previousTimeToneCurrentSec) || (thisTimeTonePreviousSec < previousTimeTonePreviousSec)) {
+        m_backwardsTimeTone++;
+	std::cout << "   " << std::endl; 
+	std::cout << "Warning! Time tones seem to go backwards in event " << iEvent << " with GEM ID " << m_digiEvent->getMetaEvent().scalers().sequence() << std::endl;
+	std::cout << "Current and previous time tones seconds are: " << thisTimeToneCurrentSec << "   " << previousTimeToneCurrentSec << "   " 
+                  << thisTimeTonePreviousSec << "   " << previousTimeTonePreviousSec << std::endl;
+	std::cout << "Current and previous time tones ticks are: " << thisTimeToneCurrentTicks << "   " << previousTimeToneCurrentTicks << "   " 
+                  << thisTimeTonePreviousTicks << "   " << previousTimeTonePreviousTicks << std::endl;
+      }
+      previousTimeToneCurrentSec    = thisTimeToneCurrentSec;
+      previousTimeTonePreviousSec   = thisTimeTonePreviousSec;
+      previousTimeToneCurrentTicks  = thisTimeToneCurrentTicks;
+      previousTimeTonePreviousTicks = thisTimeTonePreviousTicks;
+
+
+      // Current and previous time tones identical?
+      if (thisTimeToneCurrentSec==thisTimeTonePreviousSec && thisTimeToneCurrentTicks==thisTimeTonePreviousTicks) {
+        m_identicalTimeTones++;
+	std::cout << "   " << std::endl; 
+	std::cout << "Warning! Current and previous time tones are identical in event " << iEvent << " with GEM ID " << m_digiEvent->getMetaEvent().scalers().sequence() << std::endl;
+
+	std::cout << "Current and previous time tones are both: " << thisTimeToneCurrentSec << "   " << thisTimeToneCurrentTicks << std::endl;
+      }   
+
+ 
 
       // Time tone counters and flags:
       if (m_digiEvent->getMetaEvent().time().current().incomplete() != 0) {
@@ -1483,6 +1545,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 
         if (deltaDeadZone < 0) { 
           m_extendedCountersFlag++;
+  	  std::cout << "   " << std::endl; 
 	  std::cout << "Warning! The extended DeadZone counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
 	  std::cout << "         It went from " << previousDeadZone << " to " << thisDeadZone << " i.e. a change of " << deltaDeadZone << " ticks!" << std::endl;
 	}
@@ -1491,6 +1554,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
         discardedCounter         = discardedCounter + deltaDiscarded;
         if (deltaDiscarded < 0) { 
           m_extendedCountersFlag++;
+  	  std::cout << "   " << std::endl; 
 	  std::cout << "Warning! The extended Discarded counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
 	  std::cout << "         It went from " << previousDiscarded << " to " << thisDiscarded << " i.e. a change of " << deltaDiscarded << " ticks!" << std::endl;
 	}
@@ -1499,6 +1563,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
         m_timeIntervalElapsed->Fill(0.00005*deltaElapsed);
         if (deltaElapsed < 0) {
           m_extendedCountersFlag++;
+  	  std::cout << "   " << std::endl; 
 	  std::cout << "Warning! The extended Elapsed counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
 	  std::cout << "         It went from " << previousElapsed << " to " << thisElapsed << " i.e. a change of " << deltaElapsed << " ticks!" << std::endl;
 	}
@@ -1506,6 +1571,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	Long64_t deltaLiveTime = thisLiveTime - previousLiveTime;
         if (deltaLiveTime < 0) {
           m_extendedCountersFlag++;
+  	  std::cout << "   " << std::endl; 
 	  std::cout << "Warning! The extended Livetime counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
 	  std::cout << "         It went from " << previousLiveTime << " to " << thisLiveTime << " i.e. a change of " << deltaLiveTime << " ticks!" << std::endl;
 	}
@@ -1513,6 +1579,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	Long64_t deltaPrescaled = thisPrescaled - previousPrescaled;
         if (deltaPrescaled < 0) {
           m_extendedCountersFlag++;
+  	  std::cout << "   " << std::endl; 
 	  std::cout << "Warning! The extended Prescaled counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
 	  std::cout << "         It went from " << previousPrescaled << " to " << thisPrescaled << " i.e. a change of " << deltaPrescaled << " ticks!" << std::endl;
 	}
@@ -1520,6 +1587,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
 	Long64_t deltaSequence = thisSequence - previousSequence;
         if (deltaSequence < 0) {
           m_extendedCountersFlag++;
+  	  std::cout << "   " << std::endl; 
 	  std::cout << "Warning! The extended Sequence counter DECREASED from event " << (iEvent-1) << " to event " << iEvent << std::endl;
 	  std::cout << "         It went from " << previousSequence << " to " << thisSequence << " i.e. a change of " << deltaSequence << " ticks!" << std::endl;
 	}
@@ -1550,6 +1618,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
           liveTimeFraction      = (livetimeLast - livetimeFirst) / (float) (deltaTimeInterval);
           
           if (liveTimeFraction <= 0) {
+  	    std::cout << "   " << std::endl; 
 	    std::cout << "Problem! The livetime is coming out as " << liveTimeFraction << "   " << livetimeLast << "   " << livetimeFirst << "   " << deltaTimeInterval << "   " << " in event "  
                       << iEvent << std::endl;
             rateLivetimeCorrected = -1.0;
@@ -1721,6 +1790,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
             currentEventIDEPU0 = m_digiEvent->getMetaEvent().scalers().sequence();
             if (previousEventIDEPU0 != 0) {	
               if (currentEventIDEPU0 <= previousEventIDEPU0) {
+  	        std::cout << "   " << std::endl; 
 	        std::cout << "Warning! Problems with the delta Event ID in EPU0! " << iEvent << "   " << currentEventIDEPU0 << "   " << previousEventIDEPU0 << std::endl;
 	      }
               double DeltaEventID = double (currentEventIDEPU0) - double (previousEventIDEPU0);
@@ -1733,6 +1803,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
             currentEventIDEPU1 = m_digiEvent->getMetaEvent().scalers().sequence();
             if (previousEventIDEPU1 != 0) {	
               if (currentEventIDEPU1 <= previousEventIDEPU1) {
+  	        std::cout << "   " << std::endl; 
 	        std::cout << "Warning! Problems with the delta Event ID in EPU1! " << iEvent << "   " << currentEventIDEPU1 << "   " << previousEventIDEPU1 << std::endl;
 	      }
               double DeltaEventID = double (currentEventIDEPU1) - double (previousEventIDEPU1);
@@ -1745,6 +1816,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
             currentEventIDEPU2 = m_digiEvent->getMetaEvent().scalers().sequence();
             if (previousEventIDEPU2 != 0) {	
               if (currentEventIDEPU2 <= previousEventIDEPU2) {
+  	        std::cout << "   " << std::endl; 
 	        std::cout << "Warning! Problems with the delta Event ID in EPU2! " << iEvent << "   " << currentEventIDEPU2 << "   " << previousEventIDEPU2 << std::endl;
 	      } 
               double DeltaEventID = double (currentEventIDEPU2) - double (previousEventIDEPU2);
@@ -1757,6 +1829,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
             currentEventIDSIU0 = m_digiEvent->getMetaEvent().scalers().sequence();
             if (previousEventIDSIU0 != 0) {	
               if (currentEventIDSIU0 <= previousEventIDSIU0) {
+  	        std::cout << "   " << std::endl; 
 	        std::cout << "Warning! Problems with the delta Event ID in SIU0! " << iEvent << "   " << currentEventIDSIU0 << "   " << previousEventIDSIU0 << std::endl;
 	      } 
               double DeltaEventID = double (currentEventIDSIU0) - double (previousEventIDSIU0);
@@ -1769,6 +1842,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
             currentEventIDSIU1 = m_digiEvent->getMetaEvent().scalers().sequence();
             if (previousEventIDSIU1 != 0) {	
               if (currentEventIDSIU1 <= previousEventIDSIU1) {
+  	        std::cout << "   " << std::endl; 
 	        std::cout << "Warning! Problems with the delta Event ID in SIU1! " << iEvent << "   " << currentEventIDSIU1 << "   " << previousEventIDSIU1 << std::endl;
 	      } 
               double DeltaEventID = double (currentEventIDSIU1) - double (previousEventIDSIU1);
@@ -1946,6 +2020,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   if (lastDatagramEventEpu0 != -1) {
     m_digiBranch->GetEntry(lastDatagramEventEpu0);
     if (m_digiEvent->getMetaEvent().datagram().crate() != enums::Lsf::Epu0) {
+      std::cout << "   " << std::endl; 
       std::cout << "Anders! You fucked up! This should have been been from EPU0, but it's not! It is " << m_digiEvent->getMetaEvent().datagram().crate() << std::endl;
     } else {
       m_endRunDataGramEpu0 = 0;
@@ -1959,6 +2034,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
         m_fullDataGramEpu0 = 1;
       }
       if (m_endRunDataGramEpu0==0 && m_fullDataGramEpu0==0) {
+  	std::cout << "   " << std::endl; 
         std::cout << "Warning! The last datagram for EPU0 was not closed because we reached end of run or because it was full! The datagram closing reason was " << lastReasonDataGram
 	  	  << " and the datagram closing action was " << lastActionDataGram << std::endl;
       }
@@ -1969,6 +2045,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   if (lastDatagramEventEpu1 != -1) {
     m_digiBranch->GetEntry(lastDatagramEventEpu1);
     if (m_digiEvent->getMetaEvent().datagram().crate() != enums::Lsf::Epu1) {
+      std::cout << "   " << std::endl; 
       std::cout << "Anders! You fucked up! This should have been been from EPU1, but it's not! It is " << m_digiEvent->getMetaEvent().datagram().crate() << std::endl;
     } else {
       m_endRunDataGramEpu1 = 0;
@@ -1982,6 +2059,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
         m_fullDataGramEpu1 = 1;
       }
       if (m_endRunDataGramEpu1==0 && m_fullDataGramEpu1==0) {
+  	std::cout << "   " << std::endl; 
         std::cout << "Warning! The last datagram for EPU1 was not closed because we reached end of run or because it was full! The datagram closing reason was " << lastReasonDataGram
 	  	  << " and the datagram closing action was " << lastActionDataGram << std::endl;
       }
@@ -1992,6 +2070,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   if (lastDatagramEventEpu2 != -1) {
     m_digiBranch->GetEntry(lastDatagramEventEpu2);
     if (m_digiEvent->getMetaEvent().datagram().crate() != enums::Lsf::Epu2) {
+      std::cout << "   " << std::endl; 
       std::cout << "Anders! You fucked up! This should have been been from EPU2, but it's not! It is " << m_digiEvent->getMetaEvent().datagram().crate() << std::endl;
     } else {
       m_endRunDataGramEpu2 = 0;
@@ -2005,6 +2084,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
         m_fullDataGramEpu2 = 1;
       }
       if (m_endRunDataGramEpu2==0 && m_fullDataGramEpu2==0) {
+  	std::cout << "   " << std::endl; 
         std::cout << "Warning! The last datagram for EPU2 was not closed because we reached end of run or because it was full! The datagram closing reason was " << lastReasonDataGram
 	  	  << " and the datagram closing action was " << lastActionDataGram << std::endl;
       }
@@ -2016,6 +2096,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   if (lastDatagramEventSiu0 != -1) {
     m_digiBranch->GetEntry(lastDatagramEventSiu0);
     if (m_digiEvent->getMetaEvent().datagram().crate() != enums::Lsf::Siu0) {
+      std::cout << "   " << std::endl; 
       std::cout << "Anders! You fucked up! This should have been been from SIU0, but it's not! It is " << m_digiEvent->getMetaEvent().datagram().crate() << std::endl;
     } else {
       m_endCountDataGramSiu0 = 0;
@@ -2029,6 +2110,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
         m_fullDataGramSiu0 = 1;
       }
       if (m_fullDataGramSiu0==0 && m_endCountDataGramSiu0==0) {
+  	std::cout << "   " << std::endl; 
         std::cout << "Warning! The last datagram for SIU0 was not closed because it was full or because we reached end of count! The datagram closing reason was " 
                   << lastReasonDataGram << " and the datagram closing action was " << lastActionDataGram << std::endl;
       }
@@ -2039,6 +2121,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   if (lastDatagramEventSiu1 != -1) {
     m_digiBranch->GetEntry(lastDatagramEventSiu1);
     if (m_digiEvent->getMetaEvent().datagram().crate() != enums::Lsf::Siu1) {
+      std::cout << "   " << std::endl; 
       std::cout << "Anders! You fucked up! This should have been been from Siu1, but it's not! It is " << m_digiEvent->getMetaEvent().datagram().crate() << std::endl;
     } else {
       m_endCountDataGramSiu1 = 0;
@@ -2052,6 +2135,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
         m_fullDataGramSiu1 = 1;
       }
       if (m_fullDataGramSiu1==0 && m_endCountDataGramSiu1==0) {
+  	std::cout << "   " << std::endl; 
         std::cout << "Warning! The last datagram for SIU1 was not closed because it was full or because we reached end of count! The datagram closing reason was " 
                   << lastReasonDataGram << " and the datagram closing action was " << lastActionDataGram << std::endl;
       }
@@ -2676,6 +2760,15 @@ void TestReport::generateReport()
   if (m_extendedCountersFlag != 0) {
     (*m_report) << "@li Problem! At least one of the extended counters decreased from one event to the next one  @b " << m_extendedCountersFlag << " times! Check the log file for more details." << endl;
   } 
+
+  if (m_backwardsTimeTone != 0) {
+    (*m_report) << "@li Problem! Some of the time tones seem to go backwards from one event to the next one. It happened @b " << m_backwardsTimeTone << " times! Check the log file for more details." << endl;
+  }   
+
+  if (m_identicalTimeTones != 0) {
+    (*m_report) << "@li Problem! Current and previous time tones are identical in some events. It happened @b " << m_identicalTimeTones << " times! Check the log file for more details." << endl;
+  }
+
 
   (*m_report) << "   " << endl;
 
