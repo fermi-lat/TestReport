@@ -699,6 +699,9 @@ class TestReport {
   TH1F* m_deltaWindowOpenTime;
   TH1F* m_deltaWindowOpenTimeZoom;
 
+  TH1F* m_tick20MHzDeviation;
+  TH1F* m_tick20MHzDeviationZoom;
+
   TH1F* m_timeIntervalElapsed;
 
   TH1F* m_condArrivalTimeTKR;

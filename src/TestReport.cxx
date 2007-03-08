@@ -506,6 +506,14 @@ TestReport::TestReport(const char* dir, const char* prefix,
   att.set("Delta window open time (nominally 50 ns ticks)", "Number of events");
   setHistParameters(m_deltaWindowOpenTimeZoom, att);
 
+  m_tick20MHzDeviation = new TH1F("tick20MHzDeviation", "Number of ticks between successive 1-PPS - Deviation from 20 MHz", 100, 0., 1500);
+  att.set("Number of ticks between successive 1-PPS", "Number of events");
+  setHistParameters(m_tick20MHzDeviation, att);
+
+  m_tick20MHzDeviationZoom = new TH1F("tick20MHzDeviationZoom", "Number of ticks between successive 1-PPS - Deviation from 20 MHz - Zoomed", 100, 0., 200);
+  att.set("Number of ticks between successive 1-PPS - Zoom", "Number of events");
+  setHistParameters(m_tick20MHzDeviationZoom, att);
+
   m_timeIntervalElapsed = new TH1F("timeIntervalElapsed", "Elapsed time between adjacent events in milliseconds", 100, 0., 5.);
   att.set("Elapsed time between adjacent events (ms)", "Number of events");
   setHistParameters(m_timeIntervalElapsed, att);
@@ -2425,6 +2433,18 @@ void TestReport::analyzeDigiTree()
     m_deltaWindowOpenTimeZoom->Fill(deltaWindowOpenTime);
   }
 
+  // Ticks between 1-PPS:
+  Int_t deltaTick = m_digiEvent->getMetaEvent().time().current().timeHack().ticks() - m_digiEvent->getMetaEvent().time().previous().timeHack().ticks();
+  int RollOverInt = 33554432;  
+  if (deltaTick < 0) {
+    deltaTick = deltaTick + RollOverInt;
+  }
+  deltaTick       = deltaTick - 20000000;
+  m_tick20MHzDeviation->Fill(deltaTick);
+  if (deltaTick < 200 && deltaTick > -200) {
+    m_tick20MHzDeviationZoom->Fill(deltaTick);
+  }
+
 
   int tkrVector = m_digiEvent->getGem().getTkrVector();
 
@@ -2715,7 +2735,7 @@ void TestReport::generateReport()
   }
   (*m_report) << "   " << endl;
 
-  // awb
+
   if (m_digiFile) {
     (*m_report) << "@li Time of the first trigger: <b>" << asctime((struct tm*) (gmtime((time_t*) (&m_startTime)))) << " (GMT) </b>";
     (*m_report) << "@li Time of the last trigger: <b>" << asctime((struct tm*) (gmtime((time_t*) (&m_endTime)))) << " (GMT) </b>";
@@ -2741,7 +2761,7 @@ void TestReport::generateReport()
       (*m_report) << "   " << endl;
     }
 
-    // Needs Spectrum Astro FSW!: awb
+    // Needs Spectrum Astro FSW!:
     (*m_report) << "@li Livetime: <b> " << (m_liveTime * 100.0) << "% </b>" << endl;  
 
     if (m_deltaSequenceNbrEvents == 0) {
@@ -4317,6 +4337,18 @@ void TestReport::produceTimeIntervalPlotGEM()
   file += "_deltaWindowOpenTimeZoom";
   att.set(file.c_str(), "Delta window open time as measured by the GEM in system clock ticks with a cut of 1500 ticks. The time is stored in a 16 bit counter, each count is nominally 50 ns.", "deltaWindowOpenTimeZoom", true);
   producePlot(m_deltaWindowOpenTimeZoom, att);
+  insertPlot(att);
+
+  file = m_prefix;
+  file += "_tick20MHzDeviation";
+  att.set(file.c_str(), "Number of ticks between successive 1-PPS - Deviation from 20 MHz.", "tick20MHzDeviation", true);
+  producePlot(m_tick20MHzDeviation, att);
+  insertPlot(att);
+
+  file = m_prefix;
+  file += "_tick20MHzDeviationZoom";
+  att.set(file.c_str(), "Number of ticks between successive 1-PPS - Deviation from 20 MHz - Zoom.", "tick20MHzDeviationZoom", true);
+  producePlot(m_tick20MHzDeviationZoom, att);
   insertPlot(att);
 }
 
