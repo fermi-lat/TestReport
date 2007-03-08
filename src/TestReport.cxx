@@ -2699,7 +2699,14 @@ void TestReport::generateReport()
     return;
   } 
 
-  (*m_report) << "In the digi file @em " << m_digiFile->GetName() << endl;
+
+  if (m_digiFile) {
+    (*m_report) << "In the digi file @em " << m_digiFile->GetName() << endl;
+  }
+  if (m_reconFile) {
+    (*m_report) << "In the recon file @em " << m_reconFile->GetName() << endl;
+  }
+
 
   if (m_isLATTE == 1) {
     (*m_report) << "@li There are @b " << m_nEvent << " triggers. This run was taken with LATTE so there will be " << m_nEvent+2 << " events recorded in the eLog database since LATTE adds two additional events in the process which are not triggered events." << endl;
@@ -2708,278 +2715,278 @@ void TestReport::generateReport()
   }
   (*m_report) << "   " << endl;
 
-  (*m_report) << "@li Time of the first trigger: <b>" << asctime((struct tm*) (gmtime((time_t*) (&m_startTime)))) << " (GMT) </b>";
-  (*m_report) << "@li Time of the last trigger: <b>" << asctime((struct tm*) (gmtime((time_t*) (&m_endTime)))) << " (GMT) </b>";
-  (*m_report) << "@li Duration: <b>" << m_endTime - m_startTime << " seconds" << "</b>" << endl;
+  // awb
+  if (m_digiFile) {
+    (*m_report) << "@li Time of the first trigger: <b>" << asctime((struct tm*) (gmtime((time_t*) (&m_startTime)))) << " (GMT) </b>";
+    (*m_report) << "@li Time of the last trigger: <b>" << asctime((struct tm*) (gmtime((time_t*) (&m_endTime)))) << " (GMT) </b>";
+    (*m_report) << "@li Duration: <b>" << m_endTime - m_startTime << " seconds" << "</b>" << endl;
 
 
-  m_report->setf(ios::fixed);
-  (*m_report) << "@li Trigger rate: <b>" <<std::setprecision(1) <<  double(m_nEvent)/ double (m_endTime - m_startTime) << " Hz" << "</b>" << endl;
-  (*m_report) << "@li Livetime corrected trigger rate: <b>" << (double(m_nEvent) / double (m_endTime - m_startTime)) / m_liveTime << " Hz" << "</b>" << endl;
-  (*m_report) << "   " << endl;
-
-  if (m_counterGroundID == 0) {
-    (*m_report) << "@li The Ground ID is <b>" << m_firstGroundID << "</b>" << endl;
-  } else {
-    (*m_report) << "@li Warning! The ground ID changed @b " << m_counterGroundID << " times during the run! The first event had ground ID @b " << m_firstGroundID << " while the last event had ground ID @b " << m_lastGroundID << ". See the log file for more details. " << endl;
-  }
-  (*m_report) << "   " << endl;
-
-
-  if (m_bay10Layer0SplitDefault == 1) {
+    m_report->setf(ios::fixed);
+    (*m_report) << "@li Trigger rate: <b>" <<std::setprecision(1) <<  double(m_nEvent)/ double (m_endTime - m_startTime) << " Hz" << "</b>" << endl;
+    (*m_report) << "@li Livetime corrected trigger rate: <b>" << (double(m_nEvent) / double (m_endTime - m_startTime)) / m_liveTime << " Hz" << "</b>" << endl;
     (*m_report) << "   " << endl;
-    (*m_report) << "@li Warning: We are reading out hits from the left in TKR Bay 10, layer 0! Is this intentional?" << endl;
+
+    if (m_counterGroundID == 0) {
+      (*m_report) << "@li The Ground ID is <b>" << m_firstGroundID << "</b>" << endl;
+    } else {
+      (*m_report) << "@li Warning! The ground ID changed @b " << m_counterGroundID << " times during the run! The first event had ground ID @b " << m_firstGroundID << " while the last event had ground ID @b " << m_lastGroundID << ". See the log file for more details. " << endl;
+    }
     (*m_report) << "   " << endl;
-  }
-
-  // Needs Spectrum Astro FSW!: awb
-  (*m_report) << "@li Livetime: <b> " << (m_liveTime * 100.0) << "% </b>" << endl;  
-
-  if (m_deltaSequenceNbrEvents == 0) {
-    (*m_report) << "@li Expected livetime from event readout categories: <b> " <<  (1.0 - ((m_nbrEventsNormal*529.0 + m_nbrEvents4Range*1318.0 + m_nbrEvents4RangeNonZS*12500.0)/ double (m_elapsedTime))) * 100.0 << "%</b>. This estimate is only valid if the filter is not running!" << std::endl;
-  }
-
-  if ((m_nbrEventsNormal+m_nbrEvents4Range+m_nbrEvents4RangeNonZS) != m_nEvent) {
-    std::cout << "Problem!!!!! " << (m_nbrEventsNormal+m_nbrEvents4Range+m_nbrEvents4RangeNonZS) << "   " << m_nEvent << "   " << m_nbrEventsNormal << "   " << m_nbrEvents4Range << "   " 
-              << m_nbrEvents4RangeNonZS << std::endl; 
-  }
-
-  (*m_report) << "   " << endl;
-  (*m_report) << "@li There were @b " << m_nbrPrescaled << " prescaled events (<b>" << double (m_nbrPrescaled)/ double ((m_endTime - m_startTime)) <<" Hz</b>), @b " << m_nbrDeadZone  << " dead zone events (<b>" << double (m_nbrDeadZone)/ double ((m_endTime - m_startTime)) <<" Hz</b>) and @b " << m_nbrDiscarded << " discarded events (<b>" << double (m_nbrDiscarded)/ double ((m_endTime - m_startTime))  <<" Hz</b>)." << endl;
 
 
-  if (m_deltaSequenceNbrEvents != 0) {
-    (*m_report) << "@li The number of events in the digi file does not agree with the extended GEM sequence counter! The difference is @b " << m_deltaSequenceNbrEvents << " events. Is the onboard filter running?" << endl;
-  } else {
-    (*m_report) << "@li The number of events in the digi file agrees with the extended GEM sequence counter!" << endl;
-  }
+    if (m_bay10Layer0SplitDefault == 1) {
+      (*m_report) << "   " << endl;
+      (*m_report) << "@li Warning: We are reading out hits from the left in TKR Bay 10, layer 0! Is this intentional?" << endl;
+      (*m_report) << "   " << endl;
+    }
 
-  (*m_report) << "   " << endl;
-  (*m_report) << "@li There were @b " << m_nbrMissingTimeTone << " events with a missing Time tone, @b " << m_nbrFlywheeling << " flywheeling events, @b " << m_nbrIncomplete << " events with an incomplete time tone, @b " << m_nbrMissingGps << " events with a missing GPS lock, @b " << m_nbrMissingCpuPps << " events with a missing 1-PPS signal at CPU level and @b " << m_nbrMissingLatPps << " events with a missing 1-PPS signal at LAT level." << endl; 
+    // Needs Spectrum Astro FSW!: awb
+    (*m_report) << "@li Livetime: <b> " << (m_liveTime * 100.0) << "% </b>" << endl;  
 
-  if (m_extendedCountersFlag != 0) {
-    (*m_report) << "@li Problem! At least one of the extended counters decreased from one event to the next one  @b " << m_extendedCountersFlag << " times! Check the log file for more details." << endl;
-  } 
+    if (m_deltaSequenceNbrEvents == 0) {
+      (*m_report) << "@li Expected livetime from event readout categories: <b> " <<  (1.0 - ((m_nbrEventsNormal*529.0 + m_nbrEvents4Range*1318.0 + m_nbrEvents4RangeNonZS*12500.0)/ double (m_elapsedTime))) * 100.0 << "%</b>. This estimate is only valid if the filter is not running!" << std::endl;
+    }
 
-  if (m_backwardsTimeTone != 0) {
-    (*m_report) << "@li Problem! Some of the time tones seem to go backwards from one event to the next one. It happened @b " << m_backwardsTimeTone << " times! Check the log file for more details." << endl;
-  }   
+    if ((m_nbrEventsNormal+m_nbrEvents4Range+m_nbrEvents4RangeNonZS) != m_nEvent) {
+      std::cout << "Problem!!!!! " << (m_nbrEventsNormal+m_nbrEvents4Range+m_nbrEvents4RangeNonZS) << "   " << m_nEvent << "   " << m_nbrEventsNormal << "   " << m_nbrEvents4Range << "   " 
+                << m_nbrEvents4RangeNonZS << std::endl; 
+    }
 
-  if (m_identicalTimeTones != 0) {
-    (*m_report) << "@li Problem! Current and previous time tones are identical in some events. It happened @b " << m_identicalTimeTones << " times! Check the log file for more details." << endl;
-  }
+    (*m_report) << "   " << endl;
+    (*m_report) << "@li There were @b " << m_nbrPrescaled << " prescaled events (<b>" << double (m_nbrPrescaled)/ double ((m_endTime - m_startTime)) <<" Hz</b>), @b " << m_nbrDeadZone  << " dead zone events (<b>" << double (m_nbrDeadZone)/ double ((m_endTime - m_startTime)) <<" Hz</b>) and @b " << m_nbrDiscarded << " discarded events (<b>" << double (m_nbrDiscarded)/ double ((m_endTime - m_startTime))  <<" Hz</b>)." << endl;
 
 
-  (*m_report) << "   " << endl;
+    if (m_deltaSequenceNbrEvents != 0) {
+      (*m_report) << "@li The number of events in the digi file does not agree with the extended GEM sequence counter! The difference is @b " << m_deltaSequenceNbrEvents << " events. Is the onboard filter running?" << endl;
+    } else {
+      (*m_report) << "@li The number of events in the digi file agrees with the extended GEM sequence counter!" << endl;
+    }
+
+    (*m_report) << "   " << endl;
+    (*m_report) << "@li There were @b " << m_nbrMissingTimeTone << " events with a missing Time tone, @b " << m_nbrFlywheeling << " flywheeling events, @b " << m_nbrIncomplete << " events with an incomplete time tone, @b " << m_nbrMissingGps << " events with a missing GPS lock, @b " << m_nbrMissingCpuPps << " events with a missing 1-PPS signal at CPU level and @b " << m_nbrMissingLatPps << " events with a missing 1-PPS signal at LAT level." << endl; 
+
+    if (m_extendedCountersFlag != 0) {
+      (*m_report) << "@li Problem! At least one of the extended counters decreased from one event to the next one  @b " << m_extendedCountersFlag << " times! Check the log file for more details." << endl;
+    } 
+
+    if (m_backwardsTimeTone != 0) {
+      (*m_report) << "@li Problem! Some of the time tones seem to go backwards from one event to the next one. It happened @b " << m_backwardsTimeTone << " times! Check the log file for more details." << endl;
+    }   
+
+    if (m_identicalTimeTones != 0) {
+      (*m_report) << "@li Problem! Current and previous time tones are identical in some events. It happened @b " << m_identicalTimeTones << " times! Check the log file for more details." << endl;
+    }
+
+
+    (*m_report) << "   " << endl;
 
  
-  if (m_nbrDataGramsEpu0 > 0) {
-    (*m_report) << "@li There were @b " << m_nbrDataGramsEpu0 << " datagrams from EPU0 in this run with in average <b> " << ((float) m_nbrEventsDataGramsEpu0 / (float) m_nbrDataGramsEpu0) << " </b> events per datagram." << endl;
-  }
-  if (m_nbrDataGramsEpu1 > 0) {
-    (*m_report) << "@li There were @b " << m_nbrDataGramsEpu1 << " datagrams from EPU1 in this run with in average <b> " << ((float) m_nbrEventsDataGramsEpu1 / (float) m_nbrDataGramsEpu1) << " </b> events per datagram." << endl;
-  }
-  if (m_nbrDataGramsEpu2 > 0) {
-    (*m_report) << "@li There were @b " << m_nbrDataGramsEpu2 << " datagrams from EPU2 in this run with in average <b> " << ((float) m_nbrEventsDataGramsEpu2 / (float) m_nbrDataGramsEpu2) << " </b> events per datagram." << endl;
-  }
-  if (m_nbrDataGramsSiu0 > 0) {
-    (*m_report) << "@li There were @b " << (m_counterCyclesSiu0+1) << " cycles with a maximum of @b " << m_nbrDataGramsSiu0 << " datagrams per cycle from SIU0 in this run with in average <b> " << ((float) m_nbrEventsDataGramsSiu0 / ((float) m_nbrDataGramsSiu0 * (float) (m_counterCyclesSiu0+1.0))) << " </b> events per datagram." << endl;
-  }
-  if (m_nbrDataGramsSiu1 > 0) {
-    (*m_report) << "@li There were @b " << (m_counterCyclesSiu1+1) << " cycles with a maximum of @b " << m_nbrDataGramsSiu1 << " datagrams per cycle from SIU1 in this run with in average <b> " << ((float) m_nbrEventsDataGramsSiu1 / ((float) m_nbrDataGramsSiu1 * (float) (m_counterCyclesSiu1+1.0))) << " </b> events per datagram." << endl;
-  }
-
-
-
-  // EPU0:
-  if (m_nbrEventsDataGramsEpu0 > 0) {
-    if (m_counterDataDiagramsEpu0 != 0) {
-      (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagramsEpu0 << " datagram(s) from EPU0 in this run!" << endl;
+    if (m_nbrDataGramsEpu0 > 0) {
+      (*m_report) << "@li There were @b " << m_nbrDataGramsEpu0 << " datagrams from EPU0 in this run with in average <b> " << ((float) m_nbrEventsDataGramsEpu0 / (float) m_nbrDataGramsEpu0) << " </b> events per datagram." << endl;
+    }
+    if (m_nbrDataGramsEpu1 > 0) {
+      (*m_report) << "@li There were @b " << m_nbrDataGramsEpu1 << " datagrams from EPU1 in this run with in average <b> " << ((float) m_nbrEventsDataGramsEpu1 / (float) m_nbrDataGramsEpu1) << " </b> events per datagram." << endl;
+    }
+    if (m_nbrDataGramsEpu2 > 0) {
+      (*m_report) << "@li There were @b " << m_nbrDataGramsEpu2 << " datagrams from EPU2 in this run with in average <b> " << ((float) m_nbrEventsDataGramsEpu2 / (float) m_nbrDataGramsEpu2) << " </b> events per datagram." << endl;
+    }
+    if (m_nbrDataGramsSiu0 > 0) {
+      (*m_report) << "@li There were @b " << (m_counterCyclesSiu0+1) << " cycles with a maximum of @b " << m_nbrDataGramsSiu0 << " datagrams per cycle from SIU0 in this run with in average <b> " << ((float) m_nbrEventsDataGramsSiu0 / ((float) m_nbrDataGramsSiu0 * (float) (m_counterCyclesSiu0+1.0))) << " </b> events per datagram." << endl;
+    }
+    if (m_nbrDataGramsSiu1 > 0) {
+      (*m_report) << "@li There were @b " << (m_counterCyclesSiu1+1) << " cycles with a maximum of @b " << m_nbrDataGramsSiu1 << " datagrams per cycle from SIU1 in this run with in average <b> " << ((float) m_nbrEventsDataGramsSiu1 / ((float) m_nbrDataGramsSiu1 * (float) (m_counterCyclesSiu1+1.0))) << " </b> events per datagram." << endl;
     }
 
-    if (m_beginRunDataGramEpu0 != 1) {
-      (*m_report) << "@li Problem! The first datagram in EPU0 was not the first datagram after the start of the run!" << endl;
-    }
-    if (m_firstDataGramEpu0 != 0) {
-      (*m_report) << "@li Problem! The first datagram in EPU0 did not have sequence number 0! It was @b " << m_firstDataGramEpu0 << "." << endl;
-    }
-    if (m_endRunDataGramEpu0 == 0 && m_fullDataGramEpu0==1) {
-      (*m_report) << "@li Problem! The last datagram from EPU0 was not closed because of end of run, but because it was full! Are we missing events?" << endl;
-    }
-    if (m_endRunDataGramEpu0 ==0 && m_fullDataGramEpu0==0) {
-      (*m_report) << "@li Problem! The last datagram from EPU0 was not closed neither because of end of run neither because it was full. See logfile for more details!" << endl;
-    }
-  }
-
-  // EPU1:
-  if (m_nbrEventsDataGramsEpu1 > 0) {
-    if (m_counterDataDiagramsEpu1 != 0) {
-      (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagramsEpu1 << " datagram(s) from EPU1 in this run!" << endl;
-    }
-
-    if (m_beginRunDataGramEpu1 != 1) {
-      (*m_report) << "@li Problem! The first datagram in EPU1 was not the first datagram after the start of the run!" << endl;
-    }
-    if (m_firstDataGramEpu1 != 0) {
-      (*m_report) << "@li Problem! The first datagram in EPU1 did not have sequence number 0! It was @b " << m_firstDataGramEpu1 << "." << endl;
-    }
-    if (m_endRunDataGramEpu1== 0 && m_fullDataGramEpu1==1) {
-      (*m_report) << "@li Problem! The last datagram from EPU1 was not closed because of end of run, but because it was full! Are we missing events?" << endl;
-    }
-    if (m_endRunDataGramEpu1==0 && m_fullDataGramEpu1==0) {
-      (*m_report) << "@li Problem! The last datagram from EPU1 was not closed neither because of end of run neither because it was full. See logfile for more details!" << endl;
-    }
-  }
-
-  // EPU2:
-  if (m_nbrEventsDataGramsEpu2 > 0) {
-    if (m_counterDataDiagramsEpu2 != 0) {
-      (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagramsEpu2 << " datagram(s) from EPU2 in this run!" << endl;
-    }
-
-    if (m_beginRunDataGramEpu2 != 1) {
-      (*m_report) << "@li Problem! The first datagram in EPU2 was not the first datagram after the start of the run!" << endl;
-    }
-    if (m_firstDataGramEpu2 != 0) {
-      (*m_report) << "@li Problem! The first datagram in EPU2 did not have sequence number 0! It was @b " << m_firstDataGramEpu2 << "." << endl;
-    }
-    if (m_endRunDataGramEpu2== 0 && m_fullDataGramEpu2==1) {
-      (*m_report) << "@li Problem! The last datagram from EPU2 was not closed because of end of run, but because it was full! Are we missing events?" << endl;
-    }
-    if (m_endRunDataGramEpu2==0 && m_fullDataGramEpu2==0) {
-      (*m_report) << "@li Problem! The last datagram from EPU2 was not closed neither because of end of run neither because it was full. See logfile for more details!" << endl;
-    }
-  }
-
-  // SIU0
-  if (m_nbrEventsDataGramsSiu0 > 0) {
-    if (m_counterDataDiagramsSiu0 != 0) {
-      (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagramsSiu0 << " datagram(s) from SIU0 in this run!" << endl;
-    }
-
-    if (m_beginRunDataGramSiu0 != 1) {
-      (*m_report) << "@li Problem! The first datagram in SIU0 was not the first datagram after the start of the run!" << endl;
-    }
-    if (m_firstDataGramSiu0 != 0) {
-      (*m_report) << "@li Problem! The first datagram in SIU0 did not have sequence number 0! It was @b " << m_firstDataGramSiu0 << "." << endl;
-    }
-    if (m_endCountDataGramSiu0==0 && m_fullDataGramSiu0==1) {
-      (*m_report) << "@li Problem! The last datagram from SIU0 was not closed because of end of count, but because it was full! Are we missing events?" << endl;
-    }
-    if (m_endCountDataGramSiu0==0 && m_fullDataGramSiu0==0) {
-      (*m_report) << "@li Problem! The last datagram from SIU0 was not closed neither because of end of count nor because it was full. See logfile for more details!" << endl;
-    }
-  }
-
-  // SIU1
-  if (m_nbrEventsDataGramsSiu1 > 0) {
-    if (m_counterDataDiagramsSiu1 != 0) {
-      (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagramsSiu1 << " datagram(s) from SIU1 in this run!" << endl;
-    }
-
-    if (m_beginRunDataGramSiu1 != 1) {
-      (*m_report) << "@li Problem! The first datagram in EPU1 was not the first datagram after the start of the run!" << endl;
-    }
-    if (m_firstDataGramSiu1 != 0) {
-      (*m_report) << "@li Problem! The first datagram in SIU1 did not have sequence number 0! It was @b " << m_firstDataGramSiu1 << "." << endl;
-    }
-    if (m_endCountDataGramSiu1==0 && m_fullDataGramSiu1==1) {
-      (*m_report) << "@li Problem! The last datagram from SIU1 was not closed because of end of count, but because it was full! Are we missing events?" << endl;
-    }
-    if (m_endCountDataGramSiu1==0 && m_fullDataGramSiu1==0) {
-      (*m_report) << "@li Problem! The last datagram from SIU1 was not closed neither because of end of count nor because it was full. See logfile for more details!" << endl;
-    }
-  }
 
 
-  // EPU0 datagram gaps:
-  if (m_nbrEventsDataGramsEpu0 > 0) {
-    if (m_datagramGapsEPU0 != 0) {
-      (*m_report) << "   " << endl;
-      (*m_report) << "@li Problem! There were @b " << m_datagramGapsEPU0 << " datagram sequence number gaps from EPU0 in this run! " ;
-      if (m_counterDataDiagramsEpu0 == 0) {
-        (*m_report) << "Since no datagrams were actually dropped this could be the 4.2s CCSDS time shift!" << endl;
+    // EPU0:
+    if (m_nbrEventsDataGramsEpu0 > 0) {
+      if (m_counterDataDiagramsEpu0 != 0) {
+         (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagramsEpu0 << " datagram(s) from EPU0 in this run!" << endl;
       }
-    }  
-  }
-  // EPU1 datagram gaps:
-  if (m_nbrEventsDataGramsEpu1 > 0) {
-    if (m_datagramGapsEPU1 != 0) {
-      (*m_report) << "   " << endl;
-      (*m_report) << "@li Problem! There were @b " << m_datagramGapsEPU1 << " datagram sequence number gaps from EPU1 in this run! ";
-      if (m_counterDataDiagramsEpu1 == 0) {
-        (*m_report) << "Since no datagrams were actually dropped this could be the 4.2s CCSDS time shift!" << endl;
+
+      if (m_beginRunDataGramEpu0 != 1) {
+        (*m_report) << "@li Problem! The first datagram in EPU0 was not the first datagram after the start of the run!" << endl;
       }
-    }  
-  }
-  // EPU2 datagram gaps:
-  if (m_nbrEventsDataGramsEpu2 > 0) {
-    if (m_datagramGapsEPU2 != 0) {
-      (*m_report) << "   " << endl;
-      (*m_report) << "@li Problem! There were @b " << m_datagramGapsEPU2 << " datagram sequence number gaps from EPU2 in this run! " ;
-      if (m_counterDataDiagramsEpu2 == 0) {
-        (*m_report) << "Since no datagrams were actually dropped this could be the 4.2s CCSDS time shift!" << endl;
+      if (m_firstDataGramEpu0 != 0) {
+        (*m_report) << "@li Problem! The first datagram in EPU0 did not have sequence number 0! It was @b " << m_firstDataGramEpu0 << "." << endl;
       }
-    }  
-  }
-  // SIU0 datagram gaps:
-  if (m_nbrEventsDataGramsSiu0 > 0) {
-    if (m_datagramGapsSIU0 != 0) {
-      (*m_report) << "   " << endl;
-      (*m_report) << "@li Problem! There were @b " << m_datagramGapsSIU0 << " datagram sequence number gaps from SIU0 in this run! " ;
-      if (m_counterDataDiagramsSiu0 == 0) {
-        (*m_report) << "Since no datagrams were actually dropped this could be the 4.2s CCSDS time shift!" << endl;
+      if (m_endRunDataGramEpu0 == 0 && m_fullDataGramEpu0==1) {
+        (*m_report) << "@li Problem! The last datagram from EPU0 was not closed because of end of run, but because it was full! Are we missing events?" << endl;
       }
-    }  
-  }
-  // SIU1 datagram gaps:
-  if (m_nbrEventsDataGramsSiu1 > 0) {
-    if (m_datagramGapsSIU1 != 0) {
-      (*m_report) << "   " << endl;
-      (*m_report) << "@li Problem! There were @b " << m_datagramGapsSIU1 << " datagram sequence number gaps from SIU1 in this run! " ;
-      if (m_counterDataDiagramsSiu1 == 0) {
-        (*m_report) << "Since no datagrams were actually dropped this could be the 4.2s CCSDS time shift!" << endl;
+      if (m_endRunDataGramEpu0 ==0 && m_fullDataGramEpu0==0) {
+        (*m_report) << "@li Problem! The last datagram from EPU0 was not closed neither because of end of run neither because it was full. See logfile for more details!" << endl;
       }
-    }  
-  }
+    }
+
+    // EPU1:
+    if (m_nbrEventsDataGramsEpu1 > 0) {
+      if (m_counterDataDiagramsEpu1 != 0) {
+        (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagramsEpu1 << " datagram(s) from EPU1 in this run!" << endl;
+      }
+
+      if (m_beginRunDataGramEpu1 != 1) {
+        (*m_report) << "@li Problem! The first datagram in EPU1 was not the first datagram after the start of the run!" << endl;
+      }
+      if (m_firstDataGramEpu1 != 0) {
+        (*m_report) << "@li Problem! The first datagram in EPU1 did not have sequence number 0! It was @b " << m_firstDataGramEpu1 << "." << endl;
+      }
+      if (m_endRunDataGramEpu1== 0 && m_fullDataGramEpu1==1) {
+        (*m_report) << "@li Problem! The last datagram from EPU1 was not closed because of end of run, but because it was full! Are we missing events?" << endl;
+      }
+      if (m_endRunDataGramEpu1==0 && m_fullDataGramEpu1==0) {
+        (*m_report) << "@li Problem! The last datagram from EPU1 was not closed neither because of end of run neither because it was full. See logfile for more details!" << endl;
+      }
+    }
+
+    // EPU2:
+    if (m_nbrEventsDataGramsEpu2 > 0) {
+      if (m_counterDataDiagramsEpu2 != 0) {
+        (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagramsEpu2 << " datagram(s) from EPU2 in this run!" << endl;
+      }
+
+      if (m_beginRunDataGramEpu2 != 1) {
+        (*m_report) << "@li Problem! The first datagram in EPU2 was not the first datagram after the start of the run!" << endl;
+      }
+      if (m_firstDataGramEpu2 != 0) {
+        (*m_report) << "@li Problem! The first datagram in EPU2 did not have sequence number 0! It was @b " << m_firstDataGramEpu2 << "." << endl;
+      }
+      if (m_endRunDataGramEpu2== 0 && m_fullDataGramEpu2==1) {
+        (*m_report) << "@li Problem! The last datagram from EPU2 was not closed because of end of run, but because it was full! Are we missing events?" << endl;
+      }
+      if (m_endRunDataGramEpu2==0 && m_fullDataGramEpu2==0) {
+        (*m_report) << "@li Problem! The last datagram from EPU2 was not closed neither because of end of run neither because it was full. See logfile for more details!" << endl;
+      }
+    }
+
+    // SIU0
+    if (m_nbrEventsDataGramsSiu0 > 0) {
+      if (m_counterDataDiagramsSiu0 != 0) {
+        (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagramsSiu0 << " datagram(s) from SIU0 in this run!" << endl;
+      }
+
+      if (m_beginRunDataGramSiu0 != 1) {
+        (*m_report) << "@li Problem! The first datagram in SIU0 was not the first datagram after the start of the run!" << endl;
+      }
+      if (m_firstDataGramSiu0 != 0) {
+        (*m_report) << "@li Problem! The first datagram in SIU0 did not have sequence number 0! It was @b " << m_firstDataGramSiu0 << "." << endl;
+      }
+      if (m_endCountDataGramSiu0==0 && m_fullDataGramSiu0==1) {
+        (*m_report) << "@li Problem! The last datagram from SIU0 was not closed because of end of count, but because it was full! Are we missing events?" << endl;
+      }
+      if (m_endCountDataGramSiu0==0 && m_fullDataGramSiu0==0) {
+        (*m_report) << "@li Problem! The last datagram from SIU0 was not closed neither because of end of count nor because it was full. See logfile for more details!" << endl;
+      }
+    }
+
+    // SIU1
+    if (m_nbrEventsDataGramsSiu1 > 0) {
+      if (m_counterDataDiagramsSiu1 != 0) {
+        (*m_report) << "@li Problem! We dropped  @b " << m_counterDataDiagramsSiu1 << " datagram(s) from SIU1 in this run!" << endl;
+      }
+
+      if (m_beginRunDataGramSiu1 != 1) {
+        (*m_report) << "@li Problem! The first datagram in EPU1 was not the first datagram after the start of the run!" << endl;
+      }
+      if (m_firstDataGramSiu1 != 0) {
+        (*m_report) << "@li Problem! The first datagram in SIU1 did not have sequence number 0! It was @b " << m_firstDataGramSiu1 << "." << endl;
+      }
+      if (m_endCountDataGramSiu1==0 && m_fullDataGramSiu1==1) {
+        (*m_report) << "@li Problem! The last datagram from SIU1 was not closed because of end of count, but because it was full! Are we missing events?" << endl;
+      }
+      if (m_endCountDataGramSiu1==0 && m_fullDataGramSiu1==0) {
+        (*m_report) << "@li Problem! The last datagram from SIU1 was not closed neither because of end of count nor because it was full. See logfile for more details!" << endl;
+      }
+    }
 
 
+    // EPU0 datagram gaps:
+    if (m_nbrEventsDataGramsEpu0 > 0) {
+      if (m_datagramGapsEPU0 != 0) {
+        (*m_report) << "   " << endl;
+        (*m_report) << "@li Problem! There were @b " << m_datagramGapsEPU0 << " datagram sequence number gaps from EPU0 in this run! " ;
+        if (m_counterDataDiagramsEpu0 == 0) {
+          (*m_report) << "Since no datagrams were actually dropped this could be the 4.2s CCSDS time shift!" << endl;
+        }
+      }  
+    }
+    // EPU1 datagram gaps:
+    if (m_nbrEventsDataGramsEpu1 > 0) {
+      if (m_datagramGapsEPU1 != 0) {
+        (*m_report) << "   " << endl;
+        (*m_report) << "@li Problem! There were @b " << m_datagramGapsEPU1 << " datagram sequence number gaps from EPU1 in this run! ";
+        if (m_counterDataDiagramsEpu1 == 0) {
+          (*m_report) << "Since no datagrams were actually dropped this could be the 4.2s CCSDS time shift!" << endl;
+        }
+      }  
+    }
+    // EPU2 datagram gaps:
+    if (m_nbrEventsDataGramsEpu2 > 0) {
+      if (m_datagramGapsEPU2 != 0) {
+        (*m_report) << "   " << endl;
+        (*m_report) << "@li Problem! There were @b " << m_datagramGapsEPU2 << " datagram sequence number gaps from EPU2 in this run! " ;
+        if (m_counterDataDiagramsEpu2 == 0) {
+          (*m_report) << "Since no datagrams were actually dropped this could be the 4.2s CCSDS time shift!" << endl;
+        }
+      }  
+    }
+    // SIU0 datagram gaps:
+    if (m_nbrEventsDataGramsSiu0 > 0) {
+      if (m_datagramGapsSIU0 != 0) {
+        (*m_report) << "   " << endl;
+        (*m_report) << "@li Problem! There were @b " << m_datagramGapsSIU0 << " datagram sequence number gaps from SIU0 in this run! " ;
+        if (m_counterDataDiagramsSiu0 == 0) {
+          (*m_report) << "Since no datagrams were actually dropped this could be the 4.2s CCSDS time shift!" << endl;
+        }
+      }  
+    }
+    // SIU1 datagram gaps:
+    if (m_nbrEventsDataGramsSiu1 > 0) {
+      if (m_datagramGapsSIU1 != 0) {
+        (*m_report) << "   " << endl;
+        (*m_report) << "@li Problem! There were @b " << m_datagramGapsSIU1 << " datagram sequence number gaps from SIU1 in this run! " ;
+        if (m_counterDataDiagramsSiu1 == 0) {
+          (*m_report) << "Since no datagrams were actually dropped this could be the 4.2s CCSDS time shift!" << endl;
+        }
+      }  
+    }
 
 
+    (*m_report) << "   " << endl;
 
-  (*m_report) << "   " << endl;
+    (*m_report) << "@li There are @b " << m_nBadEvts              << " bad events as defined by Offline (catch all flag)." << endl;
 
-  (*m_report) << "@li There are @b " << m_nBadEvts              << " bad events as defined by Offline (catch all flag)." << endl;
+    (*m_report) << "@li There are @b " << m_eventTrgParityError   << " events with Trigger Parity errors. " << endl;
+    (*m_report) << "@li There are @b " << m_eventPacketError      << " events with Packet errors. " << endl;
 
-  (*m_report) << "@li There are @b " << m_eventTrgParityError   << " events with Trigger Parity errors. " << endl;
-  (*m_report) << "@li There are @b " << m_eventPacketError      << " events with Packet errors. " << endl;
+    (*m_report) << "@li There are @b " << m_eventPhaseError       << " events with Phasing errors." << endl;
+    (*m_report) << "@li There are @b " << m_eventTimeoutError     << " events with Timeout errors." << endl;
 
-  (*m_report) << "@li There are @b " << m_eventPhaseError       << " events with Phasing errors." << endl;
-  (*m_report) << "@li There are @b " << m_eventTimeoutError     << " events with Timeout errors." << endl;
+    (*m_report) << "@li There are @b " << m_nAcdOddParityError    << " events with ACD Odd Parity errors. " << endl;
+    (*m_report) << "@li There are @b " << m_nAcdHeaderParityError << " events with ACD 'Header Parity errors' (there should _never_ be any)." << endl;
 
-  (*m_report) << "@li There are @b " << m_nAcdOddParityError    << " events with ACD Odd Parity errors. " << endl;
-  (*m_report) << "@li There are @b " << m_nAcdHeaderParityError << " events with ACD 'Header Parity errors' (there should _never_ be any)." << endl;
+    (*m_report) << "@li There are @b " << m_eventBadLdfStatus     << " events with a bad LDF status flag. " << endl;
 
-  (*m_report) << "@li There are @b " << m_eventBadLdfStatus     << " events with a bad LDF status flag. " << endl;
+    (*m_report) << "@li There are @b " << m_eventBadEventSequence << " events with event sequence issues (not increasing monotonically)." << endl;
 
-  (*m_report) << "@li There are @b " << m_eventBadEventSequence << " events with event sequence issues (not increasing monotonically)." << endl;
+    (*m_report) << "@li There are @b " << m_eventTemError         << " events with TEM errors (includes TKR FIFO full errors)." << endl;
 
-  (*m_report) << "@li There are @b " << m_eventTemError         << " events with TEM errors (includes TKR FIFO full errors)." << endl;
+    (*m_report) << "@li There are @b " << m_eventGtccError        << " events with GTCC errors." << endl;
+    (*m_report) << "@li There are @b " << m_eventGtccFifo         << " events with GTCC FIFO errors." << endl;
+    (*m_report) << "@li There are @b " << m_eventGtccHdrParity    << " events with GTCC Header Parity errors." << endl;
+    (*m_report) << "@li There are @b " << m_eventGtccWcParity     << " events with GTCC Word Count Parity errors." << endl;
+    (*m_report) << "@li There are @b " << m_eventGtccDataParity   << " events with GTCC Data Parity errors." << endl; 
+    (*m_report) << "@li There are @b " << m_eventGtccTimeout      << " events with GTCC Timeout errors." << endl;
 
-  (*m_report) << "@li There are @b " << m_eventGtccError        << " events with GTCC errors." << endl;
-  (*m_report) << "@li There are @b " << m_eventGtccFifo         << " events with GTCC FIFO errors." << endl;
-  (*m_report) << "@li There are @b " << m_eventGtccHdrParity    << " events with GTCC Header Parity errors." << endl;
-  (*m_report) << "@li There are @b " << m_eventGtccWcParity     << " events with GTCC Word Count Parity errors." << endl;
-  (*m_report) << "@li There are @b " << m_eventGtccDataParity   << " events with GTCC Data Parity errors." << endl; 
-  (*m_report) << "@li There are @b " << m_eventGtccTimeout      << " events with GTCC Timeout errors." << endl;
+    (*m_report) << "@li There are @b " << m_eventGtrcSummary      << " events with GTRC Summary errors." << endl;
+    (*m_report) << "@li There are @b " << m_eventGtrcPhase        << " events with GTRC Phase errors." << endl;
 
-  (*m_report) << "@li There are @b " << m_eventGtrcSummary      << " events with GTRC Summary errors." << endl;
-  (*m_report) << "@li There are @b " << m_eventGtrcPhase        << " events with GTRC Phase errors." << endl;
-
-  (*m_report) << "@li There are @b " << m_eventGtfePhase        << " events with GTFE Phase errors." << endl;
-  (*m_report) << "@li There are @b " << m_eventGcccError        << " events with GCCC errors." << endl;
+    (*m_report) << "@li There are @b " << m_eventGtfePhase        << " events with GTFE Phase errors." << endl;
+    (*m_report) << "@li There are @b " << m_eventGcccError        << " events with GCCC errors." << endl;
     
-  (*m_report) << "@li There are @b " << m_eventBadTkrRecon      << " events passing the Offline Bad TKR Recon criteria." << endl;
+    (*m_report) << "@li There are @b " << m_eventBadTkrRecon      << " events passing the Offline Bad TKR Recon criteria." << endl;
+  }
 
   if(m_reconFile) {
     (*m_report) << "<p>The Recon file is: @em " << m_reconFile->GetName() << "</p>" << endl;
