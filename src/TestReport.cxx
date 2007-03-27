@@ -2723,6 +2723,9 @@ void TestReport::generateReport()
   if (m_digiFile) {
     (*m_report) << "In the digi file @em " << m_digiFile->GetName() << endl;
   }
+  if (m_digiFile && m_reconFile) {
+    (*m_report) << " and " << endl;
+  }
   if (m_reconFile) {
     (*m_report) << "In the recon file @em " << m_reconFile->GetName() << endl;
   }
