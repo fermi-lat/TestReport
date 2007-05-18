@@ -16,6 +16,9 @@
 #include "reconRootData/AcdTkrIntersection.h"
 #include "digiRootData/AcdDigi.h"
 
+#include "calibTkrUtil/TkrNoiseOcc.h"
+
+
 /**
  * \class TestReport
  * \brief TestReport produces SVAC reports for both digi and recon data
@@ -771,6 +774,8 @@ class TestReport {
   TH2F* m_AcdMipMapA;
   TH2F* m_AcdMipMapB;
 
-
+  // for TKR noise analysis report
+  TkrNoiseOcc* m_tkrNoiseOcc;
+  TDirectory* m_tkrNoiseOcc_dir;
 };
 #endif

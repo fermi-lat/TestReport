@@ -234,6 +234,7 @@ TestReport::TestReport(const char* dir, const char* prefix,
   r += prefix;
   r += "_hist.root";
   m_outputFile = new TFile(r.c_str(), "RECREATE");
+  m_tkrNoiseOcc_dir = m_outputFile->mkdir("TkrNoiseOcc"); // for TKR noise histograms
 
   std::fill((int*) m_nFec, ((int*) m_nFec)+g_nTower*g_nLayer*g_nView*2, 12);
 
@@ -648,12 +649,15 @@ TestReport::TestReport(const char* dir, const char* prefix,
   att.set("ACD GEM ID","MIPs");
   att.m_canRebin = false;
   setHistParameters(m_AcdMipMapB,att);
+ 
+  m_tkrNoiseOcc = new TkrNoiseOcc();
   
 }
 
 TestReport::~TestReport()
 {
   if(m_outputFile) {
+    m_tkrNoiseOcc->writeAnaToHis(m_tkrNoiseOcc_dir);
     m_outputFile->cd();
     m_outputFile->Write(0, TObject::kOverwrite);
     m_outputFile->Close();
@@ -667,6 +671,8 @@ TestReport::~TestReport()
   delete m_digiFile;
   delete m_reconFile;
   delete m_report;
+
+  delete m_tkrNoiseOcc;
 }
 
 void TestReport::setHistParameters(TH1* h, const HistAttribute& att)
@@ -997,7 +1003,10 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   int previousDatagramGapsSIU0 = 0;
   int previousDatagramGapsSIU1 = 0;
 
-
+  //TkrNoiseOcc::initAnalysis(int nEvent, int evt_interval)
+  m_tkrNoiseOcc->initAnalysis(m_nEvent, 1000);
+  m_tkrNoiseOcc->setDigiEvtPtr(m_digiEvent);
+  
   // Loop over events:
   for(int iEvent = 0; iEvent != m_nEvent; ++iEvent) {
 
@@ -1022,7 +1031,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       m_digiBranch->GetEntry(iEvent);
 
       analyzeDigiTree();
-
+      m_tkrNoiseOcc->anaDigiEvt(); // TKR noise analysis
 
       // Gaps in datagram sequence number?
       int mycpuNumber      = m_digiEvent->getMetaEvent().datagram().crate(); 
