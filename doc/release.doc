@@ -343,3 +343,9 @@ v3r6p40	- Added plots for number of ticks between 1-PPS.
 
 April 2, 2007: awb
 v3r6p41	- Added line break between digi and recon files at the top of the report.
+
+May 17, 2007: mutsumi
+v3r7 - move TkrNoiseOcc module from svac/EngineeringModelRoot
+       add TKR noise analysis in TestReport digi analysis
+       The output root hist file includes the directory "TkrNoiseOcc"
+       It is used to generate TKR noise report
