@@ -514,6 +514,7 @@ class TestReport {
   Int_t m_nbrMissingCpuPps;
   Int_t m_nbrMissingLatPps;
   Int_t m_nbrMissingTimeTone;
+  Int_t m_nbrEarlyEvent;
 
   /// percentage of events with TKR trigger but less than 6 digis in a tower
   TGraph* m_nDigi;
