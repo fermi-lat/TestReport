@@ -145,6 +145,21 @@ fillHistMap(const char* fileName, strToIntMap& theMap, const strToIntMap& mergeC
 	theMap[tString] = itrFind->second;
       }
     }
+    // if the histogram name contains "ZZ" replace that with each of 16 tower numbers
+    unsigned int towerStPos = tokens[0].find("ZZ");
+    if ( towerStPos == std::string::npos ) {
+      theMap[ tokens[0] ] = itrFind->second;
+    } else {
+      for ( int iTower(0); iTower < 16; iTower++ ) {
+	const char tName[16][3] = {"0","1","2","3",
+				   "4","5","6","7",
+				   "8","9","10","11",
+				   "12","13","14","15"};
+	std::string tString = tokens[0];
+	tString.replace(towerStPos,2,tName[iTower]);
+	theMap[tString] = itrFind->second;
+      }
+    }
 
     // ok, on to the next line
     inputFile.getline(buffer,bufSize);
