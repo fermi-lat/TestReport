@@ -130,36 +130,51 @@ fillHistMap(const char* fileName, strToIntMap& theMap, const strToIntMap& mergeC
       return -4;
     }  
 
-    // if the histogram name contains "XX" replace that with each of 16 tower numbers
+    // if the histogram name contains "XX" or "TowerLoop" replace that with each of 16 tower numbers
+    bool loopovertwrs_1(0),loopovertwrs_2(0);
     unsigned int towerStPos = tokens[0].find("XX");
     if ( towerStPos == std::string::npos ) {
-      theMap[ tokens[0] ] = itrFind->second;
-    } else {
-      for ( int iTower(0); iTower < 16; iTower++ ) {
+      towerStPos = tokens[0].find("TowerLoop");
+      if ( towerStPos != std::string::npos )
+	loopovertwrs_2 = 1;
+    }
+    else
+      loopovertwrs_1 = 1;
+
+
+   
+    if(!(loopovertwrs_1||loopovertwrs_2)){
+      theMap[ tokens[0] ] = itrFind->second;}
+    else{
+      if(loopovertwrs_1){
+	// if the histogram name contains "XX" replace that with each of 16 tower numbers
 	const char tName[16][3] = {"00","01","02","03",
 				   "04","05","06","07",
 				   "08","09","10","11",
 				   "12","13","14","15"};
-	std::string tString = tokens[0];
-	tString.replace(towerStPos,2,tName[iTower]);
-	theMap[tString] = itrFind->second;
+	for ( int iTower(0); iTower < 16; iTower++ ) {
+	  std::string tString = tokens[0];
+	  tString.replace(towerStPos,2,tName[iTower]);
+	  theMap[tString] = itrFind->second;
+	}
       }
-    }
-    // if the histogram name contains "ZZ" replace that with each of 16 tower numbers
-    unsigned int towerStPos = tokens[0].find("ZZ");
-    if ( towerStPos == std::string::npos ) {
-      theMap[ tokens[0] ] = itrFind->second;
-    } else {
-      for ( int iTower(0); iTower < 16; iTower++ ) {
+      else{
+	// if the histogram name contains "TowerLoop" replace that with each of 16 tower numberss
+	std::string st2replace("TowerLoop");
 	const char tName[16][3] = {"0","1","2","3",
 				   "4","5","6","7",
 				   "8","9","10","11",
 				   "12","13","14","15"};
-	std::string tString = tokens[0];
-	tString.replace(towerStPos,2,tName[iTower]);
-	theMap[tString] = itrFind->second;
+	for ( int iTower(0); iTower < 16; iTower++ ) {
+	  std::string tString = tokens[0];
+	  tString.replace(towerStPos,st2replace.size(),tName[iTower]);
+	  //std::cout << "String after replacement: " << tString.c_str() << std::endl;
+	  theMap[tString] = itrFind->second;
+	}
+	
       }
     }
+   
 
     // ok, on to the next line
     inputFile.getline(buffer,bufSize);
