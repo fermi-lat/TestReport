@@ -352,3 +352,6 @@ v3r7 - move TkrNoiseOcc module from svac/EngineeringModelRoot
 
 June 29, 2007: awb
 v3r7p1 - Added early event counter.
+
+July 18, 2007: awb
+v3r7p2 - Retagging TRdp20070706 (changes to MergeHistFiles.cxx).
