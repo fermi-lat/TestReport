@@ -2796,7 +2796,7 @@ void TestReport::generateReport()
 
 
     if (m_deltaSequenceNbrEvents != 0) {
-      (*m_report) << "@li The number of events in the digi file does not agree with the extended GEM sequence counter! The difference is @b " << m_deltaSequenceNbrEvents << " events. Is the onboard filter running?" << endl;
+      (*m_report) << "@li The number of events in the digi file does not agree with the extended GEM sequence counter! The difference is @b " << m_deltaSequenceNbrEvents << " events. Is the onboard filter running? If the differences is 2 it may be because I'm not properly accounting for the sweep events being sent to both EPUs." << endl;
     } else {
       (*m_report) << "@li The number of events in the digi file agrees with the extended GEM sequence counter!" << endl;
     }
