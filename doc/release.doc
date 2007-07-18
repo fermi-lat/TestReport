@@ -358,3 +358,6 @@ v3r7p2 - Retagging TRdp20070706 (changes to MergeHistFiles.cxx).
 
 July 18, 2007: awb
 v3r7p3	- Added warning about sweep events not properly accounted for in extra event warning.
+
+July 18, 2007: awb
+v3r7p4	- Fixed typo in sweep event warning message.
