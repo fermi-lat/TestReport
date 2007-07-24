@@ -511,6 +511,7 @@ class TestReport {
 
   Int_t m_nbrIncomplete;
   Int_t m_nbrMissingGps;
+  Int_t m_isSourceGPS;
   Int_t m_nbrMissingCpuPps;
   Int_t m_nbrMissingLatPps;
   Int_t m_nbrMissingTimeTone;

@@ -172,7 +172,8 @@ TestReport::TestReport(const char* dir, const char* prefix,
     m_identicalTimeTones(0),
     m_nbrFlywheeling(0), 
     m_nbrIncomplete(0), 
-    m_nbrMissingGps(0), 
+    m_nbrMissingGps(0),
+    m_isSourceGPS(0), 
     m_nbrMissingCpuPps(0), 
     m_nbrMissingLatPps(0), 
     m_nbrMissingTimeTone(0),
@@ -865,6 +866,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
   m_nbrFlywheeling     = 0;
   m_nbrIncomplete      = 0;
   m_nbrMissingGps      = 0;
+  m_isSourceGPS        = 0;
   m_nbrMissingCpuPps   = 0;
   m_nbrMissingLatPps   = 0;
   m_nbrMissingTimeTone = 0;  
@@ -1530,6 +1532,7 @@ void TestReport::analyzeTrees(const char* mcFileName="mc.root",
       }
       if (m_digiEvent->getMetaEvent().time().current().missingGps() != 0) {
         m_nbrMissingGps++;
+        m_isSourceGPS++;
       }
       if (m_digiEvent->getMetaEvent().time().current().missingCpuPps() != 0) {
         m_nbrMissingCpuPps++;
@@ -2802,7 +2805,8 @@ void TestReport::generateReport()
     }
 
     (*m_report) << "   " << endl;
-    (*m_report) << "@li There were @b " << m_nbrMissingTimeTone << " events with a missing Time tone, @b " << m_nbrFlywheeling << " flywheeling events, @b " << m_nbrIncomplete << " events with an incomplete time tone, @b " << m_nbrEarlyEvent << " early events, @b " << m_nbrMissingGps << " events with a missing GPS lock, @b " << m_nbrMissingCpuPps << " events with a missing 1-PPS signal at CPU level and @b " << m_nbrMissingLatPps << " events with a missing 1-PPS signal at LAT level." << endl; 
+    //    (*m_report) << "@li There were @b " << m_nbrMissingTimeTone << " events with a missing Time tone, @b " << m_nbrFlywheeling << " flywheeling events, @b " << m_nbrIncomplete << " events with an incomplete time tone, @b " << m_nbrEarlyEvent << " early events, @b " << m_nbrMissingGps << " events with a missing GPS lock, @b " << m_nbrMissingCpuPps << " events with a missing 1-PPS signal at CPU level and @b " << m_nbrMissingLatPps << " events with a missing 1-PPS signal at LAT level." << endl; 
+    (*m_report) << "@li There were @b " << m_nbrMissingTimeTone << " events with a missing Time tone, @b " << m_nbrFlywheeling << " flywheeling events, @b " << m_nbrIncomplete << " events with an incomplete time tone, @b " << m_nbrEarlyEvent << " early events, @b " << m_isSourceGPS << " events where GPS is the source, @b " << m_nbrMissingCpuPps << " events with a missing 1-PPS signal at CPU level and @b " << m_nbrMissingLatPps << " events with a missing 1-PPS signal at LAT level." << endl; 
 
     if (m_extendedCountersFlag != 0) {
       (*m_report) << "@li Problem! At least one of the extended counters decreased from one event to the next one  @b " << m_extendedCountersFlag << " times! Check the log file for more details." << endl;

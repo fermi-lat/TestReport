@@ -361,3 +361,6 @@ v3r7p3	- Added warning about sweep events not properly accounted for in extra ev
 
 July 18, 2007: awb
 v3r7p4	- Fixed typo in sweep event warning message.
+
+July 24, 2007: awb
+v3r7p5	- Replaced m_nbrMissingGps with m_isSourceGPS.
