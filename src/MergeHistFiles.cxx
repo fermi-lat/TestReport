@@ -85,8 +85,7 @@ initMergeCodeMap(strToIntMap& theMap) {
 
 //
 // load up the map of how to fill the histograms
-int 
-fillHistMap(const char* fileName, strToIntMap& theMap, const strToIntMap& mergeCodes) { 
+int fillHistMap(const char* fileName, strToIntMap& theMap, const strToIntMap& mergeCodes) { 
 
   // open file
   std::ifstream inputFile(fileName);
@@ -98,6 +97,84 @@ fillHistMap(const char* fileName, strToIntMap& theMap, const strToIntMap& mergeC
   // grab one line
   const int bufSize(200); char buffer[bufSize];
   inputFile.getline(buffer,bufSize);
+
+
+  // Definition of Name loops (tower->16, callayer ->8...)
+  // The histogram names in config file will be scanned for the flags 
+  // specified here (i.e. TowerLoop) and N names (i.e. 16 for TowerLoop) 
+  // will be created, each of them with a different suffix (vector component).
+  // The entity relating flags with components is latloops, which 
+  // is defined right here
+
+  typedef std::map<std::string,std::vector<std::string> > LoopMap;
+  LoopMap latloops;
+  
+  std::vector<unsigned int> vLoopDim;
+  std::vector<std::string> vLoopFlags;
+  vLoopFlags.push_back("TowerLoop");
+  vLoopDim.push_back(16);
+  vLoopFlags.push_back("CalLayerLoop");
+  vLoopDim.push_back(8);
+  vLoopFlags.push_back("CalColumnLoop");
+  vLoopDim.push_back(12);
+  vLoopFlags.push_back("AcdTileLoop");
+  vLoopDim.push_back(128);
+
+  // special tower loop (not for monitoring)
+  vLoopFlags.push_back("XX");
+  vLoopDim.push_back(16);
+  
+  // create vector of indices
+  char charindex[5];
+  for(unsigned int iloop = 0; iloop < vLoopFlags.size()-1; iloop++){
+    
+    std::vector<std::string> vl;
+    
+    for(unsigned int i = 0; i < vLoopDim[iloop];i++){
+      sprintf(charindex,"%d",i);
+      vl.push_back(charindex);
+    }
+    latloops[vLoopFlags[iloop]] = vl;
+  }
+
+  // The XX loop is a special one... 
+
+  std::vector<std::string> vl;
+  vl.push_back("00");
+  vl.push_back("01");
+  vl.push_back("02");
+  vl.push_back("03");
+  vl.push_back("04");
+  vl.push_back("05");
+  vl.push_back("06");
+  vl.push_back("07");
+  vl.push_back("08");
+  vl.push_back("09");
+  vl.push_back("10");
+  vl.push_back("11");
+  vl.push_back("12");
+  vl.push_back("13");
+  vl.push_back("14");
+  vl.push_back("15");
+
+  latloops[vLoopFlags[vLoopFlags.size()-1]] = vl;
+  
+  // print latloops
+  /*
+  for(LoopMap::const_iterator itr = latloops.begin();
+      itr != latloops.end(); itr++){
+
+    std::cout << "Printing components for loop " 
+	      << itr->first.c_str() << std::endl << std::endl;
+    
+    for(unsigned int index = 0; index < itr->second.size();index++){
+      std::cout << itr->second[index].c_str() << "\t";
+    }
+    std::cout << std::endl << std::endl;
+    
+  }
+  */
+
 
   // loop until EOF
   while ( ! inputFile.eof() ) {
@@ -130,52 +207,96 @@ fillHistMap(const char* fileName, strToIntMap& theMap, const strToIntMap& mergeC
       return -4;
     }  
 
-    // if the histogram name contains "XX" or "TowerLoop" replace that with each of 16 tower numbers
-    bool loopovertwrs_1(0),loopovertwrs_2(0);
-    unsigned int towerStPos = tokens[0].find("XX");
-    if ( towerStPos == std::string::npos ) {
-      towerStPos = tokens[0].find("TowerLoop");
-      if ( towerStPos != std::string::npos )
-	loopovertwrs_2 = 1;
-    }
-    else
-      loopovertwrs_1 = 1;
-
-
    
-    if(!(loopovertwrs_1||loopovertwrs_2)){
-      theMap[ tokens[0] ] = itrFind->second;}
+    // Checking (and making) loops using object latloops (defined above)
+    /*
+    two steps process
+    1- Creation of object LoopMap LoopsInHistoName;
+    2 - Replacing names with loops and filling theMap object
+    */
+
+    // Step 1
+    // Creation and filling of object containing the loops to 
+    // be done for this particular histogram name
+    LoopMap LoopsInHistoName;
+    std::string::size_type spos(tokens[0].size());
+    for(LoopMap::const_iterator itr = latloops.begin();
+	itr != latloops.end(); itr++){
+      spos = tokens[0].find(itr->first.c_str());
+      if(spos < tokens[0].size()){
+	// this loop is present
+	LoopsInHistoName[itr->first]=itr->second;
+      }
+      
+    }
+  
+    // tmp
+    /*
+    std::cout << "Loops present for histo name " << tokens[0].c_str() << std::endl;
+    for(LoopMap::const_iterator itr = LoopsInHistoName.begin();
+	itr != LoopsInHistoName.end(); itr++){
+      std::cout << itr->first.c_str() << std::endl;
+    }
+    */
+    // endtmp
+    
+   
+    // Step 2
+    // Replacing names with loops and filling theMap object
+
+    if(LoopsInHistoName.size() <1){
+      // std::cout << "No loops" << std::endl;
+      theMap[ tokens[0] ] = itrFind->second; // no loops to be done
+    } 
     else{
-      if(loopovertwrs_1){
-	// if the histogram name contains "XX" replace that with each of 16 tower numbers
-	const char tName[16][3] = {"00","01","02","03",
-				   "04","05","06","07",
-				   "08","09","10","11",
-				   "12","13","14","15"};
-	for ( int iTower(0); iTower < 16; iTower++ ) {
-	  std::string tString = tokens[0];
-	  tString.replace(towerStPos,2,tName[iTower]);
-	  theMap[tString] = itrFind->second;
-	}
-      }
-      else{
-	// if the histogram name contains "TowerLoop" replace that with each of 16 tower numberss
-	std::string st2replace("TowerLoop");
-	const char tName[16][3] = {"0","1","2","3",
-				   "4","5","6","7",
-				   "8","9","10","11",
-				   "12","13","14","15"};
-	for ( int iTower(0); iTower < 16; iTower++ ) {
-	  std::string tString = tokens[0];
-	  tString.replace(towerStPos,st2replace.size(),tName[iTower]);
-	  //std::cout << "String after replacement: " << tString.c_str() << std::endl;
-	  theMap[tString] = itrFind->second;
-	}
+      std::vector<std::string> vhistoname;
+      std::vector<std::string> vhistonametmp;
+      vhistoname.push_back(tokens[0]);
+      
+      for(LoopMap::const_iterator itr = LoopsInHistoName.begin();
+	  itr != LoopsInHistoName.end(); itr++){
+	spos = tokens[0].find(itr->first.c_str());
 	
+	if(spos > tokens[0].size()){
+	  std::cout << "MergeHistFiles::fillHistMap(): ERROR" << std::endl
+		    << "Loop with flag "<<  itr->first.c_str() << " is NOT present in " 
+		    << "histo name " << tokens[0].c_str() << std::endl
+		    << "This should not happen at this point... aborting."<< std::endl;
+	  assert(0);
+	}
+      
+	// drop components from vhistoname to vhistonametmp
+	vhistonametmp.clear();
+	for(unsigned int iname = 0; iname < vhistoname.size();iname++)
+	  vhistonametmp.push_back(vhistoname[iname]);
+	vhistoname.clear();
+	
+	for(unsigned int iname = 0; iname < vhistonametmp.size();iname++){
+	  for(unsigned int index = 0; index < itr->second.size();index++){
+	    std::string tmpstring = vhistonametmp[iname];
+	    tmpstring.replace(spos,itr->first.size(),itr->second[index].c_str());
+	    // std::cout << "String after replacement: " << tmpstring.c_str() << std::endl;
+	    vhistoname.push_back(tmpstring);
+	  }
+	}
       }
+      // tmp
+      /*
+      std::cout << "MergeHistFiles::fillHistMap(): info" << std::endl
+		<< "Histogram names craeted after loop scan are the following ones: "
+		<< std::endl
+		<< std::endl;
+      for(unsigned int i = 0; i < vhistoname.size();i++)
+	std::cout << vhistoname[i].c_str() << std::endl;
+      */
+      // endtmp
+      
+      for(unsigned int i = 0; i < vhistoname.size();i++)
+	theMap[vhistoname[i]] = itrFind->second;
+      
     }
-   
-
+  
+  
     // ok, on to the next line
     inputFile.getline(buffer,bufSize);
   }
