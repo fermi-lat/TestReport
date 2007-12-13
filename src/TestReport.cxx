@@ -2725,7 +2725,7 @@ void TestReport::generateReport()
   (*m_report) << "This report is used in offline data analyses to identify apparent problems in cosmic ray muon and VDG data. <b>Warning! Results from other tests(such as charge injection) should be interpreted with care.</b>" << endl;
 
   (*m_report) << "@section version Software Version" << endl;
-  (*m_report) << "@li EngineeringModel: @b " << m_emVersion << endl;
+  (*m_report) << "@li GlastRelease: @b " << m_emVersion << endl;
   (*m_report) << "@li TestReport: @b " << m_version << endl;
   /*
   (*m_report) << "@section calibversion Serial no. of calibration constants (-9999 means no constants were used.)" << endl;
