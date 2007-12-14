@@ -35,7 +35,7 @@ my $htmlFile = 'index.html';
 my $pwd =  $ENV{PWD};
 
 my $appRoot = '/nfs/farm/g/glast/u33/borgland/Releases/GlastRelease-v13r5p5/Code-opt/svac/';
-my $testReportVersion = 'v4r0p1';
+my $testReportVersion = 'v4r1';
 my $emVersion = 'v13r5p5';
 my $cmtPath = "$appRoot:/nfs/farm/g/glast/u30/builds/rh9_gcc32opt/GlastRelease/GlastRelease-$emVersion";
 my $cmtDir = "$appRoot/TestReport/$testReportVersion/cmt";

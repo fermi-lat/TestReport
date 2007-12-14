@@ -2285,7 +2285,9 @@ void TestReport::analyzeReconTree()
 	m_AcdEfficMap->Fill( acdGemId );
 	const AcdHit* acdHit = acdHitMap[ acdInter->getTileId().getId() ];	
 	if ( acdHit != 0 ) {
-	  Double_t angleToPlane = acdInter->getCosTheta();
+          Double_t tileWidth = int( acdInter->getTileId().getId() / 10 ) == 2 ? 12. : 10.;
+          Double_t pathLength = acdInter->getPathLengthInTile();
+	  Double_t angleToPlane = tileWidth / pathLength; 
 	  Double_t mipsA = acdHit->getMips(AcdHit::A) * angleToPlane;
 	  Double_t mipsB = acdHit->getMips(AcdHit::B) * angleToPlane;
 	  m_AcdMipMapA->Fill(acdGemId,mipsA);

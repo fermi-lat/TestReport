@@ -1,8 +1,8 @@
-/nfs/farm/g/glast/u33/borgland/Releases/GlastRelease-v13r5p5/Data/processing/digi.root
-/nfs/farm/g/glast/u33/borgland/Releases/GlastRelease-v13r5p5/Data/processing/recon.root
-/nfs/farm/g/glast/u33/borgland/Releases/GlastRelease-v13r5p5/Code-opt/svac/TestReport/v4/report
+/nfs/farm/g/glast/u33/borgland/Releases/GlastRelease-v13r5p5/Data/processing/Org//digi.root
+/nfs/farm/g/glast/u33/borgland/Releases/GlastRelease-v13r5p5/Data/processing/Org//recon.root
+/nfs/farm/g/glast/u33/borgland/Releases/GlastRelease-v13r5p5/Code-opt/svac/TestReport/v4r1/report
 077016012
-v4
+v4r1
 v13r5p5
 -9999
 -9999

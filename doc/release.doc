@@ -367,3 +367,9 @@ v3r7p5	- Replaced m_nbrMissingGps with m_isSourceGPS.
 
 December 13, 2007: awb
 v4	- Updated to run with Root V5.16 (GR v13).
+
+December 13, 2007: awb
+v4r0p1	- Changed 'EngineeringModel' to 'GlastRelease' in the report.
+
+December 13, 2007: awb
+v4r1	- Fixed Acd Mips maps.
