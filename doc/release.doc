@@ -373,3 +373,7 @@ v4r0p1	- Changed 'EngineeringModel' to 'GlastRelease' in the report.
 
 December 13, 2007: awb
 v4r1	- Fixed Acd Mips maps.
+
+January 25, 2008: mem
+v5r0	- Added the 'RunVerify' package.
+
