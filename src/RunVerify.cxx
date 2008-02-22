@@ -11,9 +11,9 @@ using std::cout;
 using std::endl;
 using std::string;
 
-RunVerify::RunVerify(const char* dir, const char* prefix,  const char* version, const char* grVersion)
-  : m_dir(dir), 
-    m_prefix(prefix), 
+RunVerify::RunVerify(const char* xmlFileName, const char* histoFileName,  const char* version, const char* grVersion)
+  : m_xmlFileName(xmlFileName), 
+    m_histoFileName(histoFileName), 
     m_version(version), 
     m_grVersion(grVersion),
     m_xml(0), 
@@ -29,17 +29,11 @@ RunVerify::RunVerify(const char* dir, const char* prefix,  const char* version, 
   }
   gROOT->SetBatch();  // initialize ROOT
 
-  string f(dir);
-  f += '/';
-  f += prefix;
-  f += "_verify.xml";
+  string f(m_xmlFileName);
   m_xml = new ofstream(f.c_str());
   m_xml->precision(2);
 
-  string r(dir);
-  r += '/';
-  r += prefix;
-  r += "_verify.root";
+  string r(m_histoFileName);
   m_root = new TFile(r.c_str(), "RECREATE");
 
   for (int i=0; i< MaxEpuNumber; i++){
