@@ -44,7 +44,7 @@ typedef vector<EpuDatagrams> EpuList;
 class RunVerify {
  //friend class EpuDatagrams;
  public:
-  RunVerify(const char* xmlFileName, const char* histoFileName, const char* version, const char* grVersion);
+  RunVerify(const char* xmlFileName, const char* histoFileName);
   ~RunVerify();
 
   void analyzeDigi(const char* digiFileName);
@@ -58,10 +58,6 @@ class RunVerify {
   std::string m_xmlFileName;
   /// xml output file
   std::string m_histoFileName;
-  /// version of the RunVerify package
-  std::string m_version;
-  /// version of the GlastRelease package
-  std::string m_grVersion;
  
   TFile* m_root;
   std::ofstream* m_xml;

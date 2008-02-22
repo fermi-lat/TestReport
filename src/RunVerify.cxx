@@ -11,11 +11,9 @@ using std::cout;
 using std::endl;
 using std::string;
 
-RunVerify::RunVerify(const char* xmlFileName, const char* histoFileName,  const char* version, const char* grVersion)
+RunVerify::RunVerify(const char* xmlFileName, const char* histoFileName)
   : m_xmlFileName(xmlFileName), 
     m_histoFileName(histoFileName), 
-    m_version(version), 
-    m_grVersion(grVersion),
     m_xml(0), 
     m_digiFile(0), 
     m_digiTree(0),
@@ -235,10 +233,6 @@ void RunVerify::generateXml()
   writeHeader();
   (*m_xml) << "section purpose: Purpose" << endl;
   (*m_xml) << "		Bla bla bla bla." << endl;
-
-  (*m_xml) << "section version: Software Version" << endl;
-  (*m_xml) << "		GlastRelease: " << m_grVersion << endl;
-  (*m_xml) << "		TestReport (including RunVerify): " << m_version << endl;
 
   (*m_xml) << "section summary: Summary" << endl;
   if(m_nEvent == 0) {
