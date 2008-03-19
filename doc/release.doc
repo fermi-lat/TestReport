@@ -377,3 +377,11 @@ v4r1	- Fixed Acd Mips maps.
 January 25, 2008: mem
 v5r0	- Added the 'RunVerify' package.
 
+February 22, 2008: mem
+v5r2    - RunVerify redesigned to accept parameters from the command line.
+
+February 22, 2008: mem
+v5r3    - Removed program/GR versions from options (not used and wrong for use in pipeline).
+
+March 18, 2008: mem
+v5r4    - Run Verify Xml output implemented and adapted to errors format.

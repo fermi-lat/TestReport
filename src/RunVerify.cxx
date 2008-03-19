@@ -231,26 +231,14 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
 void RunVerify::generateXml()
 {
   writeHeader();
-  (*m_xml) << "section purpose: Purpose" << endl;
-  (*m_xml) << "		Bla bla bla bla." << endl;
 
-  (*m_xml) << "section summary: Summary" << endl;
   if(m_nEvent == 0) {
-    (*m_xml) << "	There are no events in this run!" << endl;
+    (*m_xml) << "        <errorType code=\"EMPTY_FILE\" quantity=\"1\"/>" << endl;
+    writeTail();
     return;
   } 
 
   if (m_digiFile) {
-    (*m_xml) << "In the digi file " << m_digiFile->GetName() << endl;
-
-    for (int iLoop = 0; iLoop < MaxEpuNumber; iLoop ++) {
-        int ListSize = m_epuList.at(iLoop).m_listDatagrams.size();
-        if (ListSize >= 1) {
-          (*m_xml) << "		There were " << ListSize << " datagrams from " << m_epuList.at(iLoop).m_epuName 
-	           << " in this run, with in average " << ((float)m_epuList.at(iLoop).m_nbrEventsDatagram / (float)ListSize)
-		   << " events per datagram." << endl;
-        }
-    }
 
     // Loop over EPU/SIUs to report problems
     for (int iLoop = 0; iLoop < MaxEpuNumber; iLoop ++) {
@@ -258,34 +246,31 @@ void RunVerify::generateXml()
         // Missing Datagrams?
         int MissingDatagrams = m_epuList.at(iLoop).m_counterMissingDatagrams;
         if (MissingDatagrams != 0) {
-          (*m_xml) << "		Problem! We dropped " << MissingDatagrams << " datagram(s) from " 
-	  	   << m_epuList.at(iLoop).m_epuName << " in this run!" << endl;
+          (*m_xml) << "        <errorType code=\"DROPPED_DATAGRAMS_" << m_epuList.at(iLoop).m_epuName 
+	  	   << "\" quantity=\"" << MissingDatagrams << "\"/>" << endl;
         }
         // Datagram Gaps?
         if (m_epuList.at(iLoop).m_datagramGaps != 0) {
-          (*m_xml) << "		Problem! There were " << m_epuList.at(iLoop).m_datagramGaps << " datagram gaps from "
-	   	   << m_epuList.at(iLoop).m_epuName << " in this run!" << endl;
-          if (MissingDatagrams == 0) {
-            (*m_xml) << "	Since no datagrams were actually dropped, some events may be out of order!" << endl;
-          }
+          (*m_xml) << "        <errorType code=\"DATAGRAMS_GAPS_" << m_epuList.at(iLoop).m_epuName 
+	  	   << "\" quantity=\"" << m_epuList.at(iLoop).m_datagramGaps << "\"/>" << endl;
 	}
 	// Check First Datagram
         if (m_epuList.at(iLoop).m_firstOpenAction != 1) {
-          (*m_xml) << "		Problem! The first datagram in " << m_epuList.at(iLoop).m_epuName 
-	  	   << " was not opened because it was the start of the run!" << endl;
+	  (*m_xml) << "        <errorType code=\"FIRST_DATAGRAM_OPENING_" << m_epuList.at(iLoop).m_epuName 
+	  	   << "\" quantity=\"1\"/>" << endl;
         }
         if (m_epuList.at(iLoop).m_firstDatagram != 0) {
-          (*m_xml) << "		Problem! The first datagram in " << m_epuList.at(iLoop).m_epuName  
-	  	   << " did not have sequence number 0! It was " << m_epuList.at(iLoop).m_firstDatagram << "!" << endl;
+	  (*m_xml) << "        <errorType code=\"FIRST_DATAGRAM_ID_" << m_epuList.at(iLoop).m_epuName 
+	  	   << "\" quantity=\"" << m_epuList.at(iLoop).m_firstDatagram << "\"/>" << endl;
         }
 	// Check Last Datagram
         if (m_epuList.at(iLoop).m_lastCloseAction == 0 && m_epuList.at(iLoop).m_lastDatagramFull==1) {
-          (*m_xml) << "		Problem! The last datagram in " << m_epuList.at(iLoop).m_epuName 
-	           << " was not closed because of end of run, but because it was full! Are we missing events?" << endl;
+	  (*m_xml) << "        <errorType code=\"LAST_DATAGRAM_FULL_" << m_epuList.at(iLoop).m_epuName 
+	  	   << "\" quantity=\"1\"/>" << endl;
         }
         if (m_epuList.at(iLoop).m_lastCloseAction == 0 && m_epuList.at(iLoop).m_lastDatagramFull==0) {
-          (*m_xml) << "		Problem! The last datagram in " << m_epuList.at(iLoop).m_epuName
-	  	   << " was not closed neither because of end of run neither because it was full!" << endl;
+	  (*m_xml) << "        <errorType code=\"LAST_DATAGRAM_CLOSING_" << m_epuList.at(iLoop).m_epuName 
+	  	   << "\" quantity=\"1\"/>" << endl;
         }
       }
     }
@@ -295,11 +280,16 @@ void RunVerify::generateXml()
 
 void RunVerify::writeHeader()
 {
-  (*m_xml) << "Beginning the run verify xml output" << endl;
+  (*m_xml) << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
+  (*m_xml) << endl;
+  (*m_xml) << "<errorContribution>" << endl;
+  (*m_xml) << "    <!-- Summary by error code -->" << endl;
+  (*m_xml) << "    <errorSummary>" << endl;
 }
 
 void RunVerify::writeTail()
 {
-  (*m_xml) << "End" << endl;
+  (*m_xml) << "    </errorSummary>" << endl;
+  (*m_xml) << "</errorContribution>" << endl;
 }
 
