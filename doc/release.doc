@@ -384,4 +384,8 @@ February 22, 2008: mem
 v5r3    - Removed program/GR versions from options (not used and wrong for use in pipeline).
 
 March 18, 2008: mem
-v5r4    - Run Verify Xml output implemented and adapted to errors format.
+v5r4    - Run Verify Xml output implemented and adapted to errors format (initial attempt).
+
+March 24, 2008: mem
+v5r5    - Old stuff (TestReport) removed from requirements.
+
