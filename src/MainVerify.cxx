@@ -38,8 +38,8 @@ int main(int argn, char** argv)
   if (xmlFileName == "") xmlFileName = xmlFileName_def;
   if (histoFileName == "") histoFileName = histoFileName_def;
 
-  RunVerify v(xmlFileName.c_str(), histoFileName.c_str());
+  RunVerify v(histoFileName.c_str());
   v.analyzeDigi(digiRootFile.c_str());
-  v.generateXml();
+  v.writeXmlFile(xmlFileName.c_str());
 }
 

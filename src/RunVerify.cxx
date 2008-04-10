@@ -1,20 +1,28 @@
 #include <iostream>
 #include <cstdio>
-#include <strings.h>
+#include <string>
 #include <stdexcept>
+#include <iterator>
+
 #include "TROOT.h"
 #include "RunVerify.h"
-#include <iterator>
+#include "AcdXmlUtil.h"
+#include "DomElement.h"
 #include "TSystem.h"
+
+#include "xmlBase/Dom.h"
+#include "xmlBase/XmlParser.h"
+#include "xercesc/dom/DOMElement.hpp"
+#include "xercesc/dom/DOMDocument.hpp" 
+#include "xercesc/dom/DOMImplementation.hpp"
+
 
 using std::cout;
 using std::endl;
 using std::string;
 
-RunVerify::RunVerify(const char* xmlFileName, const char* histoFileName)
-  : m_xmlFileName(xmlFileName), 
-    m_histoFileName(histoFileName), 
-    m_xml(0), 
+RunVerify::RunVerify(const char* histoFileName)
+  : m_histoFileName(histoFileName), 
     m_digiFile(0), 
     m_digiTree(0),
     m_digiBranch(0), 
@@ -26,10 +34,6 @@ RunVerify::RunVerify(const char* xmlFileName, const char* histoFileName)
     static TROOT g_root("report", "report");
   }
   gROOT->SetBatch();  // initialize ROOT
-
-  string f(m_xmlFileName);
-  m_xml = new ofstream(f.c_str());
-  m_xml->precision(2);
 
   string r(m_histoFileName);
   m_root = new TFile(r.c_str(), "RECREATE");
@@ -47,7 +51,7 @@ RunVerify::RunVerify(const char* xmlFileName, const char* histoFileName)
     ptr += m_epuList.at(i).m_epuName;
     string title("Number of events per datagram - ");
     title += m_epuList.at(i).m_epuName;
-    m_datagrams[i] = new TH1F(ptr.c_str(),title.c_str(),101,-1,100);
+    m_datagrams[i] = new TH1F(ptr.c_str(),title.c_str(),101,-2,200);
   }
 }
 
@@ -63,7 +67,6 @@ RunVerify::~RunVerify()
     delete m_root;
   }
   delete m_digiFile;
-  delete m_xml;
   m_epuList.clear();
 }
 
@@ -228,56 +231,90 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
   if(m_digiFile) m_digiFile->Close();
 }
 
-void RunVerify::generateXml()
-{
-  writeHeader();
+Bool_t RunVerify::writeXmlFile(const char* fileName) const {
 
-  if(m_nEvent == 0) {
-    (*m_xml) << "        <errorType code=\"EMPTY_FILE\" quantity=\"1\"/>" << endl;
-    writeTail();
-    return;
-  } 
+  DomElement elem = AcdXmlUtil::makeDocument("errorContribution");
+  writeXmlHeader(elem);
+  writeXmlErrorSummary(elem);
+  writeXmlEventSummary(elem);
+  writeXmlFooter(elem);
+  return AcdXmlUtil::writeIt(elem,fileName);
 
-  if (m_digiFile) {
+}
 
-    // Loop over EPU/SIUs to report problems
-    for (int iLoop = 0; iLoop < MaxEpuNumber; iLoop ++) {
-      if (m_epuList.at(iLoop).m_nbrEventsDatagram > 0) {
-        // Missing Datagrams?
-        int MissingDatagrams = m_epuList.at(iLoop).m_counterMissingDatagrams;
-        if (MissingDatagrams != 0) {
-          (*m_xml) << "        <errorType code=\"DROPPED_DATAGRAMS_" << m_epuList.at(iLoop).m_epuName 
-	  	   << "\" quantity=\"" << MissingDatagrams << "\"/>" << endl;
-        }
-        // Datagram Gaps?
-        if (m_epuList.at(iLoop).m_datagramGaps != 0) {
-          (*m_xml) << "        <errorType code=\"DATAGRAMS_GAPS_" << m_epuList.at(iLoop).m_epuName 
-	  	   << "\" quantity=\"" << m_epuList.at(iLoop).m_datagramGaps << "\"/>" << endl;
-	}
-	// Check First Datagram
-        if (m_epuList.at(iLoop).m_firstOpenAction != 1) {
-	  (*m_xml) << "        <errorType code=\"FIRST_DATAGRAM_OPENING_" << m_epuList.at(iLoop).m_epuName 
-	  	   << "\" quantity=\"1\"/>" << endl;
-        }
-        if (m_epuList.at(iLoop).m_firstDatagram != 0) {
-	  (*m_xml) << "        <errorType code=\"FIRST_DATAGRAM_ID_" << m_epuList.at(iLoop).m_epuName 
-	  	   << "\" quantity=\"" << m_epuList.at(iLoop).m_firstDatagram << "\"/>" << endl;
-        }
-	// Check Last Datagram
-        if (m_epuList.at(iLoop).m_lastCloseAction == 0 && m_epuList.at(iLoop).m_lastDatagramFull==1) {
-	  (*m_xml) << "        <errorType code=\"LAST_DATAGRAM_FULL_" << m_epuList.at(iLoop).m_epuName 
-	  	   << "\" quantity=\"1\"/>" << endl;
-        }
-        if (m_epuList.at(iLoop).m_lastCloseAction == 0 && m_epuList.at(iLoop).m_lastDatagramFull==0) {
-	  (*m_xml) << "        <errorType code=\"LAST_DATAGRAM_CLOSING_" << m_epuList.at(iLoop).m_epuName 
-	  	   << "\" quantity=\"1\"/>" << endl;
-        }
+void RunVerify::writeXmlHeader(DomElement& /* node */) const {
+//  if(m_nEvent == 0) {
+//    (*m_xml) << "        <errorType code=\"EMPTY_FILE\" quantity=\"1\"/>" << endl;
+//    writeTail();
+//  } 
+  return;
+}
+
+void RunVerify::writeXmlFooter(DomElement& /* node */) const {
+  return;
+}
+
+void RunVerify::writeXmlErrorSummary(DomElement& node) const {
+
+  DomElement errSummary = AcdXmlUtil::makeChildNode(node,"errorSummary");
+  // Loop over EPU/SIUs to report problems
+  for (int iLoop = 0; iLoop < MaxEpuNumber; iLoop ++) {
+    if (m_epuList.at(iLoop).m_nbrEventsDatagram > 0) {
+      // Missing Datagrams?
+      if (m_epuList.at(iLoop).m_counterMissingDatagrams != 0) {
+        DomElement errType = AcdXmlUtil::makeChildNode(errSummary,"errorType");
+        string errCode("DROPPED_DATAGRAMS_");
+	errCode += m_epuList.at(iLoop).m_epuName;
+        AcdXmlUtil::addAttribute(errType,"code",errCode.c_str());
+        AcdXmlUtil::addAttribute(errType,"quantity",int(m_epuList.at(iLoop).m_counterMissingDatagrams));
+      }
+      // Datagram Gaps?
+      if (m_epuList.at(iLoop).m_datagramGaps != 0) {
+        DomElement errType = AcdXmlUtil::makeChildNode(errSummary,"errorType");
+        string errCode("DATAGRAMS_GAPS_");
+ 	errCode += m_epuList.at(iLoop).m_epuName;
+        AcdXmlUtil::addAttribute(errType,"code",errCode.c_str());
+        AcdXmlUtil::addAttribute(errType,"quantity",int(m_epuList.at(iLoop).m_datagramGaps));
+      }
+      // Check First Datagram
+      if (m_epuList.at(iLoop).m_firstOpenAction != 1) {
+        DomElement errType = AcdXmlUtil::makeChildNode(errSummary,"errorType");
+        string errCode("FIRST_DATAGRAM_OPENING_");
+	errCode += m_epuList.at(iLoop).m_epuName;
+        AcdXmlUtil::addAttribute(errType,"code",errCode.c_str());
+        AcdXmlUtil::addAttribute(errType,"quantity",int(m_epuList.at(iLoop).m_firstOpenAction));
+      }
+      if (m_epuList.at(iLoop).m_firstDatagram != 0) {
+        DomElement errType = AcdXmlUtil::makeChildNode(errSummary,"errorType");
+        string errCode("FIRST_DATAGRAM_ID_");
+	errCode += m_epuList.at(iLoop).m_epuName;
+        AcdXmlUtil::addAttribute(errType,"code",errCode.c_str());
+        AcdXmlUtil::addAttribute(errType,"quantity",int(m_epuList.at(iLoop).m_firstDatagram));
+      }
+      // Check Last Datagram
+      if (m_epuList.at(iLoop).m_lastCloseAction == 0 && m_epuList.at(iLoop).m_lastDatagramFull==1) {
+        DomElement errType = AcdXmlUtil::makeChildNode(errSummary,"errorType");
+        string errCode("LAST_DATAGRAM_FULL_");
+ 	errCode += m_epuList.at(iLoop).m_epuName;
+        AcdXmlUtil::addAttribute(errType,"code",errCode.c_str());
+        AcdXmlUtil::addAttribute(errType,"quantity",int(m_epuList.at(iLoop).m_lastDatagramFull));
+      }
+      if (m_epuList.at(iLoop).m_lastCloseAction == 0 && m_epuList.at(iLoop).m_lastDatagramFull==0) {
+        DomElement errType = AcdXmlUtil::makeChildNode(errSummary,"errorType");
+        string errCode("LAST_DATAGRAM_CLOSING_");
+ 	errCode += m_epuList.at(iLoop).m_epuName;
+        AcdXmlUtil::addAttribute(errType,"code",errCode.c_str());
+        AcdXmlUtil::addAttribute(errType,"quantity",int(m_epuList.at(iLoop).m_lastCloseAction));
       }
     }
   }
-  writeTail();
 }
 
+void RunVerify::writeXmlEventSummary(DomElement& /* node */) const {
+}
+
+
+/*
 void RunVerify::writeHeader()
 {
   (*m_xml) << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
@@ -292,4 +329,4 @@ void RunVerify::writeTail()
   (*m_xml) << "    </errorSummary>" << endl;
   (*m_xml) << "</errorContribution>" << endl;
 }
-
+*/

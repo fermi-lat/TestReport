@@ -9,6 +9,8 @@
 #include "TTree.h"
 #include "TH1F.h"
 #include "digiRootData/DigiEvent.h"
+#include <xercesc/util/XercesDefs.hpp>
+#include "xercesc/dom/DOMElement.hpp"
 
 /**
  * \class RunVerify
@@ -18,6 +20,9 @@
 
 using std::list;
 using std::vector;
+using XERCES_CPP_NAMESPACE_QUALIFIER DOMElement;
+
+class DomElement;
 
 class EpuDatagrams {
  friend class RunVerify;
@@ -44,23 +49,27 @@ typedef vector<EpuDatagrams> EpuList;
 class RunVerify {
  //friend class EpuDatagrams;
  public:
-  RunVerify(const char* xmlFileName, const char* histoFileName);
+  RunVerify(const char* histoFileName);
   ~RunVerify();
 
   void analyzeDigi(const char* digiFileName);
-  void generateXml();
+  
+  // write errors to an xml file
+  Bool_t writeXmlFile(const char* fileName) const;
+  // write xml header
+  void writeXmlHeader(DomElement& node) const;
+  // write xml footer
+  void writeXmlFooter(DomElement& node) const;
+  // write error summary to xml file
+  void writeXmlErrorSummary(DomElement& node) const;
+  // write event summary to xml file
+  void writeXmlEventSummary(DomElement& node) const;
 
  private:
-  void writeHeader();
-  void writeTail();
-
-  /// xml output file
-  std::string m_xmlFileName;
-  /// xml output file
+  /// root output file
   std::string m_histoFileName;
  
   TFile* m_root;
-  std::ofstream* m_xml;
 
   TFile* m_digiFile;
   TTree* m_digiTree;
@@ -72,6 +81,5 @@ class RunVerify {
   // evts/datagram histogram for each EPU
   TH1F* m_datagrams[MaxEpuNumber];
 };
-
 
 #endif

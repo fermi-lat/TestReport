@@ -23,7 +23,8 @@ macro_append ROOT_linkopts " -lHist -lGpad -lGraf -lGui -lGraf3d -lPostscript -l
 macro testreport_linkopts "$(ROOT_linkopts) $(commonRootData_linkopts) $(mcRootData_linkopts) $(digiRootData_linkopts) $(reconRootData_linkopts)"
 macro runverify_linkopts "$(ROOT_linkopts) $(commonRootData_linkopts) $(digiRootData_linkopts)"
 
+#application runStrip JobConfig.cxx StripVal.cxx StripFiller.cxx StripDataFiller.cxx DigiFiller.cxx StripFiller_Digi.cxx runStrip.cxx
 #application TestReport Geo.cxx Main.cxx TestReport.cxx $(calibTkrUtil_srcs)
 #application MergeHistFiles MergeHistFiles.cxx
-application RunVerify MainVerify.cxx RunVerify.cxx
-#application runStrip JobConfig.cxx StripVal.cxx StripFiller.cxx StripDataFiller.cxx DigiFiller.cxx StripFiller_Digi.cxx runStrip.cxx
+application RunVerify MainVerify.cxx RunVerify.cxx AcdXmlUtil.cxx DomElement.cxx 
+
