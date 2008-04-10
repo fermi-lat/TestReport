@@ -1,0 +1,25 @@
+
+Apr 9, 2008: mem
+v5r8    - New file release.notes added.
+
+Apr 9, 2008: mem
+v5r7    - xml utilities included. Changed range for histos.
+
+March 24, 2008: mem
+v5r6    - Old stuff (TestReport) removed from requirements.
+
+March 24, 2008: mem
+v5r5    - Empty tag created by mistake.
+
+March 18, 2008: mem
+v5r4    - Run Verify Xml output implemented and adapted to errors format (initial attempt).
+
+February 22, 2008: mem
+v5r3    - Removed program/GR versions from options (not used and wrong for use in pipeline).
+
+February 22, 2008: mem
+v5r2    - RunVerify redesigned to accept parameters from the command line.
+
+January 25, 2008: mem
+v5r0	- Added the 'RunVerify' package.
+
