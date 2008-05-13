@@ -27,8 +27,8 @@ class DomElement;
 class EvtError{
  friend class RunVerify;
  public:
-  EvtError(int evtNumber, const char* errName, int errValue, int epuNumber);
-  EvtError(int evtNumber, const char* errName, int errValue);
+  EvtError(int evtNumber, string errName, int errValue, int epuNumber);
+  EvtError(int evtNumber, string errName, int errValue);
   ~EvtError();
 
  private:
