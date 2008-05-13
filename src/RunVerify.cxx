@@ -37,6 +37,9 @@ RunVerify::RunVerify(const char* histoFileName)
 
   string r(m_histoFileName);
   m_root = new TFile(r.c_str(), "RECREATE");
+  m_epuList.clear();
+  m_errorTypes.clear();
+  m_evtErrors.clear();
 
   for (int i=0; i< MaxEpuNumber; i++){
     char e_name[5];
@@ -68,6 +71,27 @@ RunVerify::~RunVerify()
   }
   delete m_digiFile;
   m_epuList.clear();
+  m_errorTypes.clear();
+  m_evtErrors.clear();
+}
+
+EvtError::EvtError(int evtNumber, const char* errName, int errValue, int epuNumber)
+  : m_evtNumber(evtNumber),
+    m_errName(errName),
+    m_errValue(errValue),
+    m_epuNumber(epuNumber)
+{
+}
+
+EvtError::EvtError(int evtNumber, const char* errName, int errValue)
+  : m_evtNumber(evtNumber),
+    m_errName(errName),
+    m_errValue(errValue)
+{
+  m_epuNumber = -1;
+}
+
+EvtError::~EvtError() {
 }
 
 EpuDatagrams::EpuDatagrams(const char* epuName)
@@ -142,6 +166,9 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
     if ((DatagramSeqNbr != m_epuList.at(cpuNbr).m_previousDatagram) && 
     		((DatagramSeqNbr-m_epuList.at(cpuNbr).m_previousDatagram)!=1)) {
       m_epuList.at(cpuNbr).m_datagramGaps++;
+      m_errorTypes.push_back("DATAGRAM_GAPS");
+      EvtError* evt_e = new EvtError(iEvent,"DATAGRAM_GAPS",1,cpuNbr);
+      m_evtErrors.push_back(*evt_e);
       cout << "Warning! there was a gap in the datagram sequence number for " << m_epuList.at(cpuNbr).m_epuName << "! event " 
       	   << iEvent << ", datagram gap: " << DatagramSeqNbr << " - " << m_epuList.at(cpuNbr).m_previousDatagram << endl;  
     }
@@ -170,6 +197,9 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
       if (firstDatagramOpen == enums::Lsf::Open::Start) {
 	m_epuList.at(cpuNbr).m_firstOpenAction = 1;
       } else {
+        m_errorTypes.push_back("FIRST_DATAGRAM_OPENING");
+        EvtError* evt_e = new EvtError(iEvent,"FIRST_DATAGRAM_OPENING",firstDatagramOpen,cpuNbr);
+        m_evtErrors.push_back(*evt_e);
         cout << "Warning! The fist datagram for " << m_epuList.at(cpuNbr).m_epuName 
 	     << " was not opened because we started the run! The datagram opening reason was " << firstDatagramOpen << endl;
       }
@@ -201,6 +231,9 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
           int diff = *p - *(--p);
           p++;
           if (diff > 1) {
+            m_errorTypes.push_back("DROPPED_DATAGRAMS");
+            EvtError* evt_e = new EvtError(-1,"DROPPED_DATAGRAMS",diff-1,iLoop);
+            m_evtErrors.push_back(*evt_e);
             m_epuList.at(iLoop).m_counterMissingDatagrams = m_epuList.at(iLoop).m_counterMissingDatagrams + diff - 1;
      	    cout << "Warning! We dropped " << (diff - 1) << " datagram(s) before datagram " << (*p) << " for " 
 		 << m_epuList.at(iLoop).m_epuName << "!" << endl;
@@ -217,9 +250,15 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
       }
       if (lastReasonDataGram == enums::Lsf::Close::Full) {
         m_epuList.at(iLoop).m_lastDatagramFull = 1;
+        m_errorTypes.push_back("LAST_DATAGRAM_FULL");
+        EvtError* evt_e = new EvtError(m_epuList.at(iLoop).m_lastDatagramEvent,"LAST_DATAGRAM_FULL",1,iLoop);
+        m_evtErrors.push_back(*evt_e);
         cout << "The closing reason for the last datagram for " << m_epuList.at(iLoop).m_epuName << " was: Datagram Full" << endl;
       }
       if (m_epuList.at(iLoop).m_lastCloseAction == 0 && m_epuList.at(iLoop).m_lastDatagramFull == 0) {
+        m_errorTypes.push_back("LAST_DATAGRAM_CLOSING");
+        EvtError* evt_e = new EvtError(m_epuList.at(iLoop).m_lastDatagramEvent,"LAST_DATAGRAM_CLOSING",lastActionDataGram,iLoop);
+        m_evtErrors.push_back(*evt_e);
         cout << "Warning! The last datagram for " << m_epuList.at(iLoop).m_epuName 
 	     << " was not closed because we reached the end of run or because it was full! The datagram closing reason was " 
 	     << lastReasonDataGram << " and the datagram closing action was " << lastActionDataGram << endl;
@@ -257,6 +296,7 @@ void RunVerify::writeXmlFooter(DomElement& /* node */) const {
 void RunVerify::writeXmlErrorSummary(DomElement& node) const {
 
   DomElement errSummary = AcdXmlUtil::makeChildNode(node,"errorSummary");
+  //m_errorTypes.sort();
   // Loop over EPU/SIUs to report problems
   for (int iLoop = 0; iLoop < MaxEpuNumber; iLoop ++) {
     if (m_epuList.at(iLoop).m_nbrEventsDatagram > 0) {

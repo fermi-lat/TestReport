@@ -24,6 +24,20 @@ using XERCES_CPP_NAMESPACE_QUALIFIER DOMElement;
 
 class DomElement;
 
+class EvtError{
+ friend class RunVerify;
+ public:
+  EvtError(int evtNumber, const char* errName, int errValue, int epuNumber);
+  EvtError(int evtNumber, const char* errName, int errValue);
+  ~EvtError();
+
+ private:
+  int m_evtNumber;
+  std::string m_errName;
+  int m_errValue;
+  int m_epuNumber;
+};
+
 class EpuDatagrams {
  friend class RunVerify;
  public:
@@ -44,10 +58,7 @@ class EpuDatagrams {
   std::list<int> m_listDatagrams;
 };
 
-typedef vector<EpuDatagrams> EpuList;
-
 class RunVerify {
- //friend class EpuDatagrams;
  public:
   RunVerify(const char* histoFileName);
   ~RunVerify();
@@ -70,14 +81,15 @@ class RunVerify {
   std::string m_histoFileName;
  
   TFile* m_root;
-
   TFile* m_digiFile;
   TTree* m_digiTree;
   TBranch* m_digiBranch;
   DigiEvent* m_digiEvent;
 
   int m_nEvent;
-  EpuList m_epuList;
+  vector<EpuDatagrams> m_epuList;
+  std::list<std::string> m_errorTypes;
+  std::list<EvtError> m_evtErrors;
   // evts/datagram histogram for each EPU
   TH1F* m_datagrams[MaxEpuNumber];
 };
