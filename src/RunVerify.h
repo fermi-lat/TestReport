@@ -5,6 +5,7 @@
 #include <fstream>
 #include <string>
 #include <list>
+#include <map>
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1F.h"
@@ -19,7 +20,9 @@
  */
 
 using std::list;
+using std::string;
 using std::vector;
+using std::map;
 using XERCES_CPP_NAMESPACE_QUALIFIER DOMElement;
 
 class DomElement;
@@ -27,13 +30,11 @@ class DomElement;
 class EvtError{
  friend class RunVerify;
  public:
-  EvtError(int evtNumber, string errName, int errValue, int epuNumber);
-  EvtError(int evtNumber, string errName, int errValue);
+  EvtError(string errName, int errValue, int epuNumber);
   ~EvtError();
 
  private:
-  int m_evtNumber;
-  std::string m_errName;
+  string m_errName;
   int m_errValue;
   int m_epuNumber;
 };
@@ -45,7 +46,7 @@ class EpuDatagrams {
   ~EpuDatagrams();
 
  private:
-  std::string m_epuName;
+  string m_epuName;
   int m_counterMissingDatagrams;
   int m_nbrEventsDatagram;
   unsigned int m_firstDatagram;
@@ -88,8 +89,8 @@ class RunVerify {
 
   int m_nEvent;
   vector<EpuDatagrams> m_epuList;
-  std::list<std::string> m_errorTypes;
-  std::list<EvtError> m_evtErrors;
+  map< string, list<int> > m_errMap;
+  map< int, list<EvtError*> > m_evtMap;
   // evts/datagram histogram for each EPU
   TH1F* m_datagrams[MaxEpuNumber];
 };
