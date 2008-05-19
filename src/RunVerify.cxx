@@ -31,7 +31,9 @@ RunVerify::RunVerify(const char* histoFileName)
     m_digiTree(0),
     m_digiBranch(0), 
     m_digiEvent(0), 
-    m_nEvent(0)
+    m_nEvent(0), 
+    m_latcKey(0), 
+    m_groundId(0) 
 { 
   // initialize ROOT
   if(gROOT == 0) {
@@ -144,8 +146,7 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
   }
 
   // Loop over events:
-  //for(int iEvent = 0; iEvent != m_nEvent; ++iEvent) {
-  for(int iEvent = 0; iEvent != 20000; ++iEvent) {
+  for(int iEvent = 0; iEvent != m_nEvent; ++iEvent) {
 
     if (iEvent % 10000 == 0) {
       cout << "Event number " << iEvent << endl;
@@ -158,6 +159,39 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
     unsigned int DatagramSeqNbr = m_digiEvent->getMetaEvent().datagram().datagrams();
     m_epuList.at(cpuNbr).m_nbrEventsDatagram++;
     m_epuList.at(cpuNbr).m_lastDatagramEvent = iEvent;
+
+    // check the LatcKey
+    if (m_digiEvent->getMetaEvent().keys() != 0) { 
+      unsigned int tmpLatcKey = m_digiEvent->getMetaEvent().keys()->LATC_master(); 
+      if (m_latcKey == 0){
+        m_latcKey = tmpLatcKey;
+	cout << "LatcKey found: " << m_latcKey << endl;
+      } else if (tmpLatcKey != m_latcKey){
+	cout << "ERROR! LatcKey changed from: " << m_latcKey  <<" to: " << tmpLatcKey << endl;
+        m_latcKey = tmpLatcKey;
+	errorName = "LATC_KEY_CHANGE"; 
+        EvtError* evt_e = new EvtError(errorName,m_latcKey,-1);
+        m_evtMap[iEvent].push_back(evt_e);
+        m_errMap[errorName].push_back(iEvent);
+      }
+    } 
+
+    // check the Ground ID
+    if (m_digiEvent->getMetaEvent().run().id() != 0) { 
+      unsigned int tmpGroundId = m_digiEvent->getMetaEvent().run().id(); 
+      if (m_groundId == 0){
+        m_groundId = tmpGroundId;
+	cout << "GroundId found: " << m_groundId << endl;
+      } else if (tmpGroundId != m_groundId){
+	cout << "ERROR! GroundId changed from: " << m_groundId  <<" to: " << tmpGroundId << endl;
+        m_groundId = tmpGroundId;
+	errorName = "GROUND_ID_CHANGE"; 
+        EvtError* evt_e = new EvtError(errorName,m_groundId,-1);
+        m_evtMap[iEvent].push_back(evt_e);
+        m_errMap[errorName].push_back(iEvent);
+      }
+    } 
+
 
     // Gaps in datagram sequence number?
     if ((DatagramSeqNbr != m_epuList.at(cpuNbr).m_previousDatagram) && 

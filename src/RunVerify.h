@@ -87,6 +87,8 @@ class RunVerify {
   TBranch* m_digiBranch;
   DigiEvent* m_digiEvent;
 
+  unsigned int m_latcKey; 
+  unsigned int m_groundId; 
   int m_nEvent;
   vector<EpuDatagrams> m_epuList;
   map< string, list<int> > m_errMap;
