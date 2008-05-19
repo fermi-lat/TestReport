@@ -27,13 +27,15 @@ using std::vector;
 
 RunVerify::RunVerify(const char* histoFileName)
   : m_histoFileName(histoFileName), 
-    m_digiFile(0), 
+    m_digiFile(0),
     m_digiTree(0),
-    m_digiBranch(0), 
-    m_digiEvent(0), 
-    m_nEvent(0), 
-    m_latcKey(0), 
-    m_groundId(0) 
+    m_digiBranch(0),
+    m_digiEvent(0),
+    m_nEvent(0),
+    m_latcKey(0),
+    m_groundId(0),
+    m_firstGemId(0),
+    m_thisGemId(0)
 { 
   // initialize ROOT
   if(gROOT == 0) {
@@ -192,6 +194,29 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
       }
     } 
 
+    // check the Gem Scaler Counter
+    long unsigned int tmpGemId = m_digiEvent->getMetaEvent().scalers().sequence();
+    if (iEvent == 0){
+      m_firstGemId = tmpGemId;
+      cout << "Gem Scaler Event Id for the first event: " << m_firstGemId << endl;
+    } else if (iEvent == m_nEvent-1){
+      cout << "Gem Scaler Event Id for the last event: " << tmpGemId << endl;
+      cout << "Gem Scaler -> total Events Counted: " << tmpGemId - m_firstGemId<< endl;
+      if ( m_nEvent > (tmpGemId - m_firstGemId) ){
+        cout << "ERROR! Number of events accordind to the Gem Scalers: " << tmpGemId - m_firstGemId<< "; number of events in digi file: " << m_nEvent << endl;
+	errorName = "GEM_SCALERS_EVENTS"; 
+        EvtError* evt_e = new EvtError(errorName,tmpGemId - m_firstGemId,-1);
+        m_evtMap[iEvent].push_back(evt_e);
+        m_errMap[errorName].push_back(iEvent);
+      } 
+    } else if (tmpGemId <= m_thisGemId){
+        cout << "ERROR! Gem Scaler going backwards, from: " << m_thisGemId << " to: " << tmpGemId << "  " << endl;
+	errorName = "GEM_SCALERS_SEQUENCE"; 
+        EvtError* evt_e = new EvtError(errorName,m_thisGemId-tmpGemId,-1);
+        m_evtMap[iEvent].push_back(evt_e);
+        m_errMap[errorName].push_back(iEvent);
+    }
+    m_thisGemId = tmpGemId;
 
     // Gaps in datagram sequence number?
     if ((DatagramSeqNbr != m_epuList.at(cpuNbr).m_previousDatagram) && 
