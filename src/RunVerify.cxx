@@ -203,6 +203,16 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
       }
     } 
 
+    // check the CCSDS timestamp 
+    double ccsdsTime = m_digiEvent->getCcsds().getUtc();
+    double timeStamp = m_digiEvent->getTimeStamp();
+    if ( ccsdsTime < timeStamp ){
+      errorName = "CCSDS_EARLY_TIMESTAMP";
+      EvtError* evt_e = new EvtError(errorName,int(ccsdsTime-timeStamp),cpuNbr);
+      m_evtMap[iEvent].push_back(evt_e);
+      m_errMap[errorName].push_back(iEvent);
+    }
+
     // check the Gem/GPS Scalers and Counters
     long unsigned int tmpGemSequence = m_digiEvent->getMetaEvent().scalers().sequence();
     long unsigned int tmpGemElapsed = m_digiEvent->getMetaEvent().scalers().elapsed();
@@ -282,8 +292,8 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
       long unsigned int deltaGemElapsed = tmpGemElapsed - m_firstGemElapsed;
       long unsigned int deltaGemLivetime = tmpGemLivetime - m_firstGemLivetime;
       cout << "Gem Scalers -> Total Events Counted: " << deltaGemSequence << endl;
-      cout << "Gem Scalers -> Total Elapsed Time (ticks):" << deltaGemElapsed << endl; 
-      cout << "Gem Scalers -> Total Live Time (ticks):" << deltaGemLivetime << endl; 
+      cout << "Gem Scalers -> Total Elapsed Time (ticks): " << deltaGemElapsed << endl; 
+      cout << "Gem Scalers -> Total Live Time (ticks): " << deltaGemLivetime << endl; 
       if ( m_nEvent > deltaGemSequence ){
         cout << "ERROR! Number of events in Gem Scalers: " << deltaGemSequence << "; number of events in Digi File: " << m_nEvent << endl;
 	errorName = "GEM_SEQUENCE_NEVENTS"; 
@@ -320,6 +330,7 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
       idDatagram[cpuNbr] = m_digiEvent->getMetaEvent().datagram().datagrams();
       nbrEventsDG[cpuNbr] = 0;
     }
+
     // Last event:
     if (iEvent == (m_nEvent-1)) {
       for (int iLoop = 0; iLoop < MaxEpuNumber; iLoop++) {
