@@ -34,8 +34,17 @@ RunVerify::RunVerify(const char* histoFileName)
     m_nEvent(0),
     m_latcKey(0),
     m_groundId(0),
-    m_firstGemId(0),
-    m_thisGemId(0)
+    m_firstGemSequence(0),
+    m_thisGemSequence(0),
+    m_firstGemElapsed(0),
+    m_thisGemElapsed(0),
+    m_firstGemLivetime(0),
+    m_thisGemLivetime(0),
+    m_thisGemPrescaled(0),
+    m_thisGemDiscarded(0),
+    m_thisGemDeadzone(0),
+    m_thisGpsCurrent(0),
+    m_thisGpsPrevious(0)
 { 
   // initialize ROOT
   if(gROOT == 0) {
@@ -194,36 +203,109 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
       }
     } 
 
-    // check the Gem Scaler Counter
-    long unsigned int tmpGemId = m_digiEvent->getMetaEvent().scalers().sequence();
+    // check the Gem/GPS Scalers and Counters
+    long unsigned int tmpGemSequence = m_digiEvent->getMetaEvent().scalers().sequence();
+    long unsigned int tmpGemElapsed = m_digiEvent->getMetaEvent().scalers().elapsed();
+    long unsigned int tmpGemLivetime = m_digiEvent->getMetaEvent().scalers().livetime();
+    long unsigned int tmpGemPrescaled = m_digiEvent->getMetaEvent().scalers().prescaled();
+    long unsigned int tmpGemDiscarded = m_digiEvent->getMetaEvent().scalers().discarded();
+    long unsigned int tmpGemDeadzone = m_digiEvent->getMetaEvent().scalers().deadzone();
+    unsigned int tmpGpsCurrent = m_digiEvent->getMetaEvent().time().current().timeSecs();
+    unsigned int tmpGpsPrevious = m_digiEvent->getMetaEvent().time().previous().timeSecs();
+
     if (iEvent == 0){
-      m_firstGemId = tmpGemId;
-      cout << "Gem Scaler Event Id for the first event: " << m_firstGemId << endl;
-    } else if (iEvent == m_nEvent-1){
-      cout << "Gem Scaler Event Id for the last event: " << tmpGemId << endl;
-      cout << "Gem Scaler -> total Events Counted: " << tmpGemId - m_firstGemId<< endl;
-      if ( m_nEvent > (tmpGemId - m_firstGemId) ){
-        cout << "ERROR! Number of events accordind to the Gem Scalers: " << tmpGemId - m_firstGemId<< "; number of events in digi file: " << m_nEvent << endl;
-	errorName = "GEM_SCALERS_EVENTS"; 
-        EvtError* evt_e = new EvtError(errorName,tmpGemId - m_firstGemId,-1);
+      m_firstGemSequence = tmpGemSequence;
+      m_firstGemElapsed = tmpGemElapsed;
+      m_firstGemLivetime = tmpGemLivetime;
+    } else {
+      if ( iEvent > 1 && iEvent < m_nEvent-1 && tmpGemSequence <= m_thisGemSequence){
+	  errorName = "GEM_SEQUENCE_BACKWARDS"; 
+          EvtError* evt_e = new EvtError(errorName,m_thisGemSequence-tmpGemSequence,-1);
+          m_evtMap[iEvent].push_back(evt_e);
+          m_errMap[errorName].push_back(iEvent);
+      }
+      if (tmpGemElapsed < m_thisGemElapsed){
+	errorName = "GEM_ELAPSED_BACKWARDS"; 
+        EvtError* evt_e = new EvtError(errorName,m_thisGemElapsed-tmpGemElapsed,-1);
+        m_evtMap[iEvent].push_back(evt_e);
+        m_errMap[errorName].push_back(iEvent);
+      }
+      if (tmpGemLivetime < m_thisGemLivetime){
+	errorName = "GEM_LIVETIME_BACKWARDS"; 
+        EvtError* evt_e = new EvtError(errorName,m_thisGemLivetime-tmpGemLivetime,-1);
+        m_evtMap[iEvent].push_back(evt_e);
+        m_errMap[errorName].push_back(iEvent);
+      }
+      if (tmpGemPrescaled < m_thisGemPrescaled){
+	errorName = "GEM_PRESCALED_BACKWARDS"; 
+        EvtError* evt_e = new EvtError(errorName,m_thisGemPrescaled-tmpGemPrescaled,-1);
+        m_evtMap[iEvent].push_back(evt_e);
+        m_errMap[errorName].push_back(iEvent);
+      }
+      if (tmpGemDiscarded < m_thisGemDiscarded){
+	errorName = "GEM_DISCARDED_BACKWARDS"; 
+        EvtError* evt_e = new EvtError(errorName,m_thisGemDiscarded-tmpGemDiscarded,-1);
+        m_evtMap[iEvent].push_back(evt_e);
+        m_errMap[errorName].push_back(iEvent);
+      }
+      if (tmpGemDeadzone < m_thisGemDeadzone){
+	errorName = "GEM_DEADZONE_BACKWARDS"; 
+        EvtError* evt_e = new EvtError(errorName,m_thisGemDeadzone-tmpGemDeadzone,-1);
+        m_evtMap[iEvent].push_back(evt_e);
+        m_errMap[errorName].push_back(iEvent);
+      }
+      if (tmpGpsCurrent < m_thisGpsCurrent){
+	errorName = "GPS_CURRENT_BACKWARDS"; 
+        EvtError* evt_e = new EvtError(errorName,m_thisGpsCurrent-tmpGpsCurrent,-1);
+        m_evtMap[iEvent].push_back(evt_e);
+        m_errMap[errorName].push_back(iEvent);
+      }
+      if (tmpGpsPrevious < m_thisGpsPrevious){
+	errorName = "GPS_PREVIOUS_BACKWARDS"; 
+        EvtError* evt_e = new EvtError(errorName,m_thisGpsPrevious-tmpGpsPrevious,-1);
+        m_evtMap[iEvent].push_back(evt_e);
+        m_errMap[errorName].push_back(iEvent);
+      }
+    }
+    m_thisGemSequence = tmpGemSequence;
+    m_thisGemElapsed = tmpGemElapsed;
+    m_thisGemLivetime = tmpGemLivetime;
+    m_thisGemPrescaled = tmpGemPrescaled;
+    m_thisGemDiscarded = tmpGemDiscarded;
+    m_thisGemDeadzone = tmpGemDeadzone;
+    m_thisGpsCurrent = tmpGpsCurrent;
+    m_thisGpsPrevious = tmpGpsPrevious;
+
+    // check total delta Id/delta time
+    if (iEvent == m_nEvent-1){
+      long unsigned int deltaGemSequence = tmpGemSequence - m_firstGemSequence;
+      long unsigned int deltaGemElapsed = tmpGemElapsed - m_firstGemElapsed;
+      long unsigned int deltaGemLivetime = tmpGemLivetime - m_firstGemLivetime;
+      cout << "Gem Scalers -> Total Events Counted: " << deltaGemSequence << endl;
+      cout << "Gem Scalers -> Total Elapsed Time (ticks):" << deltaGemElapsed << endl; 
+      cout << "Gem Scalers -> Total Live Time (ticks):" << deltaGemLivetime << endl; 
+      if ( m_nEvent > deltaGemSequence ){
+        cout << "ERROR! Number of events in Gem Scalers: " << deltaGemSequence << "; number of events in Digi File: " << m_nEvent << endl;
+	errorName = "GEM_SEQUENCE_NEVENTS"; 
+        EvtError* evt_e = new EvtError(errorName,deltaGemSequence,-1);
         m_evtMap[iEvent].push_back(evt_e);
         m_errMap[errorName].push_back(iEvent);
       } 
-    } else if (tmpGemId <= m_thisGemId){
-        cout << "ERROR! Gem Scaler going backwards, from: " << m_thisGemId << " to: " << tmpGemId << "  " << endl;
-	errorName = "GEM_SCALERS_SEQUENCE"; 
-        EvtError* evt_e = new EvtError(errorName,m_thisGemId-tmpGemId,-1);
+      if ( deltaGemElapsed > 0 && deltaGemLivetime > deltaGemElapsed ){
+        cout << "ERROR! Livetime in Gem Scalers: " << deltaGemLivetime << " greater than elapsed time: " << deltaGemElapsed << endl;
+	errorName = "GEM_LIVETIME_RATIO"; 
+        EvtError* evt_e = new EvtError(errorName,deltaGemLivetime/deltaGemElapsed,-1);
         m_evtMap[iEvent].push_back(evt_e);
         m_errMap[errorName].push_back(iEvent);
+      } 
     }
-    m_thisGemId = tmpGemId;
 
     // Gaps in datagram sequence number?
     if ((DatagramSeqNbr != m_epuList.at(cpuNbr).m_previousDatagram) && 
     		((DatagramSeqNbr-m_epuList.at(cpuNbr).m_previousDatagram)!=1)) {
       m_epuList.at(cpuNbr).m_datagramGaps++;
       errorName = "DATAGRAM_GAP"; 
-      EvtError* evt_e = new EvtError(errorName,-1,cpuNbr);
+      EvtError* evt_e = new EvtError(errorName,DatagramSeqNbr-m_epuList.at(cpuNbr).m_previousDatagram,cpuNbr);
       m_evtMap[iEvent].push_back(evt_e);
       m_errMap[errorName].push_back(iEvent);
       cout << "Warning! there was a gap in the datagram sequence number for " << m_epuList.at(cpuNbr).m_epuName << "! event " 
@@ -310,7 +392,7 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
       if (lastReasonDataGram == enums::Lsf::Close::Full) {
         m_epuList.at(iLoop).m_lastDatagramFull = 1;
 	errorName = "LAST_DATAGRAM_FULL";
-        EvtError* evt_e = new EvtError(errorName,-1,iLoop);
+        EvtError* evt_e = new EvtError(errorName,lastReasonDataGram,iLoop);
         m_evtMap[m_epuList.at(iLoop).m_lastDatagramEvent].push_back(evt_e);
         m_errMap[errorName].push_back(m_epuList.at(iLoop).m_lastDatagramEvent);
         cout << "The closing reason for the last datagram for " << m_epuList.at(iLoop).m_epuName << " was: Datagram Full" << endl;
@@ -371,7 +453,7 @@ void RunVerify::writeXmlEventSummary(DomElement& node) const {
   else 
     AcdXmlUtil::addAttribute(evtSummary,"truncated","False");
   int evtCounter = 0;  
-  for (map< int, list<EvtError*> >::const_iterator it = m_evtMap.begin(); it != m_evtMap.end() && evtCounter < 500; it++){  
+  for (map< int, list<EvtError*> >::const_iterator it = m_evtMap.begin(); it != m_evtMap.end() && evtCounter <= 500; it++){  
     DomElement evtError = AcdXmlUtil::makeChildNode(evtSummary,"errorEvent");
     if ( (*it).first > -1 )
       AcdXmlUtil::addAttribute(evtError,"eventNumber",(int)(*it).first);
@@ -380,8 +462,7 @@ void RunVerify::writeXmlEventSummary(DomElement& node) const {
     for (list<EvtError*>::const_iterator ie = (*it).second.begin(); ie != (*it).second.end(); ie ++){
       DomElement errDetail = AcdXmlUtil::makeChildNode(evtError,"error");
       AcdXmlUtil::addAttribute(errDetail,"code",(*ie)->m_errName.c_str());
-      if ((*ie)->m_errValue > -1)
-        AcdXmlUtil::addAttribute(errDetail,"value",(*ie)->m_errValue);
+      AcdXmlUtil::addAttribute(errDetail,"value",(*ie)->m_errValue);
       if ((*ie)->m_epuNumber > -1)
         AcdXmlUtil::addAttribute(errDetail,"cpu",m_epuList.at((*ie)->m_epuNumber).m_epuName.c_str());
     }

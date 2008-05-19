@@ -90,8 +90,17 @@ class RunVerify {
   int m_nEvent;
   unsigned int m_latcKey; 
   unsigned int m_groundId; 
-  long unsigned int m_firstGemId;
-  long unsigned int m_thisGemId;
+  long unsigned int m_firstGemSequence;
+  long unsigned int m_thisGemSequence;
+  long unsigned int m_firstGemElapsed;
+  long unsigned int m_thisGemElapsed;
+  long unsigned int m_firstGemLivetime;
+  long unsigned int m_thisGemLivetime;
+  long unsigned int m_thisGemPrescaled;
+  long unsigned int m_thisGemDiscarded;
+  long unsigned int m_thisGemDeadzone;
+  unsigned int m_thisGpsCurrent;
+  unsigned int m_thisGpsPrevious;
 
   vector<EpuDatagrams> m_epuList;
   map< string, list<int> > m_errMap;
