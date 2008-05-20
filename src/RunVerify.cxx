@@ -288,13 +288,13 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
 
     // check total delta Id/delta time
     if (iEvent == m_nEvent-1){
-      long unsigned int deltaGemSequence = tmpGemSequence - m_firstGemSequence;
+      long unsigned int deltaGemSequence = tmpGemSequence + 1 - m_firstGemSequence;
       long unsigned int deltaGemElapsed = tmpGemElapsed - m_firstGemElapsed;
       long unsigned int deltaGemLivetime = tmpGemLivetime - m_firstGemLivetime;
       cout << "Gem Scalers -> Total Events Counted: " << deltaGemSequence << endl;
       cout << "Gem Scalers -> Total Elapsed Time (ticks): " << deltaGemElapsed << endl; 
       cout << "Gem Scalers -> Total Live Time (ticks): " << deltaGemLivetime << endl; 
-      if ( m_nEvent > deltaGemSequence ){
+      if ( m_nEvent > deltaGemSequence+2 ){
         cout << "ERROR! Number of events in Gem Scalers: " << deltaGemSequence << "; number of events in Digi File: " << m_nEvent << endl;
 	errorName = "GEM_SEQUENCE_NEVENTS"; 
         EvtError* evt_e = new EvtError(errorName,deltaGemSequence,-1);
