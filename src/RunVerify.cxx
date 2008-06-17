@@ -71,7 +71,7 @@ RunVerify::RunVerify(const char* histoFileName)
     ptr += m_epuList.at(i).m_epuName;
     string title("Number of events per datagram - ");
     title += m_epuList.at(i).m_epuName;
-    m_datagrams[i] = new TH1F(ptr.c_str(),title.c_str(),101,-2,200);
+    m_datagrams[i] = new TH1F(ptr.c_str(),title.c_str(),100,0,500);
   }
 }
 
