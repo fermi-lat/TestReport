@@ -180,7 +180,7 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
       } else if (tmpLatcKey != m_latcKey){
 	cout << "ERROR! LatcKey changed from: " << m_latcKey  <<" to: " << tmpLatcKey << endl;
         m_latcKey = tmpLatcKey;
-	errorName = "LATC_KEY_CHANGE"; 
+	errorName = "LATC_KEY_CHANGE"; // ['The LATC Master key has changed during the run'] 
         EvtError* evt_e = new EvtError(errorName,m_latcKey,-1);
         m_evtMap[iEvent].push_back(evt_e);
         m_errMap[errorName].push_back(iEvent);
@@ -196,7 +196,7 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
       } else if (tmpGroundId != m_groundId){
 	cout << "ERROR! GroundId changed from: " << m_groundId  <<" to: " << tmpGroundId << endl;
         m_groundId = tmpGroundId;
-	errorName = "GROUND_ID_CHANGE"; 
+	errorName = "GROUND_ID_CHANGE"; // ['The GROUND ID has changed during the run'] 
         EvtError* evt_e = new EvtError(errorName,m_groundId,-1);
         m_evtMap[iEvent].push_back(evt_e);
         m_errMap[errorName].push_back(iEvent);
@@ -207,7 +207,7 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
     double ccsdsTime = m_digiEvent->getCcsds().getUtc();
     double timeStamp = m_digiEvent->getTimeStamp();
     if ( ccsdsTime < timeStamp ){
-      errorName = "CCSDS_EARLY_TIMESTAMP";
+      errorName = "CCSDS_EARLY_TIMESTAMP"; // ['The CCSDS Time is earlier than the event TimeStamp']
       EvtError* evt_e = new EvtError(errorName,int(ccsdsTime-timeStamp),cpuNbr);
       m_evtMap[iEvent].push_back(evt_e);
       m_errMap[errorName].push_back(iEvent);
@@ -229,49 +229,49 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
       m_firstGemLivetime = tmpGemLivetime;
     } else {
       if ( iEvent > 1 && iEvent < m_nEvent-1 && tmpGemSequence <= m_thisGemSequence){
-	  errorName = "GEM_SEQUENCE_BACKWARDS"; 
+	  errorName = "GEM_SEQUENCE_BACKWARDS"; // ['The GEM Sequence counter is going backwards'] 
           EvtError* evt_e = new EvtError(errorName,m_thisGemSequence-tmpGemSequence,-1);
           m_evtMap[iEvent].push_back(evt_e);
           m_errMap[errorName].push_back(iEvent);
       }
       if (tmpGemElapsed < m_thisGemElapsed){
-	errorName = "GEM_ELAPSED_BACKWARDS"; 
+	errorName = "GEM_ELAPSED_BACKWARDS"; // ['The GEM Elapsed Time counter is going backwards'] 
         EvtError* evt_e = new EvtError(errorName,m_thisGemElapsed-tmpGemElapsed,-1);
         m_evtMap[iEvent].push_back(evt_e);
         m_errMap[errorName].push_back(iEvent);
       }
       if (tmpGemLivetime < m_thisGemLivetime){
-	errorName = "GEM_LIVETIME_BACKWARDS"; 
+	errorName = "GEM_LIVETIME_BACKWARDS"; // ['The GEM Livetime counter is going backwards'] 
         EvtError* evt_e = new EvtError(errorName,m_thisGemLivetime-tmpGemLivetime,-1);
         m_evtMap[iEvent].push_back(evt_e);
         m_errMap[errorName].push_back(iEvent);
       }
       if (tmpGemPrescaled < m_thisGemPrescaled){
-	errorName = "GEM_PRESCALED_BACKWARDS"; 
+	errorName = "GEM_PRESCALED_BACKWARDS"; // ['The GEM Prescaled counter is going backwards'] 
         EvtError* evt_e = new EvtError(errorName,m_thisGemPrescaled-tmpGemPrescaled,-1);
         m_evtMap[iEvent].push_back(evt_e);
         m_errMap[errorName].push_back(iEvent);
       }
       if (tmpGemDiscarded < m_thisGemDiscarded){
-	errorName = "GEM_DISCARDED_BACKWARDS"; 
+	errorName = "GEM_DISCARDED_BACKWARDS"; // ['The GEM Discarded counter is going backwards'] 
         EvtError* evt_e = new EvtError(errorName,m_thisGemDiscarded-tmpGemDiscarded,-1);
         m_evtMap[iEvent].push_back(evt_e);
         m_errMap[errorName].push_back(iEvent);
       }
       if (tmpGemDeadzone < m_thisGemDeadzone){
-	errorName = "GEM_DEADZONE_BACKWARDS"; 
+	errorName = "GEM_DEADZONE_BACKWARDS"; // ['The GEM Deadzone counter is going backwards'] 
         EvtError* evt_e = new EvtError(errorName,m_thisGemDeadzone-tmpGemDeadzone,-1);
         m_evtMap[iEvent].push_back(evt_e);
         m_errMap[errorName].push_back(iEvent);
       }
       if (tmpGpsCurrent < m_thisGpsCurrent){
-	errorName = "GPS_CURRENT_BACKWARDS"; 
+	errorName = "GPS_CURRENT_BACKWARDS"; // ['The GPS time of the Current event is going backwards'] 
         EvtError* evt_e = new EvtError(errorName,m_thisGpsCurrent-tmpGpsCurrent,-1);
         m_evtMap[iEvent].push_back(evt_e);
         m_errMap[errorName].push_back(iEvent);
       }
       if (tmpGpsPrevious < m_thisGpsPrevious){
-	errorName = "GPS_PREVIOUS_BACKWARDS"; 
+	errorName = "GPS_PREVIOUS_BACKWARDS"; // ['The GPS time of the Previous event is going backwards'] 
         EvtError* evt_e = new EvtError(errorName,m_thisGpsPrevious-tmpGpsPrevious,-1);
         m_evtMap[iEvent].push_back(evt_e);
         m_errMap[errorName].push_back(iEvent);
@@ -288,22 +288,21 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
 
     // check total delta Id/delta time
     if (iEvent == m_nEvent-1){
-      long unsigned int deltaGemSequence = tmpGemSequence + 1 - m_firstGemSequence;
-      long unsigned int deltaGemElapsed = tmpGemElapsed - m_firstGemElapsed;
+      
       long unsigned int deltaGemLivetime = tmpGemLivetime - m_firstGemLivetime;
       cout << "Gem Scalers -> Total Events Counted: " << deltaGemSequence << endl;
       cout << "Gem Scalers -> Total Elapsed Time (ticks): " << deltaGemElapsed << endl; 
       cout << "Gem Scalers -> Total Live Time (ticks): " << deltaGemLivetime << endl; 
       if ( m_nEvent > deltaGemSequence+2 ){
         cout << "ERROR! Number of events in Gem Scalers: " << deltaGemSequence << "; number of events in Digi File: " << m_nEvent << endl;
-	errorName = "GEM_SEQUENCE_NEVENTS"; 
+	errorName = "GEM_SEQUENCE_NEVENTS"; // ['The Digi file has more events than what counted by the GEM']  
         EvtError* evt_e = new EvtError(errorName,deltaGemSequence,-1);
         m_evtMap[iEvent].push_back(evt_e);
         m_errMap[errorName].push_back(iEvent);
       } 
       if ( deltaGemElapsed > 0 && deltaGemLivetime > deltaGemElapsed ){
         cout << "ERROR! Livetime in Gem Scalers: " << deltaGemLivetime << " greater than elapsed time: " << deltaGemElapsed << endl;
-	errorName = "GEM_LIVETIME_RATIO"; 
+	errorName = "GEM_LIVETIME_RATIO"; // ['The Livetime is greater than the Elapsed Time'] 
         EvtError* evt_e = new EvtError(errorName,deltaGemLivetime/deltaGemElapsed,-1);
         m_evtMap[iEvent].push_back(evt_e);
         m_errMap[errorName].push_back(iEvent);
@@ -314,7 +313,7 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
     if ((DatagramSeqNbr != m_epuList.at(cpuNbr).m_previousDatagram) && 
     		((DatagramSeqNbr-m_epuList.at(cpuNbr).m_previousDatagram)!=1)) {
       m_epuList.at(cpuNbr).m_datagramGaps++;
-      errorName = "DATAGRAM_GAP"; 
+      errorName = "DATAGRAM_GAP"; // ['Gaps were found in the datagram sequence number'] 
       EvtError* evt_e = new EvtError(errorName,DatagramSeqNbr-m_epuList.at(cpuNbr).m_previousDatagram,cpuNbr);
       m_evtMap[iEvent].push_back(evt_e);
       m_errMap[errorName].push_back(iEvent);
@@ -347,7 +346,7 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
       if (firstDatagramOpen == enums::Lsf::Open::Start) {
 	m_epuList.at(cpuNbr).m_firstOpenAction = 1;
       } else {
-        errorName = "FIRST_DATAGRAM_OPENING";
+        errorName = "FIRST_DATAGRAM_OPENING"; // ['The first datagram was not opened for the appropriate reason'] 
         EvtError* evt_e = new EvtError(errorName,firstDatagramOpen,cpuNbr);
         m_evtMap[iEvent].push_back(evt_e);
         m_errMap[errorName].push_back(iEvent);
@@ -382,7 +381,7 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
           int diff = *p - *(--p);
           p++;
           if (diff > 1) {
-	    errorName = "DROPPED_DATAGRAMS";
+	    errorName = "DROPPED_DATAGRAMS"; // ['Some datagrams were dropped (lost)'] 
             EvtError* evt_e = new EvtError(errorName,diff-1,iLoop);
             m_evtMap[-1].push_back(evt_e);
             m_errMap[errorName].push_back(-1);
@@ -402,14 +401,14 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
       }
       if (lastReasonDataGram == enums::Lsf::Close::Full) {
         m_epuList.at(iLoop).m_lastDatagramFull = 1;
-	errorName = "LAST_DATAGRAM_FULL";
+	errorName = "LAST_DATAGRAM_FULL"; // ['The last datagram was full: data might be missing'] 
         EvtError* evt_e = new EvtError(errorName,lastReasonDataGram,iLoop);
         m_evtMap[m_epuList.at(iLoop).m_lastDatagramEvent].push_back(evt_e);
         m_errMap[errorName].push_back(m_epuList.at(iLoop).m_lastDatagramEvent);
         cout << "The closing reason for the last datagram for " << m_epuList.at(iLoop).m_epuName << " was: Datagram Full" << endl;
       }
       if (m_epuList.at(iLoop).m_lastCloseAction == 0 && m_epuList.at(iLoop).m_lastDatagramFull == 0) {
-        errorName = "LAST_DATAGRAM_CLOSING";
+        errorName = "LAST_DATAGRAM_CLOSING"; // ['The first datagram was not opened for the appropriate reason']
         EvtError* evt_e = new EvtError(errorName,lastActionDataGram,iLoop);
         m_evtMap[m_epuList.at(iLoop).m_lastDatagramEvent].push_back(evt_e);
         m_errMap[errorName].push_back(m_epuList.at(iLoop).m_lastDatagramEvent);
