@@ -288,7 +288,8 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
 
     // check total delta Id/delta time
     if (iEvent == m_nEvent-1){
-      
+      long unsigned int deltaGemSequence = tmpGemSequence + 1 - m_firstGemSequence;
+      long unsigned int deltaGemElapsed = tmpGemElapsed - m_firstGemElapsed;
       long unsigned int deltaGemLivetime = tmpGemLivetime - m_firstGemLivetime;
       cout << "Gem Scalers -> Total Events Counted: " << deltaGemSequence << endl;
       cout << "Gem Scalers -> Total Elapsed Time (ticks): " << deltaGemElapsed << endl; 
@@ -408,7 +409,7 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
         cout << "The closing reason for the last datagram for " << m_epuList.at(iLoop).m_epuName << " was: Datagram Full" << endl;
       }
       if (m_epuList.at(iLoop).m_lastCloseAction == 0 && m_epuList.at(iLoop).m_lastDatagramFull == 0) {
-        errorName = "LAST_DATAGRAM_CLOSING"; // ['The first datagram was not opened for the appropriate reason']
+        errorName = "LAST_DATAGRAM_CLOSING"; // ['The last datagram was not closed for the appropriate reason']
         EvtError* evt_e = new EvtError(errorName,lastActionDataGram,iLoop);
         m_evtMap[m_epuList.at(iLoop).m_lastDatagramEvent].push_back(evt_e);
         m_errMap[errorName].push_back(m_epuList.at(iLoop).m_lastDatagramEvent);
