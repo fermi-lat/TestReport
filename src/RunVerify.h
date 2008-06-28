@@ -90,15 +90,15 @@ class RunVerify {
   int m_nEvent;
   unsigned int m_latcKey; 
   unsigned int m_groundId; 
-  long unsigned int m_firstGemSequence;
-  long unsigned int m_thisGemSequence;
-  long unsigned int m_firstGemElapsed;
-  long unsigned int m_thisGemElapsed;
-  long unsigned int m_firstGemLivetime;
-  long unsigned int m_thisGemLivetime;
-  long unsigned int m_thisGemPrescaled;
-  long unsigned int m_thisGemDiscarded;
-  long unsigned int m_thisGemDeadzone;
+  unsigned long long m_firstGemSequence;
+  unsigned long long m_thisGemSequence;
+  unsigned long long m_firstGemElapsed;
+  unsigned long long m_thisGemElapsed;
+  unsigned long long m_firstGemLivetime;
+  unsigned long long m_thisGemLivetime;
+  unsigned long long m_thisGemPrescaled;
+  unsigned long long m_thisGemDiscarded;
+  unsigned long long m_thisGemDeadzone;
   unsigned int m_thisGpsCurrent;
   unsigned int m_thisGpsPrevious;
 

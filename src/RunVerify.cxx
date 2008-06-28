@@ -214,12 +214,12 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
     }
 
     // check the Gem/GPS Scalers and Counters
-    long unsigned int tmpGemSequence = m_digiEvent->getMetaEvent().scalers().sequence();
-    long unsigned int tmpGemElapsed = m_digiEvent->getMetaEvent().scalers().elapsed();
-    long unsigned int tmpGemLivetime = m_digiEvent->getMetaEvent().scalers().livetime();
-    long unsigned int tmpGemPrescaled = m_digiEvent->getMetaEvent().scalers().prescaled();
-    long unsigned int tmpGemDiscarded = m_digiEvent->getMetaEvent().scalers().discarded();
-    long unsigned int tmpGemDeadzone = m_digiEvent->getMetaEvent().scalers().deadzone();
+    unsigned long long tmpGemSequence = m_digiEvent->getMetaEvent().scalers().sequence();
+    unsigned long long tmpGemElapsed = m_digiEvent->getMetaEvent().scalers().elapsed();
+    unsigned long long tmpGemLivetime = m_digiEvent->getMetaEvent().scalers().livetime();
+    unsigned long long tmpGemPrescaled = m_digiEvent->getMetaEvent().scalers().prescaled();
+    unsigned long long tmpGemDiscarded = m_digiEvent->getMetaEvent().scalers().discarded();
+    unsigned long long tmpGemDeadzone = m_digiEvent->getMetaEvent().scalers().deadzone();
     unsigned int tmpGpsCurrent = m_digiEvent->getMetaEvent().time().current().timeSecs();
     unsigned int tmpGpsPrevious = m_digiEvent->getMetaEvent().time().previous().timeSecs();
 
@@ -288,9 +288,9 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
 
     // check total delta Id/delta time
     if (iEvent == m_nEvent-1){
-      long unsigned int deltaGemSequence = tmpGemSequence + 1 - m_firstGemSequence;
-      long unsigned int deltaGemElapsed = tmpGemElapsed - m_firstGemElapsed;
-      long unsigned int deltaGemLivetime = tmpGemLivetime - m_firstGemLivetime;
+      unsigned long long deltaGemSequence = tmpGemSequence + 1 - m_firstGemSequence;
+      unsigned long long deltaGemElapsed = tmpGemElapsed - m_firstGemElapsed;
+      unsigned long long deltaGemLivetime = tmpGemLivetime - m_firstGemLivetime;
       cout << "Gem Scalers -> Total Events Counted: " << deltaGemSequence << endl;
       cout << "Gem Scalers -> Total Elapsed Time (ticks): " << deltaGemElapsed << endl; 
       cout << "Gem Scalers -> Total Live Time (ticks): " << deltaGemLivetime << endl; 
