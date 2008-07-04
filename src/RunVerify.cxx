@@ -33,7 +33,6 @@ RunVerify::RunVerify(const char* histoFileName)
     m_digiEvent(0),
     m_nEvent(0),
     m_latcKey(0),
-    m_groundId(0),
     m_firstGemSequence(0),
     m_thisGemSequence(0),
     m_firstGemElapsed(0),
@@ -182,22 +181,6 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
         m_latcKey = tmpLatcKey;
 	errorName = "LATC_KEY_CHANGE"; // ['The LATC Master key has changed during the run'] 
         EvtError* evt_e = new EvtError(errorName,m_latcKey,-1);
-        m_evtMap[iEvent].push_back(evt_e);
-        m_errMap[errorName].push_back(iEvent);
-      }
-    } 
-
-    // check the Ground ID
-    if (m_digiEvent->getMetaEvent().run().id() != 0) { 
-      unsigned int tmpGroundId = m_digiEvent->getMetaEvent().run().id(); 
-      if (m_groundId == 0){
-        m_groundId = tmpGroundId;
-	cout << "GroundId found: " << m_groundId << endl;
-      } else if (tmpGroundId != m_groundId){
-	cout << "ERROR! GroundId changed from: " << m_groundId  <<" to: " << tmpGroundId << endl;
-        m_groundId = tmpGroundId;
-	errorName = "GROUND_ID_CHANGE"; // ['The GROUND ID has changed during the run'] 
-        EvtError* evt_e = new EvtError(errorName,m_groundId,-1);
         m_evtMap[iEvent].push_back(evt_e);
         m_errMap[errorName].push_back(iEvent);
       }

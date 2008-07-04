@@ -89,7 +89,6 @@ class RunVerify {
 
   int m_nEvent;
   unsigned int m_latcKey; 
-  unsigned int m_groundId; 
   unsigned long long m_firstGemSequence;
   unsigned long long m_thisGemSequence;
   unsigned long long m_firstGemElapsed;
