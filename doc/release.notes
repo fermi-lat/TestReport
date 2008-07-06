@@ -1,4 +1,7 @@
 
+Jul 6, 2008: mem
+v6r14   - Pause is accepted as a valid closing reason (see LONE-83 and FSW-1078)
+
 Jul 4, 2008: mem
 v6r13   - Removed the check for Ground ID
 

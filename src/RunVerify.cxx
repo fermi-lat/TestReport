@@ -380,7 +380,7 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
       m_digiBranch->GetEntry(m_epuList.at(iLoop).m_lastDatagramEvent);
       int lastActionDataGram  = m_digiEvent->getMetaEvent().datagram().closeAction();
       int lastReasonDataGram = m_digiEvent->getMetaEvent().datagram().closeReason();
-      if (lastActionDataGram == enums::Lsf::Close::Stop) {
+      if (lastActionDataGram == enums::Lsf::Close::Stop || lastActionDataGram == enums::Lsf::Close::Pause) {
         m_epuList.at(iLoop).m_lastCloseAction = 1;
       }
       if (lastReasonDataGram == enums::Lsf::Close::Full) {
