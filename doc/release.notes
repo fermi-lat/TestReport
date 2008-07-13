@@ -1,4 +1,7 @@
 
+Jul 12, 2008: mem
+v6r15   - Abort is accepted as a valid closing reason instead of Pause
+
 Jul 6, 2008: mem
 v6r14   - Pause is accepted as a valid closing reason (see LONE-83 and FSW-1078)
 

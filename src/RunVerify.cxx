@@ -49,7 +49,7 @@ RunVerify::RunVerify(const char* histoFileName)
   if(gROOT == 0) {
     static TROOT g_root("report", "report");
   }
-  gROOT->SetBatch();  // initialize ROOT
+  //gROOT->SetBatch();  // initialize ROOT
 
   string r(m_histoFileName);
   m_root = new TFile(r.c_str(), "RECREATE");
@@ -380,7 +380,7 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
       m_digiBranch->GetEntry(m_epuList.at(iLoop).m_lastDatagramEvent);
       int lastActionDataGram  = m_digiEvent->getMetaEvent().datagram().closeAction();
       int lastReasonDataGram = m_digiEvent->getMetaEvent().datagram().closeReason();
-      if (lastActionDataGram == enums::Lsf::Close::Stop || lastActionDataGram == enums::Lsf::Close::Pause) {
+      if (lastActionDataGram == enums::Lsf::Close::Stop || lastActionDataGram == enums::Lsf::Close::Abort) {
         m_epuList.at(iLoop).m_lastCloseAction = 1;
       }
       if (lastReasonDataGram == enums::Lsf::Close::Full) {
