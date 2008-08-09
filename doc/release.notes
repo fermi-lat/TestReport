@@ -1,4 +1,7 @@
 
+Aug 8, 2008: mem
+v6r16   - Enabling only needed branches in digi takes care of memory leaks
+
 Jul 12, 2008: mem
 v6r15   - Abort is accepted as a valid closing reason instead of Pause
 

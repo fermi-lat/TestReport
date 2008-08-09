@@ -135,6 +135,11 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
     m_digiEvent = 0;
     m_digiBranch = m_digiTree->GetBranch("DigiEvent");
     m_digiBranch->SetAddress(&m_digiEvent);
+    m_digiTree->SetBranchStatus("*",0);
+    m_digiTree->SetBranchStatus("m_ccsds",1);
+    m_digiTree->SetBranchStatus("m_eventId",1);
+    m_digiTree->SetBranchStatus("m_metaEvent",1);
+    m_digiTree->SetBranchStatus("m_timeStamp",1);
   } else {
     cout << "ERROR: no digi file " << digiFileName << "opened!" << endl;
     return;
@@ -377,6 +382,7 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
       }
     }
     if (m_epuList.at(iLoop).m_lastDatagramEvent != -1) {
+      if (m_digiEvent) m_digiEvent->Clear();
       m_digiBranch->GetEntry(m_epuList.at(iLoop).m_lastDatagramEvent);
       int lastActionDataGram  = m_digiEvent->getMetaEvent().datagram().closeAction();
       int lastReasonDataGram = m_digiEvent->getMetaEvent().datagram().closeReason();
