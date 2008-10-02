@@ -64,7 +64,7 @@ class RunVerify {
   RunVerify(const char* histoFileName);
   ~RunVerify();
 
-  void analyzeDigi(const char* digiFileName);
+  void analyzeDigi(const char* digiFileName, bool completeRun);
   
   // write errors to an xml file
   Bool_t writeXmlFile(const char* fileName) const;

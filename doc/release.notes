@@ -1,3 +1,5 @@
+Oct 2, 2008: mem
+v7r0    - Job options to ignore first and last datagram errors for incomplete runs
 
 Aug 8, 2008: mem
 v6r16   - Enabling only needed branches in digi takes care of memory leaks

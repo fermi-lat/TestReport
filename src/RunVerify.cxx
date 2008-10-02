@@ -119,7 +119,7 @@ EpuDatagrams::~EpuDatagrams() {
   m_listDatagrams.clear();
 }
 
-void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
+void RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeRun=false)
 {
   int nDigi  = -1;
   int nbrEventsDG[MaxEpuNumber];
@@ -300,7 +300,7 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
 
     // Gaps in datagram sequence number?
     if ((DatagramSeqNbr != m_epuList.at(cpuNbr).m_previousDatagram) && 
-    		((DatagramSeqNbr-m_epuList.at(cpuNbr).m_previousDatagram)!=1)) {
+    		((DatagramSeqNbr-m_epuList.at(cpuNbr).m_previousDatagram)!=1) && atLeastOneEvt[cpuNbr]>0 ) {
       m_epuList.at(cpuNbr).m_datagramGaps++;
       errorName = "DATAGRAM_GAP"; // ['Gaps were found in the datagram sequence number'] 
       EvtError* evt_e = new EvtError(errorName,DatagramSeqNbr-m_epuList.at(cpuNbr).m_previousDatagram,cpuNbr);
@@ -327,20 +327,23 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
     }
 
     // Here I make a list of the datagrams and keep the opening reason for the first datagram:
-    // First event in first datagram?
+    // First event in first datagram? (NB: I generate the error only if the run is complete)!
     if (atLeastOneEvt[cpuNbr] == 0) {
       m_epuList.at(cpuNbr).m_listDatagrams.push_back(DatagramSeqNbr);
       m_epuList.at(cpuNbr).m_firstDatagram = DatagramSeqNbr;
+      cout << "DatagramID:" << DatagramSeqNbr << "; Epu:" << cpuNbr << endl;
       int firstDatagramOpen = m_digiEvent->getMetaEvent().datagram().openAction();
       if (firstDatagramOpen == enums::Lsf::Open::Start) {
 	m_epuList.at(cpuNbr).m_firstOpenAction = 1;
       } else {
-        errorName = "FIRST_DATAGRAM_OPENING"; // ['The first datagram was not opened for the appropriate reason'] 
-        EvtError* evt_e = new EvtError(errorName,firstDatagramOpen,cpuNbr);
-        m_evtMap[iEvent].push_back(evt_e);
-        m_errMap[errorName].push_back(iEvent);
-        cout << "Warning! The fist datagram for " << m_epuList.at(cpuNbr).m_epuName 
-	     << " was not opened because we started the run! The datagram opening reason was " << firstDatagramOpen << endl;
+        if (completeRun) {
+          errorName = "FIRST_DATAGRAM_OPENING"; // ['The first datagram was not opened for the appropriate reason'] 
+          EvtError* evt_e = new EvtError(errorName,firstDatagramOpen,cpuNbr);
+          m_evtMap[iEvent].push_back(evt_e);
+          m_errMap[errorName].push_back(iEvent);
+          cout << "Warning! The fist datagram for " << m_epuList.at(cpuNbr).m_epuName 
+	       << " was not opened because we started the run! The datagram opening reason was " << firstDatagramOpen << endl;
+	}
       }
       atLeastOneEvt[cpuNbr] = 1;
     }
@@ -389,7 +392,7 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
       if (lastActionDataGram == enums::Lsf::Close::Stop || lastActionDataGram == enums::Lsf::Close::Abort) {
         m_epuList.at(iLoop).m_lastCloseAction = 1;
       }
-      if (lastReasonDataGram == enums::Lsf::Close::Full) {
+      if (lastReasonDataGram == enums::Lsf::Close::Full && completeRun) {
         m_epuList.at(iLoop).m_lastDatagramFull = 1;
 	errorName = "LAST_DATAGRAM_FULL"; // ['The last datagram was full: data might be missing'] 
         EvtError* evt_e = new EvtError(errorName,lastReasonDataGram,iLoop);
@@ -397,7 +400,7 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root")
         m_errMap[errorName].push_back(m_epuList.at(iLoop).m_lastDatagramEvent);
         cout << "The closing reason for the last datagram for " << m_epuList.at(iLoop).m_epuName << " was: Datagram Full" << endl;
       }
-      if (m_epuList.at(iLoop).m_lastCloseAction == 0 && m_epuList.at(iLoop).m_lastDatagramFull == 0) {
+      if (m_epuList.at(iLoop).m_lastCloseAction == 0 && m_epuList.at(iLoop).m_lastDatagramFull == 0 && completeRun) {
         errorName = "LAST_DATAGRAM_CLOSING"; // ['The last datagram was not closed for the appropriate reason']
         EvtError* evt_e = new EvtError(errorName,lastActionDataGram,iLoop);
         m_evtMap[m_epuList.at(iLoop).m_lastDatagramEvent].push_back(evt_e);

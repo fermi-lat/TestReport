@@ -8,8 +8,9 @@ int main(int argn, char** argv)
   std::string digiRootFile, xmlFileName, histoFileName, optionFileName;
   std::string digiRootFile_def, xmlFileName_def, histoFileName_def;
   int opt;
+  bool completeRun = false;
  
-  while ( (opt = getopt(argn, argv, "o:d:x:r:")) != EOF ) {
+  while ( (opt = getopt(argn, argv, "o:d:x:r:e")) != EOF ) {
     switch (opt) {
       case 'o':   // Option file name
         optionFileName = string(optarg);
@@ -22,6 +23,9 @@ int main(int argn, char** argv)
         break;
       case 'r':   // root output file name      
         histoFileName = string(optarg);
+        break;
+      case 'e':   // end of run     
+        completeRun = true;
         break;
     } 
   }
@@ -39,7 +43,7 @@ int main(int argn, char** argv)
   if (histoFileName == "") histoFileName = histoFileName_def;
 
   RunVerify v(histoFileName.c_str());
-  v.analyzeDigi(digiRootFile.c_str());
+  v.analyzeDigi(digiRootFile.c_str(),completeRun);
   v.writeXmlFile(xmlFileName.c_str());
 }
 
