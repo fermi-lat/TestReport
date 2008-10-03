@@ -1,9 +1,9 @@
 
 Oct 2, 2008: mem
-v7r2    - Add a comment to know if verify was executed for Complete/inProgress run
+v7r2    - Add a tag to the xml output to know if verify was executed for Complete/inProgress run
 
 Oct 2, 2008: mem
-v7r1    - Checking the datagram ID for the first datagram in each EPU (GDQMQ-256)
+v7r1    - Checking the datagram ID for the first datagram in each EPU (GDQMQ-268)
 
 Oct 2, 2008: mem
 v7r0    - Job options to ignore first and last datagram errors for incomplete runs (GDQMQ-256)
