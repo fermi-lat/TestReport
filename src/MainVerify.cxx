@@ -44,6 +44,6 @@ int main(int argn, char** argv)
 
   RunVerify v(histoFileName.c_str());
   v.analyzeDigi(digiRootFile.c_str(),completeRun);
-  v.writeXmlFile(xmlFileName.c_str());
+  v.writeXmlFile(xmlFileName.c_str(),completeRun);
 }
 

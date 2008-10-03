@@ -67,9 +67,9 @@ class RunVerify {
   void analyzeDigi(const char* digiFileName, bool completeRun);
   
   // write errors to an xml file
-  Bool_t writeXmlFile(const char* fileName) const;
+  Bool_t writeXmlFile(const char* fileName, bool completeRun) const;
   // write xml header
-  void writeXmlHeader(DomElement& node) const;
+  void writeXmlHeader(DomElement& node, bool completeRun) const;
   // write xml footer
   void writeXmlFooter(DomElement& node) const;
   // write error summary to xml file

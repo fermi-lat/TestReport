@@ -331,7 +331,6 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeR
     if (atLeastOneEvt[cpuNbr] == 0) {
       m_epuList.at(cpuNbr).m_listDatagrams.push_back(DatagramSeqNbr);
       m_epuList.at(cpuNbr).m_firstDatagram = DatagramSeqNbr;
-      cout << "DatagramID:" << DatagramSeqNbr << "; Epu:" << cpuNbr << endl;
       int firstDatagramOpen = m_digiEvent->getMetaEvent().datagram().openAction();
       if (firstDatagramOpen == enums::Lsf::Open::Start) {
 	m_epuList.at(cpuNbr).m_firstOpenAction = 1;
@@ -344,6 +343,14 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeR
           cout << "Warning! The fist datagram for " << m_epuList.at(cpuNbr).m_epuName 
 	       << " was not opened because we started the run! The datagram opening reason was " << firstDatagramOpen << endl;
 	}
+      }
+      if (m_epuList.at(cpuNbr).m_firstDatagram >0 && completeRun){
+        errorName = "FIRST_DATAGRAM_ID"; // ['The first datagram has not datagramID = 0'] 
+        EvtError* evt_e = new EvtError(errorName,m_epuList.at(cpuNbr).m_firstDatagram,cpuNbr);
+        m_evtMap[iEvent].push_back(evt_e);
+        m_errMap[errorName].push_back(iEvent);
+        cout << "Warning! The fist datagram for " << m_epuList.at(cpuNbr).m_epuName 
+	     << " did not have datagram ID = 0! The first datagram ID was " << m_epuList.at(cpuNbr).m_firstDatagram << endl;
       }
       atLeastOneEvt[cpuNbr] = 1;
     }
@@ -416,10 +423,10 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeR
   if(m_digiFile) m_digiFile->Close();
 }
 
-Bool_t RunVerify::writeXmlFile(const char* fileName) const {
+Bool_t RunVerify::writeXmlFile(const char* fileName, bool completeRun) const {
 
   DomElement elem = AcdXmlUtil::makeDocument("errorContribution");
-  writeXmlHeader(elem);
+  writeXmlHeader(elem, completeRun);
   writeXmlErrorSummary(elem);
   writeXmlEventSummary(elem);
   writeXmlFooter(elem);
@@ -427,8 +434,11 @@ Bool_t RunVerify::writeXmlFile(const char* fileName) const {
 
 }
 
-void RunVerify::writeXmlHeader(DomElement& /* node */) const {
-  // do nothing, for now
+void RunVerify::writeXmlHeader(DomElement& node, bool completeRun) const {
+  DomElement runStatus = AcdXmlUtil::makeChildNode(node,"Run");
+  string isComplete("inProgress");
+  if (completeRun) isComplete = "Complete";
+  AcdXmlUtil::addAttribute(runStatus,"Status",isComplete.c_str());
   return;
 }
 
