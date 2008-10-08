@@ -1,4 +1,7 @@
 
+Oct 7, 2008: mem
+v7r3    - Added 3 new checks on elapsed time, livetime ratio and timestamp (GDQMQ-255)
+
 Oct 2, 2008: mem
 v7r2    - Add a tag to the xml output to know if verify was executed for Complete/inProgress run
 

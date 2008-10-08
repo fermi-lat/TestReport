@@ -100,6 +100,7 @@ class RunVerify {
   unsigned long long m_thisGemDeadzone;
   unsigned int m_thisGpsCurrent;
   unsigned int m_thisGpsPrevious;
+  double m_thisTimeStamp;
 
   vector<EpuDatagrams> m_epuList;
   map< string, list<int> > m_errMap;

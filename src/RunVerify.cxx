@@ -43,7 +43,8 @@ RunVerify::RunVerify(const char* histoFileName)
     m_thisGemDiscarded(0),
     m_thisGemDeadzone(0),
     m_thisGpsCurrent(0),
-    m_thisGpsPrevious(0)
+    m_thisGpsPrevious(0),
+    m_thisTimeStamp(0)
 { 
   // initialize ROOT
   if(gROOT == 0) {
@@ -210,6 +211,7 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeR
     unsigned long long tmpGemDeadzone = m_digiEvent->getMetaEvent().scalers().deadzone();
     unsigned int tmpGpsCurrent = m_digiEvent->getMetaEvent().time().current().timeSecs();
     unsigned int tmpGpsPrevious = m_digiEvent->getMetaEvent().time().previous().timeSecs();
+    double tmpTimeStamp = m_digiEvent->getTimeStamp();
 
     if (iEvent == 0){
       m_firstGemSequence = tmpGemSequence;
@@ -224,6 +226,12 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeR
       }
       if (tmpGemElapsed < m_thisGemElapsed){
 	errorName = "GEM_ELAPSED_BACKWARDS"; // ['The GEM Elapsed Time counter is going backwards'] 
+        EvtError* evt_e = new EvtError(errorName,m_thisGemElapsed-tmpGemElapsed,-1);
+        m_evtMap[iEvent].push_back(evt_e);
+        m_errMap[errorName].push_back(iEvent);
+      }
+      if ( (tmpGemElapsed >= m_thisGemElapsed) && (tmpGemElapsed - m_thisGemElapsed) < 530){
+	errorName = "GEM_ELAPSED_UNPHYSICAL"; // ['The Elapsed Time from the previous event is less than 530 ticks'] 
         EvtError* evt_e = new EvtError(errorName,m_thisGemElapsed-tmpGemElapsed,-1);
         m_evtMap[iEvent].push_back(evt_e);
         m_errMap[errorName].push_back(iEvent);
@@ -264,6 +272,21 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeR
         m_evtMap[iEvent].push_back(evt_e);
         m_errMap[errorName].push_back(iEvent);
       }
+      if (tmpTimeStamp < m_thisTimeStamp){
+	errorName = "EVT_TIMESTAMP_BACKWARDS"; // ['The Event TimeStamp (MET) is going backwards'] 
+        EvtError* evt_e = new EvtError(errorName,int(m_thisTimeStamp-tmpTimeStamp),-1);
+        m_evtMap[iEvent].push_back(evt_e);
+        m_errMap[errorName].push_back(iEvent);
+      }
+      if ( (tmpGemElapsed-m_thisGemElapsed) > 0 ) {
+        double tmpLiveRatio = (float) (tmpGemLivetime-m_thisGemLivetime)/(tmpGemElapsed-m_thisGemElapsed);
+        if ( tmpLiveRatio > 1 ){
+          errorName = "EVT_LIVETIME_RATIO"; // ['The Livetime since the previous event is greater than the Elapsed Time'] 
+          EvtError* evt_e = new EvtError(errorName,int(tmpLiveRatio),-1);
+          m_evtMap[iEvent].push_back(evt_e);
+          m_errMap[errorName].push_back(iEvent);
+        }
+      }
     }
     m_thisGemSequence = tmpGemSequence;
     m_thisGemElapsed = tmpGemElapsed;
@@ -273,6 +296,7 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeR
     m_thisGemDeadzone = tmpGemDeadzone;
     m_thisGpsCurrent = tmpGpsCurrent;
     m_thisGpsPrevious = tmpGpsPrevious;
+    m_thisTimeStamp = tmpTimeStamp;
 
     // check total delta Id/delta time
     if (iEvent == m_nEvent-1){
