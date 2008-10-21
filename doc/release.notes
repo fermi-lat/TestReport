@@ -1,4 +1,7 @@
 
+Oct 21, 2008: mem
+v7r4    - Added 1 leap second to the CCSDS vs timeStamp check
+
 Oct 7, 2008: mem
 v7r3    - Added 3 new checks on elapsed time, livetime ratio and timestamp (GDQMQ-255)
 
