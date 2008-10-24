@@ -1,4 +1,7 @@
 
+Oct 24, 2008: mem
+v7r5    - Fixed a bug that was generating spurious errors for sweep events 
+
 Oct 21, 2008: mem
 v7r4    - Added 1 leap second to the CCSDS vs timeStamp check
 

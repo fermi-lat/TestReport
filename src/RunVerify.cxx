@@ -183,7 +183,7 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeR
         m_latcKey = tmpLatcKey;
 	cout << "LatcKey found: " << m_latcKey << endl;
       } else if (tmpLatcKey != m_latcKey){
-	cout << "ERROR! LatcKey changed from: " << m_latcKey  <<" to: " << tmpLatcKey << endl;
+	//cout << "ERROR! LatcKey changed from: " << m_latcKey  <<" to: " << tmpLatcKey << endl;
         m_latcKey = tmpLatcKey;
 	errorName = "LATC_KEY_CHANGE"; // ['The LATC Master key has changed during the run'] 
         EvtError* evt_e = new EvtError(errorName,m_latcKey,-1);
@@ -234,7 +234,7 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeR
         m_evtMap[iEvent].push_back(evt_e);
         m_errMap[errorName].push_back(iEvent);
       }
-      if ( (tmpGemElapsed >= m_thisGemElapsed) && (tmpGemElapsed - m_thisGemElapsed) < 530){
+      if (iEvent > 1 && iEvent < m_nEvent-1 && (tmpGemElapsed >= m_thisGemElapsed) && (tmpGemElapsed - m_thisGemElapsed) < 530){
 	errorName = "GEM_ELAPSED_UNPHYSICAL"; // ['The Elapsed Time from the previous event is less than 530 ticks'] 
         EvtError* evt_e = new EvtError(errorName,m_thisGemElapsed-tmpGemElapsed,-1);
         m_evtMap[iEvent].push_back(evt_e);
