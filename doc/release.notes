@@ -1,4 +1,7 @@
 
+Nov 13, 2008: mem
+v7r6    - Taking into account leap second from Dec 31st, 2008 
+
 Oct 24, 2008: mem
 v7r5    - Fixed a bug that was generating spurious errors for sweep events 
 

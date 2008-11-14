@@ -195,9 +195,14 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeR
     // check the CCSDS timestamp 
     double ccsdsTime = m_digiEvent->getCcsds().getUtc();
     // Time from Mission elapsed time to Unix time:
-    double deltaTimeUgly = 978307200 - 1;
+    double deltaTimeUgly = 978307200;
+    double timeStamp = m_digiEvent->getTimeStamp();
+    // Leap second from Dec 31st, 2005
+    if (timeStamp > 157766400) deltaTimeUgly--; 
+    // Leap second from Dec 31st, 2008
+    if (timeStamp > 252460800) deltaTimeUgly--;
+    timeStamp = timeStamp + deltaTimeUgly;
 
-    double timeStamp = m_digiEvent->getTimeStamp() + deltaTimeUgly;
     if ( ccsdsTime < timeStamp ){
       //cout << "ERROR! CCSDS packet time: " << (int)ccsdsTime  <<" smaller than timestamp: " << (int)timeStamp << endl;
       errorName = "CCSDS_EARLY_TIMESTAMP"; // ['The CCSDS Time is earlier than the event TimeStamp']
