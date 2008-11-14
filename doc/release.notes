@@ -1,6 +1,9 @@
 
 Nov 13, 2008: mem
-v7r6    - Taking into account leap second from Dec 31st, 2008 (GDQMQ-296) 
+v7r7    - Taking into account leap second from Dec 31st, 2008 (GDQMQ-296) 
+
+Nov 13, 2008: mem
+v7r6    - Empty tag created by mistake.
 
 Oct 24, 2008: mem
 v7r5    - Fixed a bug that was generating spurious errors for sweep events 
