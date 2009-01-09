@@ -1,4 +1,7 @@
 
+Jan 08, 2009: mem
+v7r8    - Fixed a bug in the computation of the size of datagram gaps 
+
 Nov 13, 2008: mem
 v7r7    - Taking into account leap second from Dec 31st, 2008 (GDQMQ-296) 
 

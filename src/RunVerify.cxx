@@ -336,7 +336,7 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeR
     		((DatagramSeqNbr-m_epuList.at(cpuNbr).m_previousDatagram)!=1) && atLeastOneEvt[cpuNbr]>0 ) {
       m_epuList.at(cpuNbr).m_datagramGaps++;
       errorName = "DATAGRAM_GAP"; // ['Gaps were found in the datagram sequence number'] 
-      EvtError* evt_e = new EvtError(errorName,DatagramSeqNbr-m_epuList.at(cpuNbr).m_previousDatagram,cpuNbr);
+      EvtError* evt_e = new EvtError(errorName,DatagramSeqNbr-m_epuList.at(cpuNbr).m_previousDatagram-1,cpuNbr);
       m_evtMap[iEvent].push_back(evt_e);
       m_errMap[errorName].push_back(iEvent);
       cout << "Warning! there was a gap in the datagram sequence number for " << m_epuList.at(cpuNbr).m_epuName << "! event " 
