@@ -30,13 +30,14 @@ class DomElement;
 class EvtError{
  friend class RunVerify;
  public:
-  EvtError(string errName, int errValue, int epuNumber);
+  EvtError(string errName, int errValue, int epuNumber, int datagramNbr);
   ~EvtError();
 
  private:
   string m_errName;
   int m_errValue;
   int m_epuNumber;
+  int m_datagramNbr;
 };
 
 class EpuDatagrams {

@@ -1,5 +1,8 @@
 
 Jan 08, 2009: mem
+v8r0    - Added datagram ID to the error message, where appropriate
+
+Jan 08, 2009: mem
 v7r8    - Fixed a bug in the computation of the size of datagram gaps 
 
 Nov 13, 2008: mem
