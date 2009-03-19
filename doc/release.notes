@@ -1,5 +1,8 @@
 
 Mar 18, 2009: mem
+v8r2    - Fixed a bug in the tuncation from command line
+
+Mar 18, 2009: mem
 v8r1    - Truncation is now done per-error and not per-event
 
 Jan 08, 2009: mem

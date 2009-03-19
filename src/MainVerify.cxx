@@ -25,7 +25,7 @@ int main(int argn, char** argv)
         histoFileName = string(optarg);
         break;
       case 't':   // truncation     
-        truncation = int(optarg);
+        truncation = atoi(optarg);
         break;
       case 'e':   // end of run     
         completeRun = true;
