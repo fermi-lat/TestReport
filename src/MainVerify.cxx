@@ -6,11 +6,11 @@
 int main(int argn, char** argv)
 {
   std::string digiRootFile, xmlFileName, histoFileName, optionFileName;
-  std::string digiRootFile_def, xmlFileName_def, histoFileName_def;
-  int opt;
+  std::string digiRootFile_def, xmlFileName_def, histoFileName_def, tmp;
+  int opt, truncation=0, truncation_def;
   bool completeRun = false;
  
-  while ( (opt = getopt(argn, argv, "o:d:x:r:e")) != EOF ) {
+  while ( (opt = getopt(argn, argv, "o:d:x:r:t:e")) != EOF ) {
     switch (opt) {
       case 'o':   // Option file name
         optionFileName = string(optarg);
@@ -24,6 +24,9 @@ int main(int argn, char** argv)
       case 'r':   // root output file name      
         histoFileName = string(optarg);
         break;
+      case 't':   // truncation     
+        truncation = int(optarg);
+        break;
       case 'e':   // end of run     
         completeRun = true;
         break;
@@ -36,14 +39,15 @@ int main(int argn, char** argv)
 
   if (optionFileName == "") optionFileName = "../src/VerifyOption.dat";
   std::ifstream optionFile(optionFileName.c_str());
-  optionFile >> digiRootFile_def >> xmlFileName_def >> histoFileName_def ;
+  optionFile >> digiRootFile_def >> xmlFileName_def >> histoFileName_def >> truncation_def;
 
   if (digiRootFile == "") digiRootFile = digiRootFile_def;
   if (xmlFileName == "") xmlFileName = xmlFileName_def;
   if (histoFileName == "") histoFileName = histoFileName_def;
+  if (truncation == 0) truncation = truncation_def;
 
   RunVerify v(histoFileName.c_str());
   v.analyzeDigi(digiRootFile.c_str(),completeRun);
-  v.writeXmlFile(xmlFileName.c_str(),completeRun);
+  v.writeXmlFile(xmlFileName.c_str(),completeRun,truncation);
 }
 

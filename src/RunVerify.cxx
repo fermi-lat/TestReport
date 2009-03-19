@@ -458,12 +458,12 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeR
   if(m_digiFile) m_digiFile->Close();
 }
 
-Bool_t RunVerify::writeXmlFile(const char* fileName, bool completeRun) const {
+Bool_t RunVerify::writeXmlFile(const char* fileName, bool completeRun, int truncated) const {
 
   DomElement elem = AcdXmlUtil::makeDocument("errorContribution");
   writeXmlHeader(elem, completeRun);
-  writeXmlErrorSummary(elem);
-  writeXmlEventSummary(elem);
+  writeXmlErrorSummary(elem, truncated);
+  writeXmlEventSummary(elem, truncated);
   writeXmlFooter(elem);
   return AcdXmlUtil::writeIt(elem,fileName);
 
@@ -482,41 +482,47 @@ void RunVerify::writeXmlFooter(DomElement& /* node */) const {
   return;
 }
 
-void RunVerify::writeXmlErrorSummary(DomElement& node) const {
+void RunVerify::writeXmlErrorSummary(DomElement& node, int truncation) const {
   DomElement errSummary = AcdXmlUtil::makeChildNode(node,"errorSummary");
   // loop on the errors to make the error summary list
   for (map< string, list<int> >::const_iterator it = m_errMap.begin(); it != m_errMap.end(); it++){
     DomElement errType = AcdXmlUtil::makeChildNode(errSummary,"errorType");
     AcdXmlUtil::addAttribute(errType,"code",(*it).first.c_str());
     AcdXmlUtil::addAttribute(errType,"quantity",(int)(*it).second.size());
+    if ((int)(*it).second.size()>truncation) AcdXmlUtil::addAttribute(errType,"truncated","True");
+    else AcdXmlUtil::addAttribute(errType,"truncated","False");
   }
 }
 
-void RunVerify::writeXmlEventSummary(DomElement& node) const {
+void RunVerify::writeXmlEventSummary(DomElement& node, int truncation) const {
   DomElement evtSummary = AcdXmlUtil::makeChildNode(node,"eventSummary");
   AcdXmlUtil::addAttribute(evtSummary,"num_processed_events",m_nEvent);
   AcdXmlUtil::addAttribute(evtSummary,"num_error_events",(int)m_evtMap.size());
-  if ((int)m_evtMap.size()>500)
-    AcdXmlUtil::addAttribute(evtSummary,"truncated","True");
-  else 
-    AcdXmlUtil::addAttribute(evtSummary,"truncated","False");
-  int evtCounter = 0;  
-  for (map< int, list<EvtError*> >::const_iterator it = m_evtMap.begin(); it != m_evtMap.end() && evtCounter <= 500; it++){  
-    DomElement evtError = AcdXmlUtil::makeChildNode(evtSummary,"errorEvent");
-    if ( (*it).first > -1 )
-      AcdXmlUtil::addAttribute(evtError,"eventNumber",(int)(*it).first);
-    else
-      AcdXmlUtil::addAttribute(evtError,"eventNumber","noEvt");
+  map< string, int > m_errCounter;
+  for (map< string, list<int> >::const_iterator it = m_errMap.begin(); it != m_errMap.end(); it++){
+    m_errCounter[(*it).first.c_str()] = 0;
+    if ((int)(*it).second.size()>truncation) AcdXmlUtil::addAttribute(evtSummary,"truncated","True");
+    else AcdXmlUtil::addAttribute(evtSummary,"truncated","False");
+  }
+  for (map< int, list<EvtError*> >::const_iterator it = m_evtMap.begin(); it != m_evtMap.end(); it++){  
+    // check if there is at least one error that didn't reach truncation limit for this event
+    bool write_event = false;
     for (list<EvtError*>::const_iterator ie = (*it).second.begin(); ie != (*it).second.end(); ie ++){
-      DomElement errDetail = AcdXmlUtil::makeChildNode(evtError,"error");
-      AcdXmlUtil::addAttribute(errDetail,"code",(*ie)->m_errName.c_str());
-      AcdXmlUtil::addAttribute(errDetail,"value",(*ie)->m_errValue);
-      if ((*ie)->m_epuNumber > -1)
-        AcdXmlUtil::addAttribute(errDetail,"cpu",m_epuList.at((*ie)->m_epuNumber).m_epuName.c_str());
-      if ((*ie)->m_datagramNbr > -1)
-        AcdXmlUtil::addAttribute(errDetail,"datagram",(*ie)->m_datagramNbr);
+      if (m_errCounter[(*ie)->m_errName.c_str()] <= truncation) write_event = true;
     }
-    evtCounter++;
+    if (write_event) {
+      DomElement evtError = AcdXmlUtil::makeChildNode(evtSummary,"errorEvent");
+      if ( (*it).first > -1 ) AcdXmlUtil::addAttribute(evtError,"eventNumber",(int)(*it).first);
+      else AcdXmlUtil::addAttribute(evtError,"eventNumber","noEvt");
+      for (list<EvtError*>::const_iterator ie = (*it).second.begin(); ie != (*it).second.end(); ie ++){
+        DomElement errDetail = AcdXmlUtil::makeChildNode(evtError,"error");
+        AcdXmlUtil::addAttribute(errDetail,"code",(*ie)->m_errName.c_str());
+        AcdXmlUtil::addAttribute(errDetail,"value",(*ie)->m_errValue);
+        if ((*ie)->m_epuNumber > -1) AcdXmlUtil::addAttribute(errDetail,"cpu",m_epuList.at((*ie)->m_epuNumber).m_epuName.c_str());
+        if ((*ie)->m_datagramNbr > -1) AcdXmlUtil::addAttribute(errDetail,"datagram",(*ie)->m_datagramNbr);
+        m_errCounter[(*ie)->m_errName.c_str()]++;
+      }
+    }
   }
 }
 
