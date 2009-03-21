@@ -6,7 +6,7 @@
 int main(int argn, char** argv)
 {
   std::string digiRootFile, xmlFileName, histoFileName, optionFileName;
-  std::string digiRootFile_def, xmlFileName_def, histoFileName_def, tmp;
+  std::string digiRootFile_def, xmlFileName_def, histoFileName_def;
   int opt, truncation=0, truncation_def;
   bool completeRun = false;
  

@@ -13,6 +13,7 @@ use reconRootData v*
 use facilities v*
 use xmlBase v* 
 use calibTkrUtil v*
+use fitsGen v*
 
 #the following prepend makes the includes folder available locally: avoid the package_include
 macro_prepend includes "-I $(TESTREPORTROOT) -I $(TESTREPORTROOT)/src " WIN32 "/I $(TESTREPORTROOT) /I $(TESTREPORTROOT)\src "
@@ -27,4 +28,5 @@ macro runverify_linkopts "$(ROOT_linkopts) $(commonRootData_linkopts) $(digiRoot
 #application TestReport Geo.cxx Main.cxx TestReport.cxx $(calibTkrUtil_srcs)
 #application MergeHistFiles MergeHistFiles.cxx
 application RunVerify MainVerify.cxx RunVerify.cxx AcdXmlUtil.cxx DomElement.cxx 
+application ft2Verify MainFt2Verify.cxx ft2Verify.cxx AcdXmlUtil.cxx DomElement.cxx
 
