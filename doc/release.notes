@@ -1,4 +1,7 @@
 
+Mar 23, 2009: mem
+v9r0    - Added verify module for ft2 files (LONE-137)
+
 Mar 18, 2009: mem
 v8r2    - Fixed a bug in the tuncation from command line
 

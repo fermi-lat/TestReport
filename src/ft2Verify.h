@@ -23,15 +23,17 @@ using XERCES_CPP_NAMESPACE_QUALIFIER DOMElement;
 
 class DomElement;
 
-class IntervalError{
+class RowError{
  friend class ft2Verify;
  public:
-  IntervalError(string errName, float errValue);
-  ~IntervalError();
+  RowError(string errName, double livetime, double tstart, double tstop);
+  ~RowError();
 
  private:
   string m_errName;
-  float m_errValue;
+  double m_livetime;
+  double m_tstart;
+  double m_tstop;
 };
 
 class ft2Verify{
@@ -49,12 +51,13 @@ class ft2Verify{
   void writeXmlFooter(DomElement& node) const;
   // write error summary to xml file
   void writeXmlErrorSummary(DomElement& node, int truncation) const;
-  // write interval summary to xml file
-  void writeXmlIntervalSummary(DomElement& node, int truncation) const;
+  // write row summary to xml file
+  void writeXmlRowSummary(DomElement& node, int truncation) const;
 
  private:
+  int m_nRows;
   map< string, list<int> > m_errMap;
-  map< int, list<IntervalError*> > m_intMap;
+  map< int, list<RowError*> > m_rowMap;
 };
 
 #endif
