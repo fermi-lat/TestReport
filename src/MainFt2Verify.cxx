@@ -11,7 +11,7 @@ int main(int argn, char** argv)
 {
   std::string ft2FileName, xmlFileName, optionFileName;
   std::string ft2FileName_def, xmlFileName_def;
-  int opt, truncation=0, truncation_def;
+  int opt, truncation=0, truncation_def=100;
  
   while ( (opt = getopt(argn, argv, "o:f:x:t:")) != EOF ) {
     switch (opt) {
@@ -36,7 +36,7 @@ int main(int argn, char** argv)
 
   if (optionFileName == "") optionFileName = "../src/ft2VerifyOption.dat";
   std::ifstream optionFile(optionFileName.c_str());
-  optionFile >> ft2FileName_def >> xmlFileName_def >> truncation_def;
+  optionFile >> ft2FileName_def >> xmlFileName_def;
 
   if (ft2FileName == "") ft2FileName = ft2FileName_def;
   if (xmlFileName == "") xmlFileName = xmlFileName_def;

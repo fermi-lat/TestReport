@@ -7,7 +7,7 @@ int main(int argn, char** argv)
 {
   std::string digiRootFile, xmlFileName, histoFileName, optionFileName;
   std::string digiRootFile_def, xmlFileName_def, histoFileName_def;
-  int opt, truncation=0, truncation_def;
+  int opt, truncation=0, truncation_def=100;
   bool completeRun = false;
  
   while ( (opt = getopt(argn, argv, "o:d:x:r:t:e")) != EOF ) {
@@ -39,7 +39,7 @@ int main(int argn, char** argv)
 
   if (optionFileName == "") optionFileName = "../src/VerifyOption.dat";
   std::ifstream optionFile(optionFileName.c_str());
-  optionFile >> digiRootFile_def >> xmlFileName_def >> histoFileName_def >> truncation_def;
+  optionFile >> digiRootFile_def >> xmlFileName_def >> histoFileName_def;
 
   if (digiRootFile == "") digiRootFile = digiRootFile_def;
   if (xmlFileName == "") xmlFileName = xmlFileName_def;
