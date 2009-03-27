@@ -51,8 +51,8 @@ class ft2Verify{
   void writeXmlFooter(DomElement& node) const;
   // write error summary to xml file
   void writeXmlErrorSummary(DomElement& node, int truncation) const;
-  // write row summary to xml file
-  void writeXmlRowSummary(DomElement& node, int truncation) const;
+  // write event summary to xml file
+  void writeXmlEventSummary(DomElement& node, int truncation) const;
 
  private:
   int m_nRows;

@@ -1,4 +1,8 @@
 
+
+Mar 26, 2009: mem
+v9r1    - xml output for ft2 conformed to standard for error parser
+
 Mar 23, 2009: mem
 v9r0    - Added verify module for ft2 files (LONE-137)
 

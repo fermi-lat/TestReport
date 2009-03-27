@@ -88,7 +88,7 @@ Bool_t ft2Verify::writeXmlFile(const char* fileName, int truncated) const {
   DomElement elem = AcdXmlUtil::makeDocument("errorContribution");
   writeXmlHeader(elem);
   writeXmlErrorSummary(elem, truncated);
-  writeXmlRowSummary(elem, truncated);
+  writeXmlEventSummary(elem, truncated);
   writeXmlFooter(elem);
   return AcdXmlUtil::writeIt(elem,fileName);
 
@@ -115,15 +115,15 @@ void ft2Verify::writeXmlErrorSummary(DomElement& node, int truncation) const {
   }
 }
 
-void ft2Verify::writeXmlRowSummary(DomElement& node, int truncation) const {
-  DomElement rowSummary = AcdXmlUtil::makeChildNode(node,"rowSummary");
-  AcdXmlUtil::addAttribute(rowSummary,"num_processed_rows",m_nRows);
-  AcdXmlUtil::addAttribute(rowSummary,"num_error_rows",(int)m_rowMap.size());
+void ft2Verify::writeXmlEventSummary(DomElement& node, int truncation) const {
+  DomElement eventSummary = AcdXmlUtil::makeChildNode(node,"eventSummary");
+  AcdXmlUtil::addAttribute(eventSummary,"num_processed_events",m_nRows);
+  AcdXmlUtil::addAttribute(eventSummary,"num_error_events",(int)m_rowMap.size());
   map< string, int > m_errCounter;
   for (map< string, list<int> >::const_iterator it = m_errMap.begin(); it != m_errMap.end(); it++){
     m_errCounter[(*it).first.c_str()] = 0;
-    if ((int)(*it).second.size()>truncation) AcdXmlUtil::addAttribute(rowSummary,"truncated","True");
-    else AcdXmlUtil::addAttribute(rowSummary,"truncated","False");
+    if ((int)(*it).second.size()>truncation) AcdXmlUtil::addAttribute(eventSummary,"truncated","True");
+    else AcdXmlUtil::addAttribute(eventSummary,"truncated","False");
   }
   for (map< int, list<RowError*> >::const_iterator it = m_rowMap.begin(); it != m_rowMap.end(); it++){  
     // check if there is at least one error that didn't reach truncation limit for this event
@@ -132,11 +132,11 @@ void ft2Verify::writeXmlRowSummary(DomElement& node, int truncation) const {
       if (m_errCounter[(*ie)->m_errName.c_str()] <= truncation) write_row = true;
      }
     if (write_row) {
-      DomElement rowError = AcdXmlUtil::makeChildNode(rowSummary,"errorRow");
-      if ( (*it).first > -1 ) AcdXmlUtil::addAttribute(rowError,"rowNumber",(int)(*it).first);
-      else AcdXmlUtil::addAttribute(rowError,"rowNumber","noRow");
+      DomElement eventError = AcdXmlUtil::makeChildNode(eventSummary,"errorEvent");
+      if ( (*it).first > -1 ) AcdXmlUtil::addAttribute(eventError,"rowNumber",(int)(*it).first);
+      else AcdXmlUtil::addAttribute(eventError,"rowNumber","noRow");
       for (list<RowError*>::const_iterator ie = (*it).second.begin(); ie != (*it).second.end(); ie ++){
-        DomElement errDetail = AcdXmlUtil::makeChildNode(rowError,"error");
+        DomElement errDetail = AcdXmlUtil::makeChildNode(eventError,"error");
         AcdXmlUtil::addAttribute(errDetail,"code",(*ie)->m_errName.c_str());
         AcdXmlUtil::addAttribute(errDetail,"livetime",(*ie)->m_livetime);
         AcdXmlUtil::addAttribute(errDetail,"tstart",(int)(*ie)->m_tstart);
