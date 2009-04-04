@@ -1,5 +1,8 @@
 
 
+Apr 03, 2009: mem
+v9r2    - completeness job option modified (was inconsistent with L1 config)
+
 Mar 26, 2009: mem
 v9r1    - xml output for ft2 conformed to standard for error parser
 

@@ -10,7 +10,7 @@ int main(int argn, char** argv)
   int opt, truncation=0, truncation_def=100;
   bool completeRun = false;
  
-  while ( (opt = getopt(argn, argv, "o:d:x:r:t:e")) != EOF ) {
+  while ( (opt = getopt(argn, argv, "o:d:x:r:t:c")) != EOF ) {
     switch (opt) {
       case 'o':   // Option file name
         optionFileName = string(optarg);
@@ -27,7 +27,7 @@ int main(int argn, char** argv)
       case 't':   // truncation     
         truncation = atoi(optarg);
         break;
-      case 'e':   // end of run     
+      case 'c':   // end of run     
         completeRun = true;
         break;
     } 
