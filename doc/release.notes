@@ -1,4 +1,9 @@
 
+Sep 22, 2009: mem
+v10r0   - added SConscript
+        - error list is now pointing to the evtGemId 
+        - checking the FSW compression level
+	- checking that periodic evts never have the TEM bug
 
 Apr 03, 2009: mem
 v9r2    - completeness job option modified (was inconsistent with L1 config)
