@@ -3,11 +3,13 @@
 *
 *                  EOH
 
+v10r0p1 - added EOH to release.notes
+
  TestReport-10-00-00 24-Sep-2009 monzani new features - first stag tag as 10-00-00
 v10r0   - added SConscript
         - error list is now pointing to the evtGemId 
-        - checking the FSW compression level
-	- checking that periodic evts never have the TEM bug
+        - checking the FSW compression level (GDQMQ-320)
+	- checking that periodic evts never have the TEM bug (GDQMQ-319)
 
 Apr 03, 2009: mem
 v9r2    - completeness job option modified (was inconsistent with L1 config)
