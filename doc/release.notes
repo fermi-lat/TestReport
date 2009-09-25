@@ -3,7 +3,7 @@
 *
 *                  EOH
 
-v10r0p1 - added EOH to release.notes
+v10r1   - added EOH to release.notes
 
  TestReport-10-00-00 24-Sep-2009 monzani new features - first stag tag as 10-00-00
 v10r0   - added SConscript
