@@ -3,18 +3,17 @@
 *
 *                  EOH
 
+v10r4   - Fixed a bug in release.notes
+
  TestReport-10-03-00 12-May-2010 monzani added return values for missing data
 v10r3   - MainVerify returns 3 in case of missing datagrams
 
  TestReport-10-02-00 12-May-2010 monzani added return values for missing data
 v10r2   - empty tag created by mistake 
  
- TestReport-10-01-00 24-Sep-2009 monzani added EOH to release.notes
+ TestReport-10-01-00 24-Sep-2009 monzani added something to release.notes
+v10r1   - added something to release.notes
 
- TestReport-10-03-00 12-May-2010 monzani added return values for missing data
-v10r1   - added EOH to release.notes
-
- TestReport-10-02-00 12-May-2010 monzani added return values for missing data
  TestReport-10-00-00 24-Sep-2009 monzani new features - first stag tag as 10-00-00
 v10r0   - added SConscript
         - error list is now pointing to the evtGemId 
