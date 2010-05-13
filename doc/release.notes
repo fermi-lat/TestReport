@@ -3,6 +3,7 @@
 *
 *                  EOH
 
+ TestReport-10-04-00 12-May-2010 monzani bug fix in releasenotes
 v10r4   - Fixed a bug in release.notes
 
  TestReport-10-03-00 12-May-2010 monzani added return values for missing data
