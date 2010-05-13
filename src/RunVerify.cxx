@@ -121,11 +121,12 @@ EpuDatagrams::~EpuDatagrams() {
   m_listDatagrams.clear();
 }
 
-void RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeRun=false)
+int RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeRun=false)
 {
   int nDigi  = -1;
   int nbrEventsDG[MaxEpuNumber];
   int atLeastOneEvt[MaxEpuNumber];
+  bool runHasGaps = false;
   unsigned int idDatagram[MaxEpuNumber];
   std::string errorName;
 
@@ -147,7 +148,7 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeR
     m_digiTree->SetBranchStatus("m_summary",1);
   } else {
     cout << "ERROR: no digi file " << digiFileName << "opened!" << endl;
-    return;
+    return 1;
   }
   
   // Make sure we have events in the digi file:
@@ -156,7 +157,7 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeR
   m_nEvent = nDigi;
   if(nDigi < 1){
     cout << "ERROR: no events in digi file " << digiFileName << endl;
-    return;
+    return 2;
   }
  
   for (int iLoop = 0; iLoop < MaxEpuNumber; ++iLoop) {
@@ -364,6 +365,7 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeR
       m_errMap[errorName].push_back(iEvent);
       cout << "Warning! there was a gap in the datagram sequence number for " << m_epuList.at(cpuNbr).m_epuName << "! event " 
       	   << iEvent << ", datagram gap: " << DatagramSeqNbr << " - " << m_epuList.at(cpuNbr).m_previousDatagram << endl;  
+      runHasGaps = true;
     }
 
     // Fill the events per datagram histos      
@@ -443,6 +445,7 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeR
             m_epuList.at(iLoop).m_counterMissingDatagrams = m_epuList.at(iLoop).m_counterMissingDatagrams + diff - 1;
      	    cout << "Warning! We dropped " << (diff - 1) << " datagram(s) before datagram " << (*p) << " for " 
 		 << m_epuList.at(iLoop).m_epuName << "!" << endl;
+            runHasGaps = true;
 	  }
 	}
       }
@@ -479,6 +482,8 @@ void RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeR
   }
   // Closing time:  
   if(m_digiFile) m_digiFile->Close();
+  if (runHasGaps) return 3;
+  return 0;
 }
 
 Bool_t RunVerify::writeXmlFile(const char* fileName, bool completeRun, int truncated) const {

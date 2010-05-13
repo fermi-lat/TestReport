@@ -47,7 +47,9 @@ int main(int argn, char** argv)
   if (truncation == 0) truncation = truncation_def;
 
   RunVerify v(histoFileName.c_str());
-  v.analyzeDigi(digiRootFile.c_str(),completeRun);
+  int analyze = v.analyzeDigi(digiRootFile.c_str(),completeRun);
   v.writeXmlFile(xmlFileName.c_str(),completeRun,truncation);
+  if (analyze==3) return 3;
+  return 0;
 }
 
