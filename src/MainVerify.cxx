@@ -49,7 +49,7 @@ int main(int argn, char** argv)
   RunVerify v(histoFileName.c_str());
   int analyze = v.analyzeDigi(digiRootFile.c_str(),completeRun);
   v.writeXmlFile(xmlFileName.c_str(),completeRun,truncation);
-  if (analyze==3) return 3;
+  if (analyze==3) return 153;
   return 0;
 }
 
