@@ -3,6 +3,7 @@
 *
 *                  EOH
 
+ TestReport-10-06-00 18-May-2010 monzani modified the return value of MainVerify.cxx
 v10r6   - MainVerify returns 6 in case of missing datagrams
 
  TestReport-10-05-00 18-May-2010 monzani modified the return value of MainVerify.cxx
