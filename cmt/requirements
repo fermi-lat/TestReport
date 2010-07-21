@@ -11,9 +11,9 @@ use mcRootData v*
 use digiRootData v*
 use reconRootData v*
 use facilities v*
+use tip v*
 use xmlBase v* 
 use calibTkrUtil v*
-use fitsGen v*
 
 #the following prepend makes the includes folder available locally: avoid the package_include
 macro_prepend includes "-I $(TESTREPORTROOT) -I $(TESTREPORTROOT)/src " WIN32 "/I $(TESTREPORTROOT) /I $(TESTREPORTROOT)\src "

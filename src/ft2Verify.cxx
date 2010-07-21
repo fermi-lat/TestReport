@@ -11,7 +11,9 @@
 #include "DomElement.h"
 #include "TSystem.h"
 
-#include "fitsGen/MeritFile.h"
+#include "tip/Header.h"
+#include "tip/IFileSvc.h"
+#include "tip/Table.h"
 #include "xmlBase/Dom.h"
 #include "xmlBase/XmlParser.h"
 #include "xercesc/dom/DOMElement.hpp"
@@ -53,14 +55,16 @@ void ft2Verify::analyzeFt2(const char* ft2FileName="ft2.fit")
   double tdiff, tstart, tstop, livetime;
   std::string errorName;
 
-  //open fits file using the MeritFile class because it provides a row() method
-  fitsGen::MeritFile ft2file(ft2FileName, "SC_DATA");
-  for (; ft2file.itor() != ft2file.end(); ft2file.next()) {
+  //open fits file using the readTable method
+  const tip::Table* ft2file = tip::IFileSvc::instance().readTable(ft2FileName, "SC_DATA");
+  tip::Table::ConstIterator it = ft2file->begin();
+  tip::Table::ConstRecord& row = *it;
 
+  for ( ; it != ft2file->end(); ++it) {
     rowCtr++;
-    ft2file.row()["start"].get(tstart);
-    ft2file.row()["stop"].get(tstop);
-    ft2file.row()["livetime"].get(livetime);
+    tstart = row["start"].get();
+    tstop = row["stop"].get();
+    livetime = row["livetime"].get();
     tdiff = (tstop - tstart);
 
     if (livetime < 0) {
@@ -79,8 +83,8 @@ void ft2Verify::analyzeFt2(const char* ft2FileName="ft2.fit")
     }
   }
   m_nRows = rowCtr;
-  // Closing time (can't do: fitsGen::MeritFile doesn't have a close() method): 
-  //ft2file.close();
+  // Closing time 
+  delete ft2file;
 }
 
 Bool_t ft2Verify::writeXmlFile(const char* fileName, int truncated) const {

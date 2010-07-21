@@ -3,6 +3,8 @@
 *
 *                  EOH
 
+v11r0   - Removing the dependence on fitsGen (now using tip)
+
  TestReport-10-07-00 18-May-2010 monzani modified the return value of MainVerify.cxx
 v10r7   - MainVerify returns 153 in case of missing datagrams
 
