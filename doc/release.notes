@@ -3,6 +3,7 @@
 *
 *                  EOH
 
+ TestReport-11-00-00 20-Jul-2010 monzani removing fitsGen to use tip
 v11r0   - Removing the dependence on fitsGen (now using tip)
 
  TestReport-10-07-00 18-May-2010 monzani modified the return value of MainVerify.cxx
