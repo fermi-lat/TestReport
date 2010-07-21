@@ -29,4 +29,5 @@ macro runverify_linkopts "$(ROOT_linkopts) $(commonRootData_linkopts) $(digiRoot
 #application MergeHistFiles MergeHistFiles.cxx
 application RunVerify MainVerify.cxx RunVerify.cxx AcdXmlUtil.cxx DomElement.cxx 
 application ft2Verify MainFt2Verify.cxx ft2Verify.cxx AcdXmlUtil.cxx DomElement.cxx
+application ft1Verify MainFt1Verify.cxx ft1Verify.cxx AcdXmlUtil.cxx DomElement.cxx
 
