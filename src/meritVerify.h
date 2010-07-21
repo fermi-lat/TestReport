@@ -1,5 +1,5 @@
-#ifndef ft2Verify_Header
-#define ft2Verify_Header
+#ifndef meritVerify_Header
+#define meritVerify_Header
 
 #include <fstream>
 #include <string>
@@ -10,8 +10,8 @@
 #include "xercesc/dom/DOMElement.hpp"
 
 /**
- * \class ft2Verify
- * \brief ft2Verify verification of ft2 data
+ * \class meritVerify
+ * \brief meritVerify verification of merit data
  * \author M.E.
  */
 
@@ -24,24 +24,23 @@ using XERCES_CPP_NAMESPACE_QUALIFIER DOMElement;
 class DomElement;
 
 class RowError{
- friend class ft2Verify;
+ friend class meritVerify;
  public:
-  RowError(string errName, double livetime, double tstart, double tstop);
+  RowError(string errName, double eventid, double time);
   ~RowError();
 
  private:
   string m_errName;
-  double m_livetime;
-  double m_tstart;
-  double m_tstop;
+  double m_eventid;
+  double m_time;
 };
 
-class ft2Verify{
+class meritVerify{
  public:
-  ft2Verify();
-  ~ft2Verify();
+  meritVerify();
+  ~meritVerify();
 
-  void analyzeFt2(const char* ft2FileName);
+  void analyzeMerit(const char* meritFileName);
   
   // write errors to an xml file
   bool writeXmlFile(const char* fileName, int truncation) const;
