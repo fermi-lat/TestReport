@@ -3,6 +3,7 @@
 *
 *                  EOH
 
+ TestReport-11-01-00 20-Jul-2010 monzani adding ft1Verify
 v11r1   - Adding a first version of ft1Verify (see GDQMQ-322)
 
  TestReport-11-00-00 20-Jul-2010 monzani removing fitsGen to use tip
