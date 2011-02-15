@@ -127,6 +127,7 @@ int RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeRu
   int nbrEventsDG[MaxEpuNumber];
   int atLeastOneEvt[MaxEpuNumber];
   bool runHasGaps = false;
+  bool wrongBounds = false;
   unsigned int idDatagram[MaxEpuNumber];
   std::string errorName;
 
@@ -393,20 +394,24 @@ int RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeRu
       if (firstDatagramOpen == enums::Lsf::Open::Start) {
 	m_epuList.at(cpuNbr).m_firstOpenAction = 1;
       } else {
+        wrongBounds = true;
         if (completeRun) {
           errorName = "FIRST_DATAGRAM_OPENING"; // ['The first datagram was not opened for the appropriate reason'] 
           EvtError* evt_e = new EvtError(errorName,firstDatagramOpen,cpuNbr,DatagramSeqNbr);
           m_evtMap[evtGemId].push_back(evt_e);
           m_errMap[errorName].push_back(iEvent);
-          cout << "Warning! The fist datagram for " << m_epuList.at(cpuNbr).m_epuName 
-	       << " was not opened because we started the run! The datagram opening reason was " << firstDatagramOpen << endl;
 	}
+        cout << "Warning! The fist datagram for " << m_epuList.at(cpuNbr).m_epuName 
+	     << " was not opened because we started the run! The datagram opening action was " << firstDatagramOpen << endl;
       }
-      if (m_epuList.at(cpuNbr).m_firstDatagram >0 && completeRun){
-        errorName = "FIRST_DATAGRAM_ID"; // ['The first datagram has not datagramID = 0'] 
-        EvtError* evt_e = new EvtError(errorName,m_epuList.at(cpuNbr).m_firstDatagram,cpuNbr,DatagramSeqNbr);
-        m_evtMap[evtGemId].push_back(evt_e);
-        m_errMap[errorName].push_back(iEvent);
+      if (m_epuList.at(cpuNbr).m_firstDatagram >0){
+        wrongBounds = true;
+        if (completeRun) {
+          errorName = "FIRST_DATAGRAM_ID"; // ['The first datagram has not datagramID = 0'] 
+          EvtError* evt_e = new EvtError(errorName,m_epuList.at(cpuNbr).m_firstDatagram,cpuNbr,DatagramSeqNbr);
+          m_evtMap[evtGemId].push_back(evt_e);
+          m_errMap[errorName].push_back(iEvent);
+	}
         cout << "Warning! The fist datagram for " << m_epuList.at(cpuNbr).m_epuName 
 	     << " did not have datagram ID = 0! The first datagram ID was " << m_epuList.at(cpuNbr).m_firstDatagram << endl;
       }
@@ -460,22 +465,28 @@ int RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeRu
       if (lastActionDataGram == enums::Lsf::Close::Stop || lastActionDataGram == enums::Lsf::Close::Abort) {
         m_epuList.at(iLoop).m_lastCloseAction = 1;
       }
-      if (lastReasonDataGram == enums::Lsf::Close::Full && completeRun) {
-        m_epuList.at(iLoop).m_lastDatagramFull = 1;
-	errorName = "LAST_DATAGRAM_FULL"; // ['The last datagram was full: data might be missing'] 
-        EvtError* evt_e = new EvtError(errorName,lastReasonDataGram,iLoop,DatagramSeqNbr);
-        m_evtMap[evtGemId].push_back(evt_e);
-        m_errMap[errorName].push_back(m_epuList.at(iLoop).m_lastDatagramEvent);
-        cout << "The closing reason for the last datagram for " << m_epuList.at(iLoop).m_epuName << " was: Datagram Full" << endl;
+      if (lastReasonDataGram == enums::Lsf::Close::Full) {
+        wrongBounds = true;
+	m_epuList.at(iLoop).m_lastDatagramFull = 1;
+        if (completeRun) {
+	  errorName = "LAST_DATAGRAM_FULL"; // ['The last datagram was full: data might be missing'] 
+          EvtError* evt_e = new EvtError(errorName,lastReasonDataGram,iLoop,DatagramSeqNbr);
+          m_evtMap[evtGemId].push_back(evt_e);
+          m_errMap[errorName].push_back(m_epuList.at(iLoop).m_lastDatagramEvent);
+        }
+	cout << "Warning! The closing reason for the last datagram for " << m_epuList.at(iLoop).m_epuName 
+	     << " was: Datagram Full -- Data might be lost!" << endl;
       }
-      if (m_epuList.at(iLoop).m_lastCloseAction == 0 && m_epuList.at(iLoop).m_lastDatagramFull == 0 && completeRun) {
-        errorName = "LAST_DATAGRAM_CLOSING"; // ['The last datagram was not closed for the appropriate reason']
-        EvtError* evt_e = new EvtError(errorName,lastActionDataGram,iLoop,DatagramSeqNbr);
-        m_evtMap[evtGemId].push_back(evt_e);
-        m_errMap[errorName].push_back(m_epuList.at(iLoop).m_lastDatagramEvent);
+      if (m_epuList.at(iLoop).m_lastCloseAction == 0) {
+        wrongBounds = true;
+        if (completeRun) {
+          errorName = "LAST_DATAGRAM_CLOSING"; // ['The last datagram was not closed for the appropriate reason']
+          EvtError* evt_e = new EvtError(errorName,lastActionDataGram,iLoop,DatagramSeqNbr);
+          m_evtMap[evtGemId].push_back(evt_e);
+          m_errMap[errorName].push_back(m_epuList.at(iLoop).m_lastDatagramEvent);
+	}
         cout << "Warning! The last datagram for " << m_epuList.at(iLoop).m_epuName 
-	     << " was not closed because we reached the end of run or because it was full! The datagram closing reason was " 
-	     << lastReasonDataGram << " and the datagram closing action was " << lastActionDataGram << endl;
+	     << " was not closed because we reached the end of run! The datagram closing action was " << lastActionDataGram << endl;
       }
       m_digiEvent->Clear();
     }
@@ -483,6 +494,7 @@ int RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeRu
   // Closing time:  
   if(m_digiFile) m_digiFile->Close();
   if (runHasGaps) return 3;
+  if (wrongBounds) return 4;
   return 0;
 }
 
