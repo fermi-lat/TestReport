@@ -3,6 +3,8 @@
 *
 *                  EOH
 
+v11r4   - Fixed wrong names for errors in ft1/merit
+
  TestReport-11-03-00 14-Feb-2011 monzani always checking first/last datagram
 v11r3   - Always checking opening/closing action for first/last datagram
 

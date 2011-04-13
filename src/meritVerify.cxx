@@ -65,14 +65,14 @@ void meritVerify::analyzeMerit(const char* meritFileName="merit.root")
     time = row["EvtElapsedTime"].get();
     if (eventid < evtprev) {
       cout << "ERROR! Event Sequence going backwards at row " << rowCtr << endl;
-      errorName = "FT1_EVENTS_BACKWARDS"; // ['Event ID is going backwards for this row']
+      errorName = "MERIT_EVENTS_BACKWARDS"; // ['Event ID is going backwards for this row']
       RowError* row_e = new RowError(errorName,eventid,time);
       m_rowMap[rowCtr].push_back(row_e);
       m_errMap[errorName].push_back(rowCtr);
     }
     if (time < timeprev) {
       cout << "ERROR! Time is going backwards at row " << rowCtr << endl;
-      errorName = "FT2_TIME_BACKWARDS"; // ['Time is going backwards for this row']
+      errorName = "MERIT_TIME_BACKWARDS"; // ['Time is going backwards for this row']
       RowError* row_e = new RowError(errorName,eventid,time);
       m_rowMap[rowCtr].push_back(row_e);
       m_errMap[errorName].push_back(rowCtr);
