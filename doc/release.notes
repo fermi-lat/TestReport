@@ -3,6 +3,7 @@
 *
 *                  EOH
 
+ TestReport-11-04-00 12-Apr-2011 monzani Fixed wrong names for errors in ft1/merit
 v11r4   - Fixed wrong names for errors in ft1/merit
 
  TestReport-11-03-00 14-Feb-2011 monzani always checking first/last datagram
