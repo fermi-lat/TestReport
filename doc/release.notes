@@ -3,47 +3,50 @@
 *
 *                  EOH
 
+
+- Actually compiling with scons
+
  TestReport-11-04-00 12-Apr-2011 monzani Fixed wrong names for errors in ft1/merit
-v11r4   - Fixed wrong names for errors in ft1/merit
+- Fixed wrong names for errors in ft1/merit
 
  TestReport-11-03-00 14-Feb-2011 monzani always checking first/last datagram
-v11r3   - Always checking opening/closing action for first/last datagram
+- Always checking opening/closing action for first/last datagram
 
  TestReport-11-02-00 20-Jul-2010 monzani adding meritVerify
-v11r2   - Adding a first version of meritVerify (see GDQMQ-322)
+- Adding a first version of meritVerify (see GDQMQ-322)
 
  TestReport-11-01-00 20-Jul-2010 monzani adding ft1Verify
-v11r1   - Adding a first version of ft1Verify (see GDQMQ-322)
+- Adding a first version of ft1Verify (see GDQMQ-322)
 
  TestReport-11-00-00 20-Jul-2010 monzani removing fitsGen to use tip
-v11r0   - Removing the dependence on fitsGen (now using tip)
+- Removing the dependence on fitsGen (now using tip)
 
  TestReport-10-07-00 18-May-2010 monzani modified the return value of MainVerify.cxx
-v10r7   - MainVerify returns 153 in case of missing datagrams
+- MainVerify returns 153 in case of missing datagrams
 
  TestReport-10-06-00 18-May-2010 monzani modified the return value of MainVerify.cxx
-v10r6   - wrong release.notes -- AGAIN
+- wrong release.notes -- AGAIN
 
  TestReport-10-05-00 18-May-2010 monzani modified the return value of MainVerify.cxx
-v10r5   - empty tag created by mistake
+- empty tag created by mistake
  
  TestReport-10-04-00 12-May-2010 monzani bug fix in releasenotes
-v10r4   - Fixed a bug in release.notes
+- Fixed a bug in release.notes
 
  TestReport-10-03-00 12-May-2010 monzani added return values for missing data
-v10r3   - MainVerify returns 3 in case of missing datagrams
+- MainVerify returns 3 in case of missing datagrams
 
  TestReport-10-02-00 12-May-2010 monzani added return values for missing data
-v10r2   - empty tag created by mistake 
+- empty tag created by mistake 
  
  TestReport-10-01-00 24-Sep-2009 monzani added something to release.notes
-v10r1   - added something to release.notes
+- added something to release.notes
 
  TestReport-10-00-00 24-Sep-2009 monzani new features - first stag tag as 10-00-00
-v10r0   - added SConscript
-        - error list is now pointing to the evtGemId 
-        - checking the FSW compression level (GDQMQ-320)
-	- checking that periodic evts never have the TEM bug (GDQMQ-319)
+- added SConscript
+- error list is now pointing to the evtGemId 
+- checking the FSW compression level (GDQMQ-320)
+- checking that periodic evts never have the TEM bug (GDQMQ-319)
 
 Apr 03, 2009: mem
 v9r2    - completeness job option modified (was inconsistent with L1 config)
