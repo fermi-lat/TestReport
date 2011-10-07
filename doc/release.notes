@@ -3,6 +3,7 @@
 *
 *                  EOH
 
+ TestReport-12-00-00 07-Oct-2011 monzani SConscript modified to build package
 
 - Actually compiling with scons
 
