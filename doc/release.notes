@@ -3,6 +3,7 @@
 *
 *                  EOH
 
+ TestReport-12-00-01 20-Jun-2012 monzani added leap second from Jun 30, 2012
 - Added leap second from Jun 30th, 2012
 
  TestReport-12-00-00 07-Oct-2011 monzani SConscript modified to build package
