@@ -3,8 +3,9 @@
 *
 *                  EOH
 
- TestReport-12-00-00 07-Oct-2011 monzani SConscript modified to build package
+- Added leap second from Jun 30th, 2012
 
+ TestReport-12-00-00 07-Oct-2011 monzani SConscript modified to build package
 - Actually compiling with scons
 
  TestReport-11-04-00 12-Apr-2011 monzani Fixed wrong names for errors in ft1/merit
