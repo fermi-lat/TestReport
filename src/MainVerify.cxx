@@ -1,6 +1,7 @@
 #include <string>
 #include <fstream>
 #include <getopt.h>
+#include <stdlib.h> 
 #include "RunVerify.h"
 
 int main(int argn, char** argv)

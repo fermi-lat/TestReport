@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <getopt.h>
+#include <stdlib.h>
 #include "meritVerify.h"
 
 using std::cout;

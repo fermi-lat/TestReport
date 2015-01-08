@@ -1,6 +1,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <stdlib.h>
 #include <getopt.h>
 #include "ft2Verify.h"
 
