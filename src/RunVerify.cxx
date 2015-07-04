@@ -217,20 +217,8 @@ int RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeRu
       m_errMap[errorName].push_back(iEvent);
     }
 
-    // check the CCSDS timestamp 
-    double ccsdsTime = m_digiEvent->getCcsds().getUtc();
-    // Time from Mission elapsed time to Unix time:
-    double deltaTimeUgly = 978307200;
+    double ccsdsTime = m_digiEvent->getCcsds();
     double timeStamp = m_digiEvent->getTimeStamp();
-    // Leap second from Dec 31st, 2005
-    if (timeStamp > 157766400) deltaTimeUgly--; 
-    // Leap second from Dec 31st, 2008
-    if (timeStamp > 252460800) deltaTimeUgly--;
-    // Leap second from Jun 30th, 2012
-    if (timeStamp > 362793601) deltaTimeUgly--;
-    // Leap second from Jun 30th, 2015
-    if (timeStamp > 457401602) deltaTimeUgly--;
-    timeStamp = timeStamp + deltaTimeUgly;
 
     if ( ccsdsTime < timeStamp ){
       //cout << "ERROR! CCSDS packet time: " << (int)ccsdsTime  <<" smaller than timestamp: " << (int)timeStamp << endl;
