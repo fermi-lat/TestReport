@@ -230,6 +230,8 @@ int RunVerify::analyzeDigi(const char* digiFileName="digi.root", bool completeRu
     if (timeStamp > 362793601) deltaTimeUgly--;
     // Leap second from Jun 30th, 2015
     if (timeStamp > 457401602) deltaTimeUgly--;
+    // Leap second from Dec 31st, 2016
+    if (timeStamp > 504921603) deltaTimeUgly--;
     timeStamp = timeStamp + deltaTimeUgly;
 
     if ( ccsdsTime < timeStamp ){
